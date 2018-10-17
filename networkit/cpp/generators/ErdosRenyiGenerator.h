@@ -17,7 +17,7 @@ namespace NetworKit {
  * @ingroup generators
  * Creates G(n, p) graphs.
  */
-class ErdosRenyiGenerator: public StaticGraphGenerator {
+class ErdosRenyiGenerator : public StaticGraphGenerator {
 protected:
 	count n;
 	double p;
@@ -33,7 +33,7 @@ public:
 	 * @param prob Probability of existence for each edge p.
 	 * @param directed	generates a directed graph
 	 */
-	ErdosRenyiGenerator(count nNodes, double prob, bool directed=false);
+	ErdosRenyiGenerator(count nNodes, double prob, bool directed = false);
 
 	virtual Graph generate();
 };
