@@ -1,5 +1,6 @@
 #include <queue>
 
+#include "../distance/APSP.h"
 #include "InfluenceMaximization.h"
 
 namespace NetworKit {
@@ -14,7 +15,8 @@ std::vector<double> InfluenceMaximization::computeInflProb(const node &v) {
 	std::vector<double> result(n, 1.);
 	prev[v] = 1.;
 
-	while (!stop) {
+	count iters = 0;
+	while (!stop && iters++ <= diam) {
 		stop = true;
 		for (node w = 0; w < n; ++w) {
 			double pNotInfluencedNow = 1.;
@@ -29,7 +31,6 @@ std::vector<double> InfluenceMaximization::computeInflProb(const node &v) {
 			next[w] = pInfluencedNow;
 			result[w] *= pNotInfluencedNow;
 		}
-		INFO(next);
 		std::copy(next.begin(), next.end(), prev.begin());
 	}
 	for (count i = 0; i < n; ++i) {
@@ -87,5 +88,20 @@ InfluenceMaximization::performSimulation(const node &v, const count nIter) {
 	}
 
 	return result;
+}
+
+count InfluenceMaximization::computeDiameter() {
+	Graph gUnw = G.toUnweighted();
+	APSP apsp(gUnw);
+	apsp.run();
+	auto distances = apsp.getDistances();
+	edgeweight maxDist = 0;
+	for (auto curDistances : distances) {
+		std::sort(curDistances.begin(), curDistances.end(),
+		          std::greater<edgeweight>());
+		maxDist = std::max(maxDist, curDistances[0]);
+	}
+	diam = maxDist;
+	INFO("Diameter = ", diam);
 }
 } // namespace NetworKit

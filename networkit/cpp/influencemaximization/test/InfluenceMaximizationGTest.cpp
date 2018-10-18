@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "../../auxiliary/Log.h"
+#include "../../auxiliary/PrioQueue.h"
 #include "../../auxiliary/Random.h"
 #include "../../centrality/Closeness.h"
 #include "../../distance/CommuteTimeDistance.h"
@@ -21,7 +22,7 @@ TEST_F(InfluenceMaximizationGTest, testExpectedValue) {
 	const count n = 20;
 	const double p = 0.2;
 
-	const count simulations = 3e6;
+	const count simulations = 1e6;
 	const node v = 0;
 	node best;
 	double bestScore = 0.;
@@ -30,7 +31,8 @@ TEST_F(InfluenceMaximizationGTest, testExpectedValue) {
 	double bestScoreCCd = 0.;
 
 	count seed = 100;
-	for (count seed = 100; seed < 200; seed += 2) {
+	// Generates a strogly connected graph
+	for (count seed = 100; seed < seed + 1; seed += 2) {
 		Aux::Random::setSeed(seed, false);
 		Graph G(n, true, true);
 		for (node u = 0; u < n - 1; ++u) {
@@ -47,39 +49,27 @@ TEST_F(InfluenceMaximizationGTest, testExpectedValue) {
 		}
 
 		INFO("Number of edges = ", G.numberOfEdges());
-		INFO("Total edge weight = ", G.totalEdgeWeight());
-		INFO("Top Closeness ", cc.ranking()[0]);
-		CommuteTimeDistance ccd(G, 0.001);
-		ccd.run();
-		//		InfluenceMaximization infl(G);
-		//		std::vector<double> inflScores;
-		std::vector<double> cfccScores;
+		Aux::PrioQueue<double, node> simPQ(n);
+		Aux::PrioQueue<double, node> compPQ(n);
+		InfluenceMaximization infl(G);
+		infl.computeDiameter();
 		for (node u = 0; u < n; ++u) {
-			//			auto result = infl.performSimulation(u, simulations);
-			//			double curResult = std::accumulate(result.begin(), result.end(),
-			// 0.); 			inflScores.push_back(curResult); 			if (curResult >
-			// bestScore) { 				bestScore = curResult; 				best = u;
-			//			}
-			double curCCd = 0.;
-			for (node v = 0; v < n; ++v) {
-				curCCd += ccd.distance(u, v);
-			}
-			curCCd = 1. / curCCd;
-			cfccScores.push_back(curCCd);
-			if (curCCd > bestScoreCCd) {
-				bestScoreCCd = curCCd;
-				bestCCd = u;
-			}
-			//	INFO("Done simulation with ", u + 1, " nodes");
+			auto result = infl.performSimulation(u, simulations);
+			double curResult = std::accumulate(result.begin(), result.end(), 0.) - 1.;
+			simPQ.insert(-curResult, u);
+			auto upperBound = infl.computeInflProb(u);
+			double computedResult =
+			    std::accumulate(upperBound.begin(), upperBound.end(), 0.);
+			compPQ.insert(-computedResult, u);
 		}
-		//		EXPECT_EQ(best, bestCCd);
-		//		INFO("Highest value: ", best, " with score ", bestScore);
-		INFO("Best node ccd: ", bestCCd, " with score ", bestScoreCCd);
-		//		std::sort(inflScores.begin(), inflScores.end(),
-		// std::greater<double>()); 		std::sort(cfccScores.begin(),
-		// cfccScores.end(), std::greater<double>()); 		INFO(inflScores);
-		// INFO(cfccScores); 	INFO("Computed Values:\n", infl.computeInflProb(v));
-		//	INFO("Simulation result:\n", infl.performSimulation(v, simulations));
+
+		for (node u = 0; u < n; ++u) {
+			auto simElem = simPQ.peekMin(u);
+			simElem.first *= -1.;
+			auto compElem = compPQ.peekMin(u);
+			compElem.first *= -1.;
+			INFO("Simulated: ", simElem, " --- Upper Bound: ", compElem);
+		}
 	}
 }
 
