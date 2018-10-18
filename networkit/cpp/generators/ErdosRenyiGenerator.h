@@ -22,6 +22,7 @@ protected:
 	count n;
 	double p;
 	bool directed;
+	const bool weighted;
 
 public:
 	/**
@@ -33,7 +34,8 @@ public:
 	 * @param prob Probability of existence for each edge p.
 	 * @param directed	generates a directed graph
 	 */
-	ErdosRenyiGenerator(count nNodes, double prob, bool directed = false);
+	ErdosRenyiGenerator(count nNodes, double prob, bool directed = false,
+	                    const bool weighted = false);
 
 	virtual Graph generate();
 };

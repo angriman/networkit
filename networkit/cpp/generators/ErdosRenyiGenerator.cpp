@@ -12,8 +12,8 @@
 namespace NetworKit {
 
 ErdosRenyiGenerator::ErdosRenyiGenerator(count nNodes, double prob,
-                                         bool directed)
-    : n(nNodes), p(prob), directed(directed) {}
+                                         bool directed, const bool weighted)
+    : n(nNodes), p(prob), directed(directed), weighted(weighted) {}
 
 /**
  * Returns number of steps you need to wait until the next success (edge)
@@ -25,7 +25,7 @@ static inline count get_next_edge_distance(const double log_cp) {
 
 Graph ErdosRenyiGenerator::generate() {
 	Aux::SignalHandler handler;
-	Graph G(n, false, directed);
+	Graph G(n, weighted, directed);
 	const double log_cp = log(1.0 - p); // log of counter probability
 
 	// create edges

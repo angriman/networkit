@@ -7357,6 +7357,21 @@ cdef class EigenvectorCentrality(Centrality):
 		self._this = new _EigenvectorCentrality(G._this, tol)
 
 
+cdef extern from "cpp/influencemaximization/InfluenceMaximization.h":
+	cdef cppclass _InfluenceMaximization "NetworKit::InfluenceMaximization":
+		_InfluenceMaximization(_Graph) except +
+		vector[double] performSimulation(node v, count nIter) except +
+
+
+cdef class InfluenceMaximization:
+
+	cdef _InfluenceMaximization* _this
+	def __cinit__(self, Graph G):
+		self._this = new _InfluenceMaximization(G._this)
+	
+	def performSimulation(self, node v, count nIter):
+		return self._this.performSimulation(v, nIter)
+
 cdef extern from "cpp/centrality/CoreDecomposition.h":
 	cdef cppclass _CoreDecomposition "NetworKit::CoreDecomposition" (_Centrality):
 		_CoreDecomposition(_Graph, bool, bool, bool) except +

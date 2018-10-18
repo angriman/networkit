@@ -73,6 +73,7 @@ from . import stats
 from . import sampling
 from . import viz
 from . import randomization
+from . import influencemaximization
 
 if _pyplot is not None:
 	from . import plot

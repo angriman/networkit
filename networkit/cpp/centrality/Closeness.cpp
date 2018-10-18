@@ -12,6 +12,7 @@
 #include "../auxiliary/Log.h"
 #include "../auxiliary/PrioQueue.h"
 #include "../components/ConnectedComponents.h"
+#include "../components/StronglyConnectedComponents.h"
 #include "../distance/BFS.h"
 #include "../distance/Dijkstra.h"
 #include "../distance/SSSP.h"
@@ -24,10 +25,20 @@ Closeness::Closeness(const Graph &G, bool normalized, bool checkConnectedness)
 	// TODO: extend closeness definition to make check for connectedness
 	// unnecessary
 	if (checkConnectedness) {
-		ConnectedComponents compo(G);
-		compo.run();
-		if (compo.numberOfComponents() != 1) {
-			throw std::runtime_error("Closeness is undefined on disconnected graphs");
+		if (G.isDirected()) {
+			StronglyConnectedComponents scc(G);
+			scc.run();
+			if (scc.numberOfComponents() != 1) {
+				throw std::runtime_error(
+				    "Closeness is undefined on non strongly connected graphs");
+			}
+		} else {
+			ConnectedComponents compo(G);
+			compo.run();
+			if (compo.numberOfComponents() != 1) {
+				throw std::runtime_error(
+				    "Closeness is undefined on disconnected graphs");
+			}
 		}
 	}
 }
@@ -37,7 +48,6 @@ void Closeness::run() {
 	scoreData.clear();
 	scoreData.resize(z);
 	edgeweight infDist = std::numeric_limits<edgeweight>::max();
-
 	G.parallelForNodes([&](node s) {
 		std::unique_ptr<SSSP> sssp;
 		if (G.isWeighted()) {
