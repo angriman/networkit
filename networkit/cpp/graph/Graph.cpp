@@ -525,6 +525,15 @@ edgeweight Graph::weightedDegree(node v) const {
 	return defaultEdgeWeight * degree(v);
 }
 
+edgeweight Graph::weightedDegreeIn(node v) const {
+	if (weighted) {
+		edgeweight sum = 0.;
+		forInNeighborsOf(v, [&](node u, edgeweight ew) { sum += ew; });
+		return sum;
+	}
+	return defaultEdgeWeight * degreeIn(v);
+}
+
 edgeweight Graph::volume(node v) const {
 	if (weighted) {
 		edgeweight sum = 0.0;

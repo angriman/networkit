@@ -18,9 +18,13 @@ void DegreeCentrality::run() {
 	scoreData = std::vector<double>(G.upperNodeIdBound(), 0.0);
 
 	if (G.isDirected() && !outDeg) {
-		G.parallelForNodes([&](node u) { scoreData[u] = G.degreeIn(u); });
+		G.parallelForNodes([&](node u) {
+			scoreData[u] = weighted ? G.weightedDegreeIn(u) : G.degreeIn(u);
+		});
 	} else {
-		G.parallelForNodes([&](node u) { scoreData[u] = G.degree(u); });
+		G.parallelForNodes([&](node u) {
+			scoreData[u] = weighted ? G.weightedDegree(u) : G.degree(u);
+		});
 	}
 
 	if (normalized) {

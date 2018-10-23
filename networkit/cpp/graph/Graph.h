@@ -651,6 +651,8 @@ public:
 	 */
 	edgeweight weightedDegree(node v) const;
 
+	edgeweight weightedDegreeIn(node v) const;
+
 	/**
 	 * Returns the volume of the @a v, which is the weighted degree with
 	 * self-loops counted twice.
