@@ -1,11 +1,90 @@
 #include <queue>
 
+#include "../auxiliary/Parallel.h"
+#include "../auxiliary/PrioQueue.h"
+#include "../auxiliary/Random.h"
+#include "../centrality/WeightedDegreeCentrality.h"
 #include "../distance/APSP.h"
+#include "IndependentCascade.h"
 #include "InfluenceMaximization.h"
 
 namespace NetworKit {
-InfluenceMaximization::InfluenceMaximization(const Graph &G)
-    : G(G), n(G.upperNodeIdBound()) {}
+InfluenceMaximization::InfluenceMaximization(const Graph &G, const count k)
+    : G(G), n(G.upperNodeIdBound()), k(k) {
+	if (G.numberOfSelfLoops() > 0) {
+		throw std::runtime_error("Error influence maximization does not support "
+		                         "graphs with self loops.");
+	}
+
+	if (!G.isWeighted()) {
+		throw std::runtime_error("Error, the graph is not weighted.");
+	}
+
+	hasRun = false;
+}
+
+void InfluenceMaximization::run() {
+	computeDiameter();
+	Aux::PrioQueue<double, node> top(n);
+	nodeScores.assign(n, 1.);
+	topInfuencers.clear();
+	topInfuencers.reserve(k);
+
+	WeightedDegreeCentrality dc(G, nodeScores);
+	dc.run();
+	auto ranking = dc.ranking();
+	std::vector<double> bottom(n);
+	bool stop = false;
+
+	// TODO parallelize this loop
+	while (!stop) {
+		std::pair<node, double> r = ranking.front();
+		ranking.erase(ranking.begin());
+
+		// Estimating number of influenced nodes
+		auto estimate = computeInflProb(r.first);
+		double r_score = computeScore(estimate);
+		if (top.size() < k) {
+			if (top.size() == 0 || r_score < top.peekMin(0).first) {
+				bottom = estimate;
+			}
+			top.insert(r_score, r.first);
+		} else {
+			stop = true;
+		}
+		updateNodeScores(estimate);
+		// Can we only sort part of the vector?
+		Aux::Parallel::sort(
+		    ranking.begin(), ranking.end(),
+		    [&](std::pair<node, double> x, std::pair<node, double> y) {
+			    if (x.second == y.second) {
+				    return x.first < y.first;
+			    }
+			    return x.second > y.second;
+		    });
+	}
+
+	top.forElements(
+	    [&](double key, node elem) { topInfuencers.push_back(elem); });
+	hasRun = true;
+}
+
+void InfluenceMaximization::updateNodeScores(const std::vector<double> &probs) {
+#pragma omp parallel for
+	for (count i = 0; i < n; ++i) {
+		nodeScores[i] *= 1. - probs[i];
+	}
+}
+
+double
+InfluenceMaximization::computeScore(const std::vector<double> &probs) const {
+	double result = 0.;
+#pragma omp parallel for reduction(+ : result)
+	for (count i = 0; i < n; ++i) {
+		result += probs[i];
+	}
+	return result;
+}
 
 std::vector<double> InfluenceMaximization::computeInflProb(const node &v) {
 	bool stop = false;
@@ -14,16 +93,20 @@ std::vector<double> InfluenceMaximization::computeInflProb(const node &v) {
 	std::vector<double> notInflAtPrev(n, 1.);
 	std::vector<double> result(n, 1.);
 	prev[v] = 1.;
+	const double threshold = 1e-6;
 
 	count iters = 0;
-	while (!stop && iters++ <= diam) {
+	while (!stop && iters++ <= 1.5 * diam) {
 		stop = true;
 		for (node w = 0; w < n; ++w) {
+			if (w == v) {
+				continue;
+			}
 			double pNotInfluencedNow = 1.;
 			G.forInNeighborsOf(w, [&](node z) {
 				pNotInfluencedNow *= 1. - G.weight(z, w) * prev[z];
 			});
-			if (pNotInfluencedNow < 1.) {
+			if (pNotInfluencedNow < 1. - threshold) {
 				stop = false;
 			}
 			double pInfluencedNow = (1. - pNotInfluencedNow) * notInflAtPrev[w];
@@ -34,62 +117,15 @@ std::vector<double> InfluenceMaximization::computeInflProb(const node &v) {
 		std::copy(next.begin(), next.end(), prev.begin());
 	}
 	for (count i = 0; i < n; ++i) {
-		result[i] = 1. - result[i];
+		if (i != v) {
+			result[i] = 1. - result[i];
+		}
 	}
-
 	return result;
 }
 
-std::vector<double>
-InfluenceMaximization::performSimulation(const node &v, const count nIter) {
-	const count max_threads = omp_get_max_threads();
-	std::vector<std::vector<count>> influencedNodes(max_threads,
-	                                                std::vector<count>(n, 0));
-	std::vector<std::vector<bool>> influenced(max_threads,
-	                                          std::vector<bool>(n, false));
-
-#pragma omp parallel for
-	for (omp_index i = 0; i < nIter; ++i) {
-		std::vector<count> &nodes = influencedNodes[omp_get_thread_num()];
-		std::vector<bool> &curInfl = influenced[omp_get_thread_num()];
-		std::fill(curInfl.begin(), curInfl.end(), false);
-		curInfl[v] = true;
-		std::queue<node> activeNodes;
-		activeNodes.push(v);
-		while (!activeNodes.empty()) {
-			node u = activeNodes.front();
-			activeNodes.pop();
-			G.forNeighborsOf(u, [&](node v) {
-				if (!curInfl[v]) {
-					if (Aux::Random::real(0, 1) <= G.weight(u, v)) {
-						curInfl[v] = true;
-						activeNodes.push(v);
-					}
-				}
-			});
-		}
-
-		for (node u = 0; u < n; ++u) {
-			if (curInfl[u]) {
-				++nodes[u];
-			}
-		}
-	}
-
-	for (count i = 1; i < omp_get_max_threads(); ++i) {
-		for (node u = 0; u < n; ++u) {
-			influencedNodes[0][u] += influencedNodes[i][u];
-		}
-	}
-
-	std::vector<double> result(n, 0.);
-	for (node u = 0; u < n; ++u) {
-		result[u] = (double)influencedNodes[0][u] / (double)nIter;
-	}
-
-	return result;
-}
-
+// TODO implement faster algorithm to approximate the diameter of directed
+// graphs
 count InfluenceMaximization::computeDiameter() {
 	Graph gUnw = G.toUnweighted();
 	APSP apsp(gUnw);
@@ -99,9 +135,16 @@ count InfluenceMaximization::computeDiameter() {
 	for (auto curDistances : distances) {
 		std::sort(curDistances.begin(), curDistances.end(),
 		          std::greater<edgeweight>());
-		maxDist = std::max(maxDist, curDistances[0]);
+		count i = 0;
+		while (curDistances[i] > gUnw.numberOfNodes() && i < curDistances.size()) {
+			++i;
+		}
+		if (i < curDistances.size()) {
+			maxDist = std::max(maxDist, curDistances[i]);
+		}
 	}
 	diam = maxDist;
 	INFO("Diameter = ", diam);
 }
+
 } // namespace NetworKit

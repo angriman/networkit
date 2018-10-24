@@ -7357,20 +7357,67 @@ cdef class EigenvectorCentrality(Centrality):
 		self._this = new _EigenvectorCentrality(G._this, tol)
 
 
-cdef extern from "cpp/influencemaximization/InfluenceMaximization.h":
-	cdef cppclass _InfluenceMaximization "NetworKit::InfluenceMaximization":
-		_InfluenceMaximization(_Graph) except +
-		vector[double] performSimulation(node v, count nIter) except +
+cdef extern from "cpp/influencemaximization/IndependentCascade.h":
+	cdef cppclass _IndependentCascade "NetworKit::IndependentCascade":
+		_IndependentCascade(_Graph G) except +
+		void performSimulation(vector[node], count, count) except +
+		double getAverage() except +
+		count getMinimum() except +
+		count getMaximum() except +
 
-
-cdef class InfluenceMaximization:
-
-	cdef _InfluenceMaximization* _this
+cdef class IndependentCascade:
+	cdef _IndependentCascade *_this
+	cdef Graph _G
 	def __cinit__(self, Graph G):
-		self._this = new _InfluenceMaximization(G._this)
+		self._this = new _IndependentCascade(G._this)
 	
-	def performSimulation(self, node v, count nIter):
-		return self._this.performSimulation(v, nIter)
+	def performSimulation(self, vector[node] seeds, count nIter = 10000, count randomSeed = 1):
+		self._this.performSimulation(seeds, nIter, randomSeed)
+
+	def getAverage(self):
+		return self._this.getAverage()
+
+	def getMinimum(self):
+		return self._this.getMinimum()
+
+	def getMaximum(self):
+		return self._this.getMaximum()
+
+cdef extern from "cpp/influencemaximization/InfluenceMaximization.h":
+	cdef cppclass _InfluenceMaximization "NetworKit::InfluenceMaximization"(_Algorithm):
+		_InfluenceMaximization(_Graph, count) except +
+		vector[node] getTopInfluencers() except +
+
+
+cdef extern from "cpp/influencemaximization/LinearThreshold.h":
+	cdef cppclass _LinearThreshold "NetworKit::LinearThreshold":
+		_LinearThreshold(_Graph G, const vector[double]& threshold) except +
+		void performSimulation(vector[node]) except +
+		count getInfluencedNodes() except +
+
+
+cdef class LinearThreshold:
+	cdef _LinearThreshold *_this
+	cdef Graph _G
+	cdef vector[double] _threshold
+
+	def __cinit__(self, Graph G, const vector[double]& threshold):
+		self._G = G
+		self._threshold = threshold
+		self._this = new _LinearThreshold(G._this, self._threshold)
+
+	def performSimulation(self, vector[node] seeds):
+		self._this.performSimulation(seeds)
+	
+	def getInfluencedNodes(self):
+		return self._this.getInfluencedNodes()
+
+cdef class InfluenceMaximization(Algorithm):
+	def __cinit__(self, Graph G, count k = 1):
+		self._this = new _InfluenceMaximization(G._this, k)
+	
+	def getTopInfluencers(self):
+		return (<_InfluenceMaximization*>(self._this)).getTopInfluencers()
 
 cdef extern from "cpp/centrality/CoreDecomposition.h":
 	cdef cppclass _CoreDecomposition "NetworKit::CoreDecomposition" (_Centrality):
