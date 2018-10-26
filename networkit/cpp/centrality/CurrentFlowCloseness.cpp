@@ -29,7 +29,7 @@ CurrentFlowCloseness::CurrentFlowCloseness(
 
 void CurrentFlowCloseness::run() {
 	scoreData.clear();
-	scoreData.resize(G.upperNodeIdBound(), 0.0);
+	scoreData.resize(G.numberOfNodes(), 0.0);
 
 	edgeweight infDist = std::numeric_limits<edgeweight>::max();
 
