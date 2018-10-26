@@ -1,12 +1,14 @@
 #include <cmath>
 
+#include "../centrality/CurrentFlowCloseness.h"
+#include "../centrality/WeightedHarmonicCloseness.h"
 #include "../distance/APSP.h"
 #include "IndependentCascade.h"
 #include "TopCentrality.h"
 
 namespace NetworKit {
-TopCentrality::TopCentrality(const Graph &G, const count k)
-    : G(G), k(k), n(G.upperNodeIdBound()), diam(computeDiamter()),
+TopCentrality::TopCentrality(const Graph &G, const count k, const Metric)
+    : G(G), k(k), n(G.upperNodeIdBound()), diam(computeDiamter()), algo(algo),
       hasRun(false) {
 	if (!G.isDirected() || !G.isWeighted()) {
 		throw std::runtime_error("Error: the graph must be directed and weighted");
@@ -20,11 +22,18 @@ void TopCentrality::run() {
 	nodeWeights.resize(n);
 	Graph reversed = reverseWeights();
 	while (influencers.size() < k) {
-		WeightedHarmonicCloseness c(reversed, nodeWeights, inGroup, false);
-		c.run();
+		if (algo == CLOSENESS) {
+			c.reset(
+			    new WeightedHarmonicCloseness(reversed, nodeWeights, inGroup, false));
+		} else if (algo == CURRENT_FLOW) {
+			c.reset(new CurrentFlowCloseness(G, nodeWeights));
+		} else {
+			throw std::runtime_error("Error, unsupported centrality metric");
+		}
+		c->run();
 		//		CurrentFlowCloseness c(G, nodeWeights);
 		//		c.run();
-		influencers.push_back(c.ranking()[0].first);
+		influencers.push_back(c->ranking()[0].first);
 		inGroup[influencers.back()] = true;
 		nodeWeights[influencers.back()] = 0.;
 		if (influencers.size() < k) {
