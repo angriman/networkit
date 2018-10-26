@@ -7,7 +7,7 @@
 #include "TopCentrality.h"
 
 namespace NetworKit {
-TopCentrality::TopCentrality(const Graph &G, const count k, const Metric)
+TopCentrality::TopCentrality(const Graph &G, const count k, const Metric algo)
     : G(G), k(k), n(G.upperNodeIdBound()), diam(computeDiamter()), algo(algo),
       hasRun(false) {
 	if (!G.isDirected() || !G.isWeighted()) {
