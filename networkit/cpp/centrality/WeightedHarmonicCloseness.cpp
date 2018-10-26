@@ -22,6 +22,8 @@ WeightedHarmonicCloseness::WeightedHarmonicCloseness(
 
 void WeightedHarmonicCloseness::run() {
 	edgeweight infDist = std::numeric_limits<edgeweight>::max();
+	scoreData.clear();
+	scoreData.resize(G.upperNodeIdBound(), 0.0);
 
 	G.parallelForNodes([&](node v) {
 		if (inGroup[v]) {
@@ -45,7 +47,6 @@ void WeightedHarmonicCloseness::run() {
 				sum += nodeWeights[u] / dist;
 			}
 		}
-
 		scoreData[v] = sum;
 	});
 

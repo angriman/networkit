@@ -36,6 +36,7 @@ TEST_F(InfluenceMaximizationGTest, testTopCentrality) {
 	G.addEdge(4, 1, .5);
 
 	TopCentrality topc(G, 3);
+	INFO("Running");
 	topc.run();
 	topc.getInfluencers();
 }

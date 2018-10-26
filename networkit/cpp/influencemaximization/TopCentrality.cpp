@@ -19,7 +19,7 @@ void TopCentrality::run() {
 	inGroup.assign(n, false);
 	nodeWeights.resize(n);
 	while (influencers.size() < k) {
-		WeightedHarmonicCloseness c(G, nodeWeights, inGroup);
+		WeightedHarmonicCloseness c(G, nodeWeights, inGroup, false);
 		c.run();
 		//		CurrentFlowCloseness c(G, nodeWeights);
 		//		c.run();
@@ -86,7 +86,6 @@ edgeweight TopCentrality::computeDiamter() const {
 			}
 		}
 	}
-
 	return maxDist;
 }
 
