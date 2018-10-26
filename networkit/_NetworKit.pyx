@@ -6805,6 +6805,35 @@ cdef class Closeness(Centrality):
 		self._this = new _Closeness(G._this, normalized, checkConnectedness)
 
 
+cdef extern from "cpp/centrality/WeightedHarmonicCloseness.h":
+	cdef cppclass _WeightedHarmonicCloseness "NetworKit::WeightedHarmonicCloseness" (_Centrality):
+		_WeightedHarmonicCloseness(_Graph, const vector[double] &nodeWeights, const vector[bool] &inGroup, bool) except +
+
+cdef class WeightedHarmonicCloseness(Centrality):
+	"""
+	        WeightedHarmonicCloseness(G, normalized=True)
+
+		Constructs the WeightedHarmonicCloseness class for the given Graph `G`.
+        If the harmonic closeness scores should not be normalized, set
+        `normalized` to False.
+        The run() method takes O(nm) time, where n is the number
+	 	of nodes and m is the number of edges of the graph.
+
+	 	Parameters
+	 	----------
+	 	G : Graph
+	 		The graph.
+	 	normalized : bool, optional
+	 		Set this parameter to False if scores should not be
+                        normalized into an interval of [0,1].
+                        Normalization only for unweighted graphs.
+	"""
+
+	def __cinit__(self, Graph G, const vector[double] &nodeWeights, const vector[bool] &inGroup, normalized=True):
+		self._G = G
+		self._this = new _WeightedHarmonicCloseness(G._this, nodeWeights, inGroup, normalized)
+
+
 cdef extern from "cpp/centrality/HarmonicCloseness.h":
 	cdef cppclass _HarmonicCloseness "NetworKit::HarmonicCloseness" (_Centrality):
 		_HarmonicCloseness(_Graph, bool) except +
@@ -7395,7 +7424,6 @@ cdef extern from "cpp/influencemaximization/LinearThreshold.h":
 		void performSimulation(vector[node]) except +
 		count getInfluencedNodes() except +
 
-
 cdef class LinearThreshold:
 	cdef _LinearThreshold *_this
 	cdef Graph _G
@@ -7412,12 +7440,19 @@ cdef class LinearThreshold:
 	def getInfluencedNodes(self):
 		return self._this.getInfluencedNodes()
 
-cdef class InfluenceMaximization(Algorithm):
-	def __cinit__(self, Graph G, count k = 1):
-		self._this = new _InfluenceMaximization(G._this, k)
-	
-	def getTopInfluencers(self):
-		return (<_InfluenceMaximization*>(self._this)).getTopInfluencers()
+
+cdef extern from "cpp/influencemaximization/TopCentrality.h":
+	cdef cppclass _TopCentrality "NetworKit::TopCentrality"(_Algorithm):
+		_TopCentrality(_Graph G, const count k) except +
+		vector[node] getInfluencers() except +
+
+cdef class TopCentrality(Algorithm):
+	def __cinit__(self, Graph G, const count k):
+		self._this = new _TopCentrality(G._this, k)
+
+	def getInfluencers(self):
+		return (<_TopCentrality*>(self._this)).getInfluencers()
+
 
 cdef extern from "cpp/centrality/CoreDecomposition.h":
 	cdef cppclass _CoreDecomposition "NetworKit::CoreDecomposition" (_Centrality):

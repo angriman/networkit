@@ -1,1 +1,1 @@
-from _NetworKit import InfluenceMaximization, IndependentCascade, LinearThreshold
+from _NetworKit import IndependentCascade, LinearThreshold, TopCentrality

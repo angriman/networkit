@@ -24,29 +24,31 @@ void IndependentCascade::performSimulation(const std::vector<node> &seeds,
 	                                                std::vector<count>(n, 0));
 	std::vector<std::vector<bool>> influenced(max_threads,
 	                                          std::vector<bool>(n, false));
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
 	for (omp_index i = 0; i < static_cast<omp_index>(nIter); ++i) {
 
-		std::vector<count> &nodes = influencedNodes[omp_get_thread_num()];
-		std::vector<bool> &curInfl = influenced[omp_get_thread_num()];
+		const count threadId = omp_get_thread_num();
+		std::vector<count> &threadInflNodes = influencedNodes[threadId];
+		std::vector<bool> &threadInfluenced = influenced[threadId];
 
-		std::fill(curInfl.begin(), curInfl.end(), false);
+		std::fill(threadInfluenced.begin(), threadInfluenced.end(), false);
 		std::queue<node> activeNodes;
 		for (auto curNode : seeds) {
 			activeNodes.push(curNode);
-			curInfl[curNode] = true;
+			threadInfluenced[curNode] = true;
+			++threadInflNodes[curNode];
 		}
 
 		node u;
-		count totalInfluencedNodes = 0;
+		count totalInfluencedNodes = seeds.size();
 		while (!activeNodes.empty()) {
 			u = activeNodes.front();
 			activeNodes.pop();
 			G.forNeighborsOf(u, [&](node v) {
-				if (!curInfl[v]) {
+				if (!threadInfluenced[v]) {
 					if (Aux::Random::real(0, 1) <= G.weight(u, v)) {
-						curInfl[v] = true;
-						++nodes[v];
+						threadInfluenced[v] = true;
+						++threadInflNodes[v];
 						activeNodes.push(v);
 						++totalInfluencedNodes;
 					}
@@ -61,18 +63,15 @@ void IndependentCascade::performSimulation(const std::vector<node> &seeds,
 		}
 	}
 
-	for (count i = 1; i < max_threads; ++i) {
-#pragma omp parallel for
+	avg = 0.0;
+	for (count i = 0; i < max_threads; ++i) {
 		for (node u = 0; u < n; ++u) {
-			influencedNodes[0][u] += influencedNodes[i][u];
+			avg += influencedNodes[i][u];
 		}
 	}
 
-	avg = 0.0;
-#pragma omp parallel for reduction(+ : avg)
-	for (node u = 0; u < n; ++u) {
-		avg += (double)influencedNodes[0][u] / (double)nIter;
-	}
+	avg /= (double)nIter;
+
 	hasRun = true;
 }
 } // namespace NetworKit

@@ -18,10 +18,27 @@
 #include "../IndependentCascade.h"
 #include "../InfluenceMaximization.h"
 #include "../LinearThreshold.h"
+#include "../TopCentrality.h"
 
 namespace NetworKit {
 
 class InfluenceMaximizationGTest : public testing::Test {};
+
+TEST_F(InfluenceMaximizationGTest, testTopCentrality) {
+	Graph G(5, true, true);
+	G.addEdge(0, 1, .5);
+	G.addEdge(0, 2, .5);
+	G.addEdge(0, 3, .5);
+	G.addEdge(0, 4, .5);
+	G.addEdge(2, 3, .5);
+	G.addEdge(2, 1, .5);
+	G.addEdge(4, 3, .5);
+	G.addEdge(4, 1, .5);
+
+	TopCentrality topc(G, 3);
+	topc.run();
+	topc.getInfluencers();
+}
 
 TEST_F(InfluenceMaximizationGTest, testAlgorithm) {
 	//	const count n = 10;

@@ -42,6 +42,7 @@
 #include "../SpanningEdgeCentrality.h"
 #include "../TopCloseness.h"
 #include "../TopHarmonicCloseness.h"
+#include "../WeightedHarmonicCloseness.h"
 
 namespace NetworKit {
 
@@ -790,6 +791,41 @@ TEST_F(CentralityGTest, testHarmonicClosenessCentrality) {
 	EXPECT_NEAR(3.5, hc[4], tol);
 	EXPECT_NEAR(3.1667, hc[5], tol);
 	EXPECT_NEAR(1, maximum, tol);
+}
+
+TEST_F(CentralityGTest, testWeightedHarmonicClosenessCentrality) {
+	/* Graph:
+	 0    3
+	  \  / \
+	   2    5
+	  /  \ /
+	 1    4
+	*/
+	count n = 6;
+	Graph G(n, false, true);
+
+	G.addEdge(0, 2);
+	G.addEdge(1, 2);
+	G.addEdge(2, 3);
+	G.addEdge(2, 4);
+	G.addEdge(3, 5);
+	G.addEdge(4, 5);
+
+	const std::vector<double> weights = {0.2, 0.1, 0.5, 0.2, 1.0, 1.0};
+	const std::vector<bool> inGroup(n, false);
+	WeightedHarmonicCloseness centrality(G, weights, inGroup, false);
+	centrality.run();
+	std::vector<double> hc = centrality.scores();
+
+	double maximum = centrality.maximum();
+
+	const double tol = 1e-3;
+	EXPECT_NEAR(1.433, hc[0], tol);
+	EXPECT_NEAR(1.433, hc[1], tol);
+	EXPECT_NEAR(1.7, hc[2], tol);
+	EXPECT_NEAR(1, hc[3], tol);
+	EXPECT_NEAR(1, hc[4], tol);
+	EXPECT_NEAR(0, hc[5], tol);
 }
 
 TEST_F(CentralityGTest, runKPathCentrality) {
