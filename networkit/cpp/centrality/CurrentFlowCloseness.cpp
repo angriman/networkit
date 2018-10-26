@@ -39,9 +39,10 @@ void CurrentFlowCloseness::run() {
 	//
 	//	});
 
-	CommuteTimeDistance ctd(G, 0.01);
+	CommuteTimeDistance ctd(G);
+	std::cout << "Running ctd\n";
 	ctd.run();
-	G.parallelForNodes([&](node s) {
+	G.forNodes([&](node s) {
 		double sum = 0.0;
 		G.forNodes([&](node t) {
 			const double dist = ctd.distance(s, t);
