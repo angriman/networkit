@@ -35,7 +35,6 @@ void WeightedHarmonicCloseness::run() {
 		} else {
 			sssp.reset(new BFS(G, v, true, true));
 		}
-
 		sssp->run();
 
 		std::vector<edgeweight> distances = sssp->getDistances();

@@ -25,15 +25,17 @@ void TopCentrality::run() {
 		if (algo == 0) {
 			c.reset(
 			    new WeightedHarmonicCloseness(reversed, nodeWeights, inGroup, false));
+			std::cout << "Using closeness\n";
 		} else if (algo == 1) {
-			c.reset(new CurrentFlowCloseness(G, nodeWeights));
+			c.reset(new CurrentFlowCloseness(reversed, nodeWeights));
+			std::cout << "Using cfcc\n";
 		} else {
 			std::stringstream sstream;
 			sstream << "Error, unsupported centrality metric: ";
 			sstream << algo;
 			throw std::runtime_error(sstream.str());
 		}
-		std::cerr << "Algorithm: done " << influencers.size() << "/" << k
+		std::cout << "Algorithm: done " << influencers.size() << "/" << k
 		          << std::endl;
 		c->run();
 		//		CurrentFlowCloseness c(G, nodeWeights);
