@@ -33,6 +33,8 @@ void TopCentrality::run() {
 			sstream << algo;
 			throw std::runtime_error(sstream.str());
 		}
+		std::cerr << "Algorithm: done " << influencers.size() << "/" << k
+		          << std::endl;
 		c->run();
 		//		CurrentFlowCloseness c(G, nodeWeights);
 		//		c.run();
