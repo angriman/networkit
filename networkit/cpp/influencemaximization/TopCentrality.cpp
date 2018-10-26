@@ -22,13 +22,16 @@ void TopCentrality::run() {
 	nodeWeights.resize(n);
 	Graph reversed = reverseWeights();
 	while (influencers.size() < k) {
-		if (algo == CLOSENESS) {
+		if (algo == 0) {
 			c.reset(
 			    new WeightedHarmonicCloseness(reversed, nodeWeights, inGroup, false));
-		} else if (algo == CURRENT_FLOW) {
+		} else if (algo == 1) {
 			c.reset(new CurrentFlowCloseness(G, nodeWeights));
 		} else {
-			throw std::runtime_error("Error, unsupported centrality metric");
+			std::stringstream sstream;
+			sstream << "Error, unsupported centrality metric: ";
+			sstream << algo;
+			throw std::runtime_error(sstream.str());
 		}
 		c->run();
 		//		CurrentFlowCloseness c(G, nodeWeights);
