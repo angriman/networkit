@@ -24,6 +24,7 @@ private:
 	void checkHasRun() const;
 	void updateWeights();
 	edgeweight computeDiamter() const;
+	Graph reverseWeights() const;
 	bool hasRun;
 };
 

@@ -18,8 +18,9 @@ void TopCentrality::run() {
 	influencers.reserve(k);
 	inGroup.assign(n, false);
 	nodeWeights.resize(n);
+	Graph reversed = reverseWeights();
 	while (influencers.size() < k) {
-		WeightedHarmonicCloseness c(G, nodeWeights, inGroup, false);
+		WeightedHarmonicCloseness c(reversed, nodeWeights, inGroup, false);
 		c.run();
 		//		CurrentFlowCloseness c(G, nodeWeights);
 		//		c.run();
@@ -87,6 +88,14 @@ edgeweight TopCentrality::computeDiamter() const {
 		}
 	}
 	return maxDist;
+}
+
+Graph TopCentrality::reverseWeights() const {
+	Graph result(n, true, true);
+	G.forEdges([&](node u, node v, edgeweight eid) {
+		result.addEdge(u, v, 1.0 / G.weight(u, v));
+	});
+	return result;
 }
 
 } // namespace NetworKit
