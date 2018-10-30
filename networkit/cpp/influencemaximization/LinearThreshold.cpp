@@ -13,13 +13,11 @@ LinearThreshold::LinearThreshold(const Graph &G,
 }
 
 void LinearThreshold::performSimulation(const std::vector<node> &seeds) {
-	std::vector<bool> influenced(n, false);
+	influenced.resize(n, false);
 	std::queue<node> queue;
 	influencedNodes = 0;
 	std::vector<double> curThreshold(n);
 	std::copy(threshold.begin(), threshold.end(), curThreshold.begin());
-	std::cout << "Size " << threshold.size() << " first = " << threshold[0]
-	          << std::endl;
 	for (auto curNode : seeds) {
 		queue.push(curNode);
 		influenced[curNode] = true;

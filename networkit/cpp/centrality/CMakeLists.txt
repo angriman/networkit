@@ -6,7 +6,6 @@ networkit_add_module(centrality
     Centrality.cpp
     Closeness.cpp
     CoreDecomposition.cpp
-		CurrentFlowCloseness.cpp
     DegreeCentrality.cpp
     DynApproxBetweenness.cpp
     DynBetweenness.cpp
@@ -30,7 +29,6 @@ networkit_add_module(centrality
     SpanningEdgeCentrality.cpp
     TopCloseness.cpp
     TopHarmonicCloseness.cpp
-		WeightedDegreeCentrality.cpp
 		WeightedHarmonicCloseness.cpp
     )
 

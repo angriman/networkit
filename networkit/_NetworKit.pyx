@@ -7427,37 +7427,16 @@ cdef class LinearThreshold:
 		return self._this.getInfluencedNodes()
 
 
-cdef extern from "cpp/influencemaximization/TopCentrality.h" namespace "NetworKit":
-	enum Model:
-		IC = 0,
-		LT = 1
-
-class _Model(object):
-	Ic = IC
-	Lt = LT
-
-cdef extern from "cpp/influencemaximization/TopCentrality.h" namespace "NetworKit":
-	enum Metric:
-		CLOSENESS = 0,
-		KATZ = 1,
-		KPATH = 2
-
-
-class _Metric(object):
-	Closeness = CLOSENESS 
-	Katz = KATZ
-	Kpath = KPATH
-
 cdef extern from "cpp/influencemaximization/TopCentrality.h":
 	cdef cppclass _TopCentrality "NetworKit::TopCentrality"(_Algorithm):
-		_TopCentrality(_Graph G, const count k, const Model model, const Metric algo, const bool useTopk) except +
+		_TopCentrality(_Graph G, const count k, const bool useTopk) except +
 		vector[node] getInfluencers() except +
 		vector[double] getEstimate() except +
 		void setThreshold(const vector[double]) except +
 
 cdef class TopCentrality(Algorithm):
-	def __cinit__(self, Graph G, const count k = 1, model= _Model.Ic, algo = _Metric.Closeness, const bool useTopk = False):
-		self._this = new _TopCentrality(G._this, k, model, algo, useTopk)
+	def __cinit__(self, Graph G, const count k = 1, const bool useTopk = False):
+		self._this = new _TopCentrality(G._this, k, useTopk)
 
 	def getInfluencers(self):
 		return (<_TopCentrality*>(self._this)).getInfluencers()

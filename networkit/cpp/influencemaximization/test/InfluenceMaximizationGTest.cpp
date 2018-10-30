@@ -11,7 +11,6 @@
 #include "../../auxiliary/PrioQueue.h"
 #include "../../auxiliary/Random.h"
 #include "../../centrality/Closeness.h"
-#include "../../centrality/WeightedDegreeCentrality.h"
 #include "../../distance/CommuteTimeDistance.h"
 #include "../../generators/ErdosRenyiGenerator.h"
 #include "../../io/EdgeListReader.h"
@@ -205,44 +204,6 @@ TEST_F(InfluenceMaximizationGTest, testExpectedValue) {
 		IC.performSimulation({simPQ.peekMin(0).second}, simulations);
 		INFO(IC.getAverage());
 		INFO(infl.computeInflProb(simPQ.peekMin(0).second));
-	}
-}
-
-TEST_F(InfluenceMaximizationGTest, testWeightedDegreIn) {
-	Graph G(4, true, true);
-	G.addEdge(1, 0, 0.4);
-	G.addEdge(2, 0, 0.2);
-	G.addEdge(3, 0, 0.1);
-	G.addEdge(0, 1, 0.2);
-	G.addEdge(1, 3, 0.2);
-
-	EXPECT_NEAR(G.weightedDegreeIn(0), 0.7, 1e-6);
-	EXPECT_NEAR(G.weightedDegreeIn(1), 0.2, 1e-6);
-	EXPECT_NEAR(G.weightedDegreeIn(2), 0.0, 1e-6);
-	EXPECT_NEAR(G.weightedDegreeIn(3), 0.2, 1e-6);
-}
-
-TEST_F(InfluenceMaximizationGTest, testWeightedDegreCentrality) {
-	Graph G(4, true, true);
-	G.addEdge(1, 0, 0.4);
-	G.addEdge(2, 0, 0.2);
-	G.addEdge(3, 0, 0.1);
-	G.addEdge(0, 1, 0.2);
-	G.addEdge(1, 3, 0.2);
-
-	std::vector<double> scores(4, .1); // = {.5, .9, .2, .4};
-	WeightedDegreeCentrality wdc(G, scores);
-	wdc.run();
-	auto ranking = wdc.ranking();
-	for (count i = 0; i < ranking.size() - 1; ++i) {
-		EXPECT_TRUE(ranking[i].second >= ranking[i + 1].second);
-	}
-	for (auto r : ranking) {
-		double weightedDeg = 0.;
-		G.forNeighborsOf(r.first, [&](node u) {
-			weightedDeg += G.weight(r.first, u) * scores[u];
-		});
-		EXPECT_EQ(weightedDeg, r.second);
 	}
 }
 

@@ -24,7 +24,6 @@ void WeightedHarmonicCloseness::run() {
 	edgeweight infDist = std::numeric_limits<edgeweight>::max();
 	scoreData.clear();
 	scoreData.resize(n, 0.0);
-
 	G.parallelForNodes([&](node v) {
 		if (inGroup[v]) {
 			return;
@@ -37,9 +36,9 @@ void WeightedHarmonicCloseness::run() {
 		}
 		sssp->run();
 
-		std::vector<edgeweight> distances = sssp->getDistances();
+		auto distances = sssp->getDistances();
 
-		double sum = 0;
+		double sum = 0.0;
 		for (node u = 0; u < n; ++u) {
 			edgeweight dist = distances[u];
 			if (dist != infDist && dist != 0) {

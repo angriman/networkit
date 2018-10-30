@@ -3,7 +3,7 @@
 #include "../auxiliary/Parallel.h"
 #include "../auxiliary/PrioQueue.h"
 #include "../auxiliary/Random.h"
-#include "../centrality/WeightedDegreeCentrality.h"
+#include "../centrality/DegreeCentrality.h"
 #include "../distance/APSP.h"
 #include "IndependentCascade.h"
 #include "InfluenceMaximization.h"
@@ -30,7 +30,7 @@ void InfluenceMaximization::run() {
 	topInfuencers.clear();
 	topInfuencers.reserve(k);
 
-	WeightedDegreeCentrality dc(G, nodeScores);
+	DegreeCentrality dc(G);
 	dc.run();
 	auto ranking = dc.ranking();
 	std::vector<double> bottom(n);
