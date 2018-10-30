@@ -6810,28 +6810,14 @@ cdef extern from "cpp/centrality/WeightedHarmonicCloseness.h":
 		_WeightedHarmonicCloseness(_Graph, const vector[double] &nodeWeights, const vector[bool] &inGroup, bool) except +
 
 cdef class WeightedHarmonicCloseness(Centrality):
-	"""
-	        WeightedHarmonicCloseness(G, normalized=True)
-
-		Constructs the WeightedHarmonicCloseness class for the given Graph `G`.
-        If the harmonic closeness scores should not be normalized, set
-        `normalized` to False.
-        The run() method takes O(nm) time, where n is the number
-	 	of nodes and m is the number of edges of the graph.
-
-	 	Parameters
-	 	----------
-	 	G : Graph
-	 		The graph.
-	 	normalized : bool, optional
-	 		Set this parameter to False if scores should not be
-                        normalized into an interval of [0,1].
-                        Normalization only for unweighted graphs.
-	"""
+	cdef vector[double] _nodeWeights
+	cdef vector[bool] _inGroup
 
 	def __cinit__(self, Graph G, const vector[double] &nodeWeights, const vector[bool] &inGroup, normalized=True):
 		self._G = G
-		self._this = new _WeightedHarmonicCloseness(G._this, nodeWeights, inGroup, normalized)
+		self._nodeWeights = nodeWeights
+		self._inGroup = inGroup
+		self._this = new _WeightedHarmonicCloseness(G._this, self._nodeWeights, self._inGroup, normalized)
 
 
 cdef extern from "cpp/centrality/HarmonicCloseness.h":
@@ -7442,27 +7428,45 @@ cdef class LinearThreshold:
 
 
 cdef extern from "cpp/influencemaximization/TopCentrality.h" namespace "NetworKit":
+	enum Model:
+		IC = 0,
+		LT = 1
+
+class _Model(object):
+	Ic = IC
+	Lt = LT
+
+cdef extern from "cpp/influencemaximization/TopCentrality.h" namespace "NetworKit":
 	enum Metric:
 		CLOSENESS = 0,
-		CURRENT_FLOW = 1,
-		KATZ = 2
+		KATZ = 1,
+		KPATH = 2
+
 
 class _Metric(object):
 	Closeness = CLOSENESS 
-	Current_flow = CURRENT_FLOW 
 	Katz = KATZ
+	Kpath = KPATH
 
 cdef extern from "cpp/influencemaximization/TopCentrality.h":
 	cdef cppclass _TopCentrality "NetworKit::TopCentrality"(_Algorithm):
-		_TopCentrality(_Graph G, const count k, const Metric algo) except +
+		_TopCentrality(_Graph G, const count k, const Model model, const Metric algo, const bool useTopk) except +
 		vector[node] getInfluencers() except +
+		vector[double] getEstimate() except +
+		void setThreshold(const vector[double]) except +
 
 cdef class TopCentrality(Algorithm):
-	def __cinit__(self, Graph G, const count k = 1, algo = _Metric.Closeness):
-		self._this = new _TopCentrality(G._this, k, algo)
+	def __cinit__(self, Graph G, const count k = 1, model= _Model.Ic, algo = _Metric.Closeness, const bool useTopk = False):
+		self._this = new _TopCentrality(G._this, k, model, algo, useTopk)
 
 	def getInfluencers(self):
 		return (<_TopCentrality*>(self._this)).getInfluencers()
+
+	def getEstimate(self):
+		return (<_TopCentrality*>(self._this)).getEstimate()
+	
+	def setThreshold(self, threshold):
+		(<_TopCentrality*>(self._this)).setThreshold(threshold)
 
 
 cdef extern from "cpp/centrality/CoreDecomposition.h":
