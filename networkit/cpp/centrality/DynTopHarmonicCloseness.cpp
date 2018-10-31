@@ -355,33 +355,13 @@ void DynTopHarmonicCloseness::run() {
 							trail = 0;
 							nMinCloseness = 1;
 							if (k > 1) {
-								Aux::PrioQueue<edgeweight, node> tmp(n);
-								auto last = top.extractMin();
-								auto next = top.extractMin();
-								minCloseness = last.first;
-
-								if (last.first == next.first) {
-									tmp.insert(last.first, last.second);
-									while (next.first == last.first) {
-										tmp.insert(next.first, next.second);
-										++nMinCloseness;
-										if (top.size() == 0) {
-											break;
-										}
-										next = top.extractMin();
-									}
-									if (next.first != last.first) {
-										top.insert(next.first, next.second);
-									}
-
-									while (tmp.size() > 0) {
-										auto elem = tmp.extractMin();
-										top.insert(elem.first, elem.second);
-									}
-								} else {
-									top.insert(next.first, next.second);
-									top.insert(last.first, last.second);
-								}
+								double pqTop = top.peekMin(0).first;
+								double pqNext = pqTop;
+								top.forElementsWhile([&]() { return pqTop == pqNext; },
+								                     [&](double curKey, node curNode) {
+									                     pqNext = curKey;
+									                     ++nMinCloseness;
+								                     });
 							}
 						}
 					} else {
@@ -662,33 +642,13 @@ void DynTopHarmonicCloseness::addEdge(const GraphEvent &event) {
 							trail = 0;
 							nMinCloseness = 1;
 							if (k > 1) {
-								Aux::PrioQueue<edgeweight, node> tmp(n);
-								auto last = top.extractMin();
-								auto next = top.extractMin();
-								minCloseness = last.first;
-
-								if (last.first == next.first) {
-									tmp.insert(last.first, last.second);
-									while (next.first == last.first) {
-										tmp.insert(next.first, next.second);
-										++nMinCloseness;
-										if (top.size() == 0) {
-											break;
-										}
-										next = top.extractMin();
-									}
-									if (next.first != last.first) {
-										top.insert(next.first, next.second);
-									}
-
-									while (tmp.size() > 0) {
-										auto elem = tmp.extractMin();
-										top.insert(elem.first, elem.second);
-									}
-								} else {
-									top.insert(next.first, next.second);
-									top.insert(last.first, last.second);
-								}
+								double pqTop = top.peekMin(0).first;
+								double pqNext = pqTop;
+								top.forElementsWhile([&]() { return pqTop == pqNext; },
+								                     [&](double curKey, node curNode) {
+									                     pqNext = curKey;
+									                     ++nMinCloseness;
+								                     });
 							}
 						}
 					} else {
@@ -842,33 +802,13 @@ void DynTopHarmonicCloseness::removeEdge(const GraphEvent &event) {
 							trail = 0;
 							nMinCloseness = 1;
 							if (k > 1) {
-								Aux::PrioQueue<edgeweight, node> tmp(n);
-								auto last = top.extractMin();
-								auto next = top.extractMin();
-								minCloseness = last.first;
-
-								if (last.first == next.first) {
-									tmp.insert(last.first, last.second);
-									while (next.first == last.first) {
-										tmp.insert(next.first, next.second);
-										++nMinCloseness;
-										if (top.size() == 0) {
-											break;
-										}
-										next = top.extractMin();
-									}
-									if (next.first != last.first) {
-										top.insert(next.first, next.second);
-									}
-
-									while (tmp.size() > 0) {
-										auto elem = tmp.extractMin();
-										top.insert(elem.first, elem.second);
-									}
-								} else {
-									top.insert(next.first, next.second);
-									top.insert(last.first, last.second);
-								}
+								double pqTop = top.peekMin(0).first;
+								double pqNext = pqTop;
+								top.forElementsWhile([&]() { return pqTop == pqNext; },
+								                     [&](double curKey, node curNode) {
+									                     pqNext = curKey;
+									                     ++nMinCloseness;
+								                     });
 							}
 						}
 					} else {
