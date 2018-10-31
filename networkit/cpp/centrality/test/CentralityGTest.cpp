@@ -42,6 +42,7 @@
 #include "../SpanningEdgeCentrality.h"
 #include "../TopCloseness.h"
 #include "../TopHarmonicCloseness.h"
+#include "../WeightedGroupCloseness.h"
 #include "../WeightedHarmonicCloseness.h"
 
 namespace NetworKit {
@@ -1738,5 +1739,18 @@ TEST_F(CentralityGTest, testDynTopHarmonicClosenessDirected) {
 	for (count j = 0; j < k; ++j) {
 		EXPECT_FLOAT_EQ(scores[j].second, refScores[j].second);
 	}
+}
+
+TEST_F(CentralityGTest, testWeightedGroupCloseness) {
+	const count n = 10;
+	Graph G(n, true, true);
+
+	G.addEdge(0, 1, 0.5);
+	G.addEdge(0, 2, 0.5);
+	G.addEdge(2, 5, 0.5);
+
+	const count k = 3;
+	WeightedGroupCloseness wgc(G, k);
+	wgc.run();
 }
 } /* namespace NetworKit */

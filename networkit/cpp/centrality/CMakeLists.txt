@@ -29,6 +29,7 @@ networkit_add_module(centrality
     SpanningEdgeCentrality.cpp
     TopCloseness.cpp
     TopHarmonicCloseness.cpp
+		WeightedGroupCloseness.cpp
 		WeightedHarmonicCloseness.cpp
     )
 
