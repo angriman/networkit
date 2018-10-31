@@ -1748,9 +1748,24 @@ TEST_F(CentralityGTest, testWeightedGroupCloseness) {
 	G.addEdge(0, 1, 0.5);
 	G.addEdge(0, 2, 0.5);
 	G.addEdge(2, 5, 0.5);
+	G.addEdge(1, 4, 0.5);
+	G.addEdge(1, 2, 0.5);
+	G.addEdge(1, 6, 0.5);
+	G.addEdge(1, 7, 0.5);
+	G.addEdge(1, 8, 0.5);
+	G.addEdge(2, 0, 0.5);
+	G.addEdge(2, 1, 0.5);
+	G.addEdge(2, 4, 0.5);
+	G.addEdge(2, 6, 0.5);
+	G.addEdge(2, 8, 0.5);
+	G.addEdge(2, 9, 0.5);
+	G.addEdge(3, 6, 0.5);
+	G.addEdge(3, 3, 0.5);
+	G.addEdge(3, 8, 0.5);
 
 	const count k = 3;
 	WeightedGroupCloseness wgc(G, k);
 	wgc.run();
+	INFO(wgc.groupMaxCloseness());
 }
 } /* namespace NetworKit */

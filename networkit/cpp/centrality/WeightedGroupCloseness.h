@@ -18,11 +18,17 @@ protected:
 	const count k;
 	const count n;
 	std::vector<node> group;
+	std::vector<edgeweight> distances;
+	std::vector<double> margGain;
+	std::vector<bool> inGroup;
+	std::vector<std::vector<edgeweight>> newDistances;
+
+	void updateMarginalGain();
 };
 
 inline std::vector<node> WeightedGroupCloseness::groupMaxCloseness() {
 	assureFinished();
-	return groupMaxCloseness();
+	return group;
 }
 
 } // namespace NetworKit
