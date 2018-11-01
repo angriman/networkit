@@ -45,13 +45,15 @@ void WeightedGroupCloseness::updateMarginalGain() {
 
 		auto curNewDistances = computeDistances(s);
 		double curMargGain = 0;
-		for (node u = 0; u < n; ++u) {
-			curNewDistances[u] = std::min(curNewDistances[u], distances[u]);
-			if (curNewDistances[u] != 0 && !inGroup[u] &&
-			    curNewDistances[u] != infDist) {
-				curMargGain += 1.0 / curNewDistances[u];
+		G.forNodes([&](const node u) {
+			if (curNewDistances[u] < distances[u]) {
+				curNewDistances[u] = std::min(curNewDistances[u], distances[u]);
+				if (curNewDistances[u] != 0 && !inGroup[u] &&
+				    curNewDistances[u] != infDist) {
+					curMargGain += 1.0 / curNewDistances[u];
+				}
 			}
-		}
+		});
 		ranking[s] = std::make_pair(s, curMargGain);
 	});
 
@@ -69,16 +71,6 @@ void WeightedGroupCloseness::updateMarginalGain() {
 	auto curNewDistances = computeDistances(group.back());
 	G.parallelForNodes([&](node s) {
 		distances[s] = std::min(curNewDistances[s], distances[s]);
-		if (inGroup[s]) {
-			// Check here
-			if (distances[s] != 0) {
-				throw std::runtime_error("In group distances canno be zero.");
-			}
-		} else {
-			if (distances[s] == 0) {
-				throw std::runtime_error("Distances outside S cannot be zero.");
-			}
-		}
 	});
 }
 
