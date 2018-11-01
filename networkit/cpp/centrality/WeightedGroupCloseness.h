@@ -17,13 +17,13 @@ protected:
 	const Graph &G;
 	const count k;
 	const count n;
+	const edgeweight infDist = std::numeric_limits<edgeweight>::max();
 	std::vector<node> group;
 	std::vector<edgeweight> distances;
-	std::vector<double> margGain;
 	std::vector<bool> inGroup;
-	std::vector<std::vector<edgeweight>> newDistances;
 
 	void updateMarginalGain();
+	std::vector<edgeweight> computeDistances(const node &s);
 };
 
 inline std::vector<node> WeightedGroupCloseness::groupMaxCloseness() {

@@ -36,7 +36,6 @@ void IndependentCascade::performSimulation(const std::vector<node> &seeds,
 		for (auto curNode : seeds) {
 			activeNodes.push(curNode);
 			threadInfluenced[curNode] = true;
-			++threadInflNodes[curNode];
 		}
 
 		node u;
@@ -67,10 +66,14 @@ void IndependentCascade::performSimulation(const std::vector<node> &seeds,
 	for (count i = 0; i < max_threads; ++i) {
 		for (node u = 0; u < n; ++u) {
 			avg += influencedNodes[i][u];
+			if (std::find(seeds.begin(), seeds.end(), u) != seeds.end()) {
+				assert(influencedNodes[i][u] == 0);
+			}
 		}
 	}
 
 	avg /= (double)nIter;
+	avg += seeds.size();
 
 	hasRun = true;
 }

@@ -23,39 +23,32 @@ WeightedGroupCloseness::WeightedGroupCloseness(const Graph &G, const count k)
 }
 
 void WeightedGroupCloseness::run() {
-	const edgeweight infDist = std::numeric_limits<edgeweight>::max();
-	newDistances.resize(omp_get_max_threads(),
-	                    std::vector<edgeweight>(n, infDist));
 	distances.assign(n, infDist);
 	group.reserve(k);
 	inGroup.assign(n, false);
-	margGain.assign(n, 0);
 
 	while (group.size() < k) {
 		updateMarginalGain();
 	}
+
 	hasRun = true;
 }
 
 void WeightedGroupCloseness::updateMarginalGain() {
-	std::vector<std::pair<node, double>> ranking;
-	ranking.resize(n);
+	std::vector<std::pair<node, double>> ranking(n);
+
 	G.parallelForNodes([&](node s) {
 		if (inGroup[s]) {
 			ranking[s] = std::make_pair(s, 0);
 			return;
 		}
 
-		Dijkstra dijkstra(G, s, false);
-		dijkstra.run();
-
-		std::vector<edgeweight> &curNewDistances =
-		    newDistances[omp_get_thread_num()];
-		curNewDistances = dijkstra.getDistances();
+		auto curNewDistances = computeDistances(s);
 		double curMargGain = 0;
 		for (node u = 0; u < n; ++u) {
 			curNewDistances[u] = std::min(curNewDistances[u], distances[u]);
-			if (curNewDistances[u] != 0 && !inGroup[u]) {
+			if (curNewDistances[u] != 0 && !inGroup[u] &&
+			    curNewDistances[u] != infDist) {
 				curMargGain += 1.0 / curNewDistances[u];
 			}
 		}
@@ -73,15 +66,27 @@ void WeightedGroupCloseness::updateMarginalGain() {
 
 	group.push_back(ranking.front().first);
 	inGroup[group.back()] = true;
-	Dijkstra dijkstra(G, group.back(), false);
-	dijkstra.run();
-	auto curNewDistances = dijkstra.getDistances();
+	auto curNewDistances = computeDistances(group.back());
 	G.parallelForNodes([&](node s) {
 		distances[s] = std::min(curNewDistances[s], distances[s]);
 		if (inGroup[s]) {
-			assert(distances[s] == 0);
+			// Check here
+			if (distances[s] != 0) {
+				throw std::runtime_error("In group distances canno be zero.");
+			}
+		} else {
+			if (distances[s] == 0) {
+				throw std::runtime_error("Distances outside S cannot be zero.");
+			}
 		}
 	});
+}
+
+std::vector<edgeweight>
+WeightedGroupCloseness::computeDistances(const node &s) {
+	Dijkstra dijkstra(G, s, false);
+	dijkstra.run();
+	return dijkstra.getDistances();
 }
 
 } // namespace NetworKit
