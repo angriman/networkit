@@ -6612,6 +6612,23 @@ cdef class GroupDegree(Algorithm):
 
 
 
+cdef extern from "cpp/centrality/WeightedGroupCloseness.h":
+	cdef cppclass _WeightedGroupCloseness "NetworKit::WeightedGroupCloseness"(_Algorithm):
+		_WeightedGroupCloseness(_Graph G, count) except +
+		vector[node] groupMaxCloseness() except +
+
+
+cdef class WeightedGroupCloseness(Algorithm):
+	cdef Graph _G
+
+	def __cinit__(self,  Graph G, k=1):
+		self._G = G
+		self._this = new _WeightedGroupCloseness(G._this, k)
+
+	def groupMaxCloseness(self):
+		return (<_WeightedGroupCloseness*>(self._this)).groupMaxCloseness()
+
+
 cdef extern from "cpp/centrality/GroupCloseness.h":
 	cdef cppclass _GroupCloseness "NetworKit::GroupCloseness"(_Algorithm):
 		_GroupCloseness(_Graph G, count, count) except +
@@ -6668,8 +6685,6 @@ cdef class GroupCloseness(Algorithm):
 		    The group closeness score of the given group.
 		"""
 		return (<_GroupCloseness*>(self._this)).scoreOfGroup(group)
-
-
 
 cdef extern from "cpp/centrality/DegreeCentrality.h":
 	cdef cppclass _DegreeCentrality "NetworKit::DegreeCentrality" (_Centrality):
