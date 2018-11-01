@@ -12,8 +12,8 @@
 namespace NetworKit {
 
 Dijkstra::Dijkstra(const Graph &G, node source, bool storePaths,
-									 bool storeNodesSortedByDistance, node target)
-		: SSSP(G, source, storePaths, storeNodesSortedByDistance, target) {}
+                   bool storeNodesSortedByDistance, node target)
+    : SSSP(G, source, storePaths, storeNodesSortedByDistance, target) {}
 
 void Dijkstra::run() {
 
@@ -40,8 +40,9 @@ void Dijkstra::run() {
 	Aux::PrioQueue<edgeweight, node> pq(distances);
 
 	auto relax([&](node u, node v, edgeweight w) {
-		if (distances[v] > distances[u] + w) {
-			distances[v] = distances[u] + w;
+		edgeweight absW = std::abs(w);
+		if (distances[v] > distances[u] + absW) {
+			distances[v] = distances[u] + absW;
 			if (storePaths) {
 				previous[v] = {u}; // new predecessor on shortest path
 				npaths[v] = npaths[u];
@@ -50,10 +51,10 @@ void Dijkstra::run() {
 			TRACE("pq size: ", pq.size());
 			pq.changeKey(distances[v], v);
 			TRACE("pq size: ", pq.size());
-		} else if (storePaths && (distances[v] == distances[u] + w)) {
+		} else if (storePaths && (distances[v] == distances[u] + absW)) {
 			previous[v].push_back(u); // additional predecessor
 			npaths[v] += npaths[u];   // all the shortest paths to u are
-																// also shortest paths to v now
+			                          // also shortest paths to v now
 		}
 	});
 
@@ -65,7 +66,7 @@ void Dijkstra::run() {
 		TRACE("current node in Dijkstra: ", current);
 		TRACE("pq size: ", pq.size());
 		if ((breakWhenFound && target == current) ||
-				distances[current] == infDist) {
+		    distances[current] == infDist) {
 			break;
 		}
 

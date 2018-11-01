@@ -30,6 +30,7 @@ networkit_add_module(centrality
     TopCloseness.cpp
     TopHarmonicCloseness.cpp
 		WeightedGroupCloseness.cpp
+		WeightedSignedGroupCloseness.cpp
 		WeightedHarmonicCloseness.cpp
     )
 
