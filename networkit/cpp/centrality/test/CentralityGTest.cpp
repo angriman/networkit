@@ -45,6 +45,7 @@
 #include "../WeightedGroupCloseness.h"
 #include "../WeightedHarmonicCloseness.h"
 #include "../WeightedSignedGroupCloseness.h"
+#include "../WeightedTopCloseness.h"
 
 namespace NetworKit {
 
@@ -1784,5 +1785,20 @@ TEST_F(CentralityGTest, testWeightedSignedGroupCloseness) {
 	WeightedSignedGroupCloseness wgc(G, k);
 	wgc.run();
 	INFO(wgc.groupMaxCloseness());
+}
+
+TEST_F(CentralityGTest, testWeightedTopCloseness) {
+	const count n = 5;
+	Graph G(n, true, true);
+
+	G.addEdge(0, 1, 0.2);
+	G.addEdge(0, 2, 0.2);
+	G.addEdge(1, 3, 1);
+	G.addEdge(2, 3, 1);
+	G.addEdge(4, 0, 1);
+
+	const count k = 1;
+	WeightedTopCloseness wtc(G, k, false);
+	wtc.run();
 }
 } /* namespace NetworKit */
