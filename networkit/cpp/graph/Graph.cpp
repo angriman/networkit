@@ -321,6 +321,17 @@ void Graph::shrinkToFit() {
 	}
 }
 
+count Graph::maxDegreeOut() const {
+	count maxDeg = 0;
+#pragma omp parallel for reduction(max : maxDeg)
+	for (node u = 0; u < upperNodeIdBound(); ++u) {
+		if (degreeOut(u) > maxDeg) {
+			maxDeg = degreeOut(u);
+		}
+	}
+	return maxDeg;
+}
+
 void Graph::compactEdges() {
 	this->parallelForNodes([&](node u) {
 		if (degreeOut(u) != outEdges[u].size()) {

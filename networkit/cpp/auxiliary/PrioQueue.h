@@ -20,8 +20,7 @@ namespace Aux {
  * The type Val takes on integer values between 0 and n-1.
  * O(n log n) for construction, O(log n) for typical operations.
  */
-template<class Key, class Value>
-class PrioQueue {
+template <class Key, class Value> class PrioQueue {
 private:
 	typedef std::pair<Key, Value> ElemType;
 
@@ -30,9 +29,7 @@ private:
 
 	const Key undefined = std::numeric_limits<Key>::max(); // TODO: make static
 
-
 protected:
-
 	/**
 	 * Default constructor without functionality. Only here for derived classes!
 	 */
@@ -41,25 +38,23 @@ protected:
 	/**
 	 * Removes key-value pair given by @a elem.
 	 */
-	virtual void remove(const ElemType& elem);
+	virtual void remove(const ElemType &elem);
 
 	/**
 	 * @return current content of queue
 	 */
 	virtual std::set<std::pair<Key, Value>> content() const;
 
-
 public:
-
 	/**
 	 * Builds priority queue from the vector @a keys, values are indices
 	 * of @a keys.
 	 */
-	PrioQueue(const std::vector<Key>& keys);
+	PrioQueue(const std::vector<Key> &keys);
 
 	/**
-	* Builds priority queue of the specified capacity @a capacity.
-	*/
+	 * Builds priority queue of the specified capacity @a capacity.
+	 */
 	PrioQueue(uint64_t capacity);
 
 	/**
@@ -97,7 +92,7 @@ public:
 	/**
 	 * Removes key-value pair given by value @a val.
 	 */
-	virtual void remove(const Value& val);
+	virtual void remove(const Value &val);
 
 	/**
 	 * Removes all the elements from the priority queue.
@@ -108,14 +103,13 @@ public:
 	 * Iterates over all the elements of the priority queue and call @a handle
 	 * (lambda closure).
 	 */
-	template<typename L>
-	void forElements(L handle) const;
+	template <typename L> void forElements(L handle) const;
 
 	/**
 	 * Iterates over all the elements of the priority queue while the condition
 	 * is satisfied and call @a handle (lambda closure).
 	 */
-	template<typename C, typename L>
+	template <typename C, typename L>
 	void forElementsWhile(C condition, L handle) const;
 
 	/**
@@ -129,23 +123,22 @@ public:
 	}
 };
 
-
-template<class Key, class Value>
-Aux::PrioQueue<Key, Value>::PrioQueue(const std::vector<Key>& keys) {
+template <class Key, class Value>
+Aux::PrioQueue<Key, Value>::PrioQueue(const std::vector<Key> &keys) {
 	mapValToKey.resize(keys.size());
 	uint64_t index = 0;
-	for (auto key: keys) {
+	for (auto key : keys) {
 		insert(key, index);
 		++index;
 	}
 }
 
-template<class Key, class Value>
+template <class Key, class Value>
 Aux::PrioQueue<Key, Value>::PrioQueue(uint64_t capacity) {
 	mapValToKey.resize(capacity);
 }
 
-template<class Key, class Value>
+template <class Key, class Value>
 inline void Aux::PrioQueue<Key, Value>::insert(Key key, Value value) {
 	if (value >= mapValToKey.size()) {
 		uint64_t doubledSize = 2 * mapValToKey.size();
@@ -156,35 +149,35 @@ inline void Aux::PrioQueue<Key, Value>::insert(Key key, Value value) {
 	mapValToKey.at(value) = key;
 }
 
-template<class Key, class Value>
-inline void Aux::PrioQueue<Key, Value>::remove(const ElemType& elem) {
+template <class Key, class Value>
+inline void Aux::PrioQueue<Key, Value>::remove(const ElemType &elem) {
 	remove(elem.second);
 }
 
-template<class Key, class Value>
-inline void Aux::PrioQueue<Key, Value>::remove(const Value& val) {
+template <class Key, class Value>
+inline void Aux::PrioQueue<Key, Value>::remove(const Value &val) {
 	Key key = mapValToKey.at(val);
-//	DEBUG("key: ", key);
+	//	DEBUG("key: ", key);
 	pqset.erase(std::make_pair(key, val));
 	mapValToKey.at(val) = undefined;
 }
 
-template<class Key, class Value>
+template <class Key, class Value>
 std::pair<Key, Value> Aux::PrioQueue<Key, Value>::peekMin(size_t n) {
 	assert(pqset.size() > n);
 	ElemType elem = *std::next(pqset.begin(), n);
 	return elem;
 }
 
-template<class Key, class Value>
+template <class Key, class Value>
 std::pair<Key, Value> Aux::PrioQueue<Key, Value>::extractMin() {
 	assert(pqset.size() > 0);
-	ElemType elem = (* pqset.begin());
+	ElemType elem = (*pqset.begin());
 	remove(elem);
 	return elem;
 }
 
-template<class Key, class Value>
+template <class Key, class Value>
 inline void Aux::PrioQueue<Key, Value>::changeKey(Key newKey, Value value) {
 	// find and remove element with given key
 	remove(value);
@@ -193,17 +186,18 @@ inline void Aux::PrioQueue<Key, Value>::changeKey(Key newKey, Value value) {
 	insert(newKey, value);
 }
 
-template<class Key, class Value>
+template <class Key, class Value>
 inline uint64_t Aux::PrioQueue<Key, Value>::size() const {
 	return pqset.size();
 }
 
-template<class Key, class Value>
-inline std::set<std::pair<Key, Value>> Aux::PrioQueue<Key, Value>::content() const {
+template <class Key, class Value>
+inline std::set<std::pair<Key, Value>>
+Aux::PrioQueue<Key, Value>::content() const {
 	return pqset;
 }
 
-template<class Key, class Value>
+template <class Key, class Value>
 inline void Aux::PrioQueue<Key, Value>::clear() {
 	pqset.clear();
 	auto capacity = mapValToKey.size();
@@ -211,8 +205,8 @@ inline void Aux::PrioQueue<Key, Value>::clear() {
 	mapValToKey.resize(capacity);
 }
 
-template<class Key, class Value>
-template<typename L>
+template <class Key, class Value>
+template <typename L>
 inline void Aux::PrioQueue<Key, Value>::forElements(L handle) const {
 	for (auto it = pqset.begin(); it != pqset.end(); ++it) {
 		ElemType elem = *it;
@@ -220,8 +214,8 @@ inline void Aux::PrioQueue<Key, Value>::forElements(L handle) const {
 	}
 }
 
-template<class Key, class Value>
-template<typename C, typename L>
+template <class Key, class Value>
+template <typename C, typename L>
 inline void Aux::PrioQueue<Key, Value>::forElementsWhile(C condition,
                                                          L handle) const {
 	for (auto it = pqset.begin(); it != pqset.end(); ++it) {

@@ -1793,12 +1793,14 @@ TEST_F(CentralityGTest, testWeightedTopCloseness) {
 
 	G.addEdge(0, 1, 0.2);
 	G.addEdge(0, 2, 0.2);
+	G.addEdge(1, 2, 0.5);
 	G.addEdge(1, 3, 1);
 	G.addEdge(2, 3, 1);
 	G.addEdge(4, 0, 1);
 
 	const count k = 1;
-	WeightedTopCloseness wtc(G, k, false);
+	G.indexEdges();
+	WeightedTopCloseness wtc(G, k, false, false);
 	wtc.run();
 }
 } /* namespace NetworKit */

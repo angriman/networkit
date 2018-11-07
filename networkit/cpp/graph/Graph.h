@@ -632,6 +632,7 @@ public:
 	 */
 	count degreeOut(node v) const { return outDeg[v]; }
 
+	count maxDegreeOut() const;
 	/**
 	 * Check whether @a v is isolated, i.e. degree is 0.
 	 * @param v Node.
