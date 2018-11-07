@@ -24,11 +24,12 @@ WeightedTopCloseness::WeightedTopCloseness(const Graph &G, const count k,
 void WeightedTopCloseness::init() {
 	topkNodes.resize(k);
 	farness.assign(n, infDist);
-	toAnalyze.assign(n, true);
 	reachL.assign(n, 0);
 	dist.assign(n, infDist);
 	reached.assign(n, false);
 	lowerBoundDist.assign(n, infDist);
+	nodesToReset.resize(n);
+	edgesToReset.resize(G.numberOfEdges());
 	visitedEdges.assign(G.numberOfEdges(), false);
 	sortedEdges.resize(G.numberOfEdges());
 	G.parallelForEdges([&](node u, node v, edgeweight ew, edgeid eid) {
@@ -164,10 +165,10 @@ void WeightedTopCloseness::bfsBound(const node &s) {}
 
 double WeightedTopCloseness::bfsCut(const node &s) {
 	// Use a vector
-	std::queue<node> toReset;
-	std::queue<edgeid> edgesToReset;
+	count nodesToResetCount = 1;
+	count edgesToRestCount = 0;
+	nodesToReset[0] = s;
 	reached[s] = true;
-	toReset.push(s);
 	dist[s] = 0.0;
 	Aux::PrioQueue<double, node> pq(dist);
 	const double rL = reachL[s];
@@ -186,13 +187,13 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 			// Maybe a CSRMatrix would be better
 			edgeid eid = G.edgeId(cur, v);
 			visitedEdges[eid] = true;
-			edgesToReset.push(eid);
+			edgesToReset[edgesToRestCount++] = eid;
 			newDist = dist[cur] + w;
 			if (dist[v] > newDist) {
 				pq.changeKey(newDist, v);
 				if (!reached[v]) {
 					reached[v] = true;
-					toReset.push(v);
+					nodesToReset[nodesToResetCount++];
 					++reachedNodes;
 				} else {
 					sumDist -= lowerBoundDist[v];
@@ -226,17 +227,15 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 		}
 	}
 
-	while (toReset.size() > 0) {
-		cur = toReset.front();
-		toReset.pop();
+	for (count i = 0; i < nodesToResetCount; ++i) {
+		cur = nodesToReset[i];
 		dist[cur] = infDist;
 		lowerBoundDist[cur] = infDist;
 		reached[cur] = false;
 	}
 
-	while (edgesToReset.size() > 0) {
-		visitedEdges[edgesToReset.front()] = false;
-		edgesToReset.pop();
+	for (count i = 0; i < edgesToRestCount; ++i) {
+		visitedEdges[edgesToReset[i]] = false;
 	}
 
 	return lower;
@@ -258,7 +257,6 @@ void WeightedTopCloseness::run() {
 		DEBUG("# of nodes to be analyzed: ", Q.size());
 		auto p = Q.extractMin();
 		s = p.second;
-		toAnalyze[s] = false;
 
 		DEBUG("Priority of node ", s, " is ", p.first);
 		if (G.degreeOut(s) == 0 || farness[s] > kth) {
@@ -293,5 +291,4 @@ void WeightedTopCloseness::run() {
 
 	hasRun = true;
 }
-
 } // namespace NetworKit

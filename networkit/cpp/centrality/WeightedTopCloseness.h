@@ -23,13 +23,14 @@ private:
 	double kth;
 	std::vector<node> topkNodes;
 	std::vector<double> farness;
-	std::vector<bool> toAnalyze;
 	std::vector<bool> reached;
 	std::vector<count> reachL;
 	std::vector<double> dist;
 	std::vector<double> lowerBoundDist;
 	std::vector<std::pair<index, double>> sortedEdges;
 	std::vector<bool> visitedEdges;
+	std::vector<node> nodesToReset;
+	std::vector<index> edgesToReset;
 
 	void init();
 	void computeReachable();
