@@ -19,14 +19,13 @@ private:
 	const bool firstHeu;
 	const bool secondHeu;
 	const count n;
-	const double infDist;
+	const double infDist = std::numeric_limits<double>::max();
 	double kth;
 	std::vector<node> topkNodes;
 	std::vector<double> farness;
 	std::vector<bool> toAnalyze;
 	std::vector<bool> reached;
 	std::vector<count> reachL;
-	std::vector<count> reachU;
 	std::vector<double> dist;
 	std::vector<double> lowerBoundDist;
 	std::vector<std::pair<index, double>> sortedEdges;

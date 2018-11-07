@@ -12,8 +12,7 @@ WeightedTopCloseness::WeightedTopCloseness(const Graph &G, const count k,
                                            const bool firstHeu,
                                            const bool secondHeu)
     : G(G), k(k), firstHeu(firstHeu), secondHeu(secondHeu),
-      n(G.upperNodeIdBound()), infDist(std::numeric_limits<double>::max()),
-      kth(infDist) {
+      n(G.upperNodeIdBound()), kth(infDist) {
 	if (k == 0 || k > n) {
 		throw std::runtime_error("Error: k must be at least 1 and at most n.");
 	}
@@ -27,7 +26,6 @@ void WeightedTopCloseness::init() {
 	farness.assign(n, infDist);
 	toAnalyze.assign(n, true);
 	reachL.assign(n, 0);
-	reachU.assign(n, 0);
 	dist.assign(n, infDist);
 	reached.assign(n, false);
 	lowerBoundDist.assign(n, infDist);
@@ -137,7 +135,6 @@ void WeightedTopCloseness::computeReachable() {
 
 	for (node v = 0; v < n; ++v) {
 		reachL[v] = reachLSCC[sccs.componentOfNode(v) - 1];
-		reachU[v] = reachUSCC[sccs.componentOfNode(v) - 1];
 	}
 }
 
@@ -152,8 +149,10 @@ void WeightedTopCloseness::computeBounds() {
 				++numberOfNeighbors;
 			});
 			const double rL = reachL[u];
-			farness[u] = minWeight + (minWeight + sortedEdges[0].second) *
-			                             std::max(0.0, numberOfNeighbors - 1.0);
+			farness[u] =
+			    minWeight + (minWeight + sortedEdges[0].second) *
+			                    (std::max(0.0, numberOfNeighbors - 1.0) +
+			                     std::max(0.0, rL - 1.0 - numberOfNeighbors));
 			farness[u] *= (n - 1) / (rL - 1.0) / (rL - 1.0);
 		} else {
 			farness[u] = infDist;
