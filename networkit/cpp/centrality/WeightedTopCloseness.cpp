@@ -22,7 +22,7 @@ WeightedTopCloseness::WeightedTopCloseness(const Graph &G, const count k,
 }
 
 void WeightedTopCloseness::init() {
-	topkNodes.reserve(k);
+	topkNodes.resize(k);
 	farness.assign(n, infDist);
 	toAnalyze.assign(n, true);
 	reachL.assign(n, 0);
@@ -284,6 +284,13 @@ void WeightedTopCloseness::run() {
 			}
 		}
 	}
+
+	// Filling result vector
+	while (top.size() > 0) {
+		topPair = top.extractMin();
+		topkNodes[top.size()] = topPair.second;
+	}
+
 	hasRun = true;
 }
 

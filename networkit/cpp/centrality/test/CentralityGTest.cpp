@@ -1802,5 +1802,7 @@ TEST_F(CentralityGTest, testWeightedTopCloseness) {
 	G.indexEdges();
 	WeightedTopCloseness wtc(G, k, false, false);
 	wtc.run();
+
+	//	DEBUG(wtc.topkNodesList());
 }
 } /* namespace NetworKit */
