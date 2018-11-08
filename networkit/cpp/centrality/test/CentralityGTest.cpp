@@ -30,6 +30,7 @@
 #include "../EigenvectorCentrality.h"
 #include "../EstimateBetweenness.h"
 #include "../GroupCloseness.h"
+#include "../GroupClosenessWeighted.h"
 #include "../GroupDegree.h"
 #include "../HarmonicCloseness.h"
 #include "../KPathCentrality.h"
@@ -1804,5 +1805,23 @@ TEST_F(CentralityGTest, testWeightedTopCloseness) {
 	wtc.run();
 
 	//	DEBUG(wtc.topkNodesList());
+}
+
+TEST_F(CentralityGTest, testGroupClosenessWeighted) {
+	const count n = 20;
+	const count k = 5;
+
+	Graph G(n, true, true);
+
+	G.addEdge(0, 1, 0.2);
+	G.addEdge(0, 2, 0.2);
+	G.addEdge(1, 2, 0.5);
+	G.addEdge(1, 3, 1);
+	G.addEdge(2, 3, 1);
+	G.addEdge(4, 0, 1);
+
+	G.indexEdges();
+	GroupClosenessWeighted gcw(G, k);
+	gcw.run();
 }
 } /* namespace NetworKit */
