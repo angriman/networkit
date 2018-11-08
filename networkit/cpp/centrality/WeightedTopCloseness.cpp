@@ -164,7 +164,6 @@ void WeightedTopCloseness::computeBounds() {
 void WeightedTopCloseness::bfsBound(const node &s) {}
 
 double WeightedTopCloseness::bfsCut(const node &s) {
-	// Use a vector
 	count nodesToResetCount = 1;
 	count edgesToRestCount = 0;
 	nodesToReset[0] = s;
