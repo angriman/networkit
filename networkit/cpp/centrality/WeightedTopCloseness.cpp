@@ -3,16 +3,16 @@
 #include <queue>
 
 #include "../auxiliary/Parallel.h"
-#include "../auxiliary/PrioQueue.h"
 #include "../components/StronglyConnectedComponents.h"
 #include "WeightedTopCloseness.h"
 
 namespace NetworKit {
 WeightedTopCloseness::WeightedTopCloseness(const Graph &G, const count k,
                                            const bool firstHeu,
-                                           const bool secondHeu)
+                                           const bool secondHeu,
+                                           const bool storeTopDist)
     : G(G), k(k), firstHeu(firstHeu), secondHeu(secondHeu),
-      n(G.upperNodeIdBound()), kth(infDist) {
+      n(G.upperNodeIdBound()), storeTopDist(storeTopDist), kth(infDist), top(n) {
 	if (k == 0 || k > n) {
 		throw std::runtime_error("Error: k must be at least 1 and at most n.");
 	}
@@ -26,6 +26,8 @@ void WeightedTopCloseness::init() {
 	farness.assign(n, infDist);
 	reachL.assign(n, 0);
 	dist.assign(n, infDist);
+	topDist.assign(n, infDist);
+
 	reached.assign(n, false);
 	lowerBoundDist.assign(n, infDist);
 	nodesToReset.resize(n);
@@ -172,6 +174,7 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 	Aux::PrioQueue<double, node> pq(dist);
 	const double rL = reachL[s];
 	double d = 0.0, sumDist = 0.0, newDist, lower;
+	bool updateDist = false;
 	edgeweight minWeight = infDist;
 	node cur;
 	count reachedNodes = 1;
@@ -226,6 +229,22 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 		}
 	}
 
+	if (storeTopDist) {
+		if (top.size() == 0) {
+			updateDist = true;	
+			topNode = s;
+		} else {
+			tmpNode = top.peekMin(top.size() - 1).second;
+			if (tmpNode != topNode) {
+				topNode = tmpNode;
+				updateDist = true;
+			}
+		}
+		if (updateDist) {
+			std::copy(dist.begin(), dist.end(), topDist.begin());
+		}
+	}
+
 	for (count i = 0; i < nodesToResetCount; ++i) {
 		cur = nodesToReset[i];
 		dist[cur] = infDist;
@@ -245,7 +264,6 @@ void WeightedTopCloseness::run() {
 	computeReachable();
 	computeBounds();
 
-	Aux::PrioQueue<double, node> top(n);
 	Aux::PrioQueue<double, node> Q(farness);
 	DEBUG("Done filling the queue.");
 

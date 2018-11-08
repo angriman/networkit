@@ -1801,10 +1801,11 @@ TEST_F(CentralityGTest, testWeightedTopCloseness) {
 
 	const count k = 1;
 	G.indexEdges();
-	WeightedTopCloseness wtc(G, k, false, false);
+	WeightedTopCloseness wtc(G, k, false, false, true);
 	wtc.run();
 
-	//	DEBUG(wtc.topkNodesList());
+	INFO(wtc.topkNodesList());
+	INFO(wtc.getTopNodeDist());
 }
 
 TEST_F(CentralityGTest, testGroupClosenessWeighted) {

@@ -9,8 +9,10 @@ GroupClosenessWeighted::GroupClosenessWeighted(const Graph &G, const count k)
 	}
 }
 
+void GroupClosenessWeighted::init() { group.reserve(k); }
+
 void GroupClosenessWeighted::run() {
-	DEBUG("Running the algorithm.");
+	init();
 	hasRun = true;
 }
 } // namespace NetworKit
