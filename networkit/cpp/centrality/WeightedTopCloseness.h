@@ -2,9 +2,9 @@
 #define WEIGHTEDTOPCLOSENESS_H_
 
 #include "../auxiliary/Log.h"
+#include "../auxiliary/PrioQueue.h"
 #include "../base/Algorithm.h"
 #include "../graph/Graph.h"
-#include "../auxiliary/PrioQueue.h"
 
 namespace NetworKit {
 class WeightedTopCloseness : public Algorithm {

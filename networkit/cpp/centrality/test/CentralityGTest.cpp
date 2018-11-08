@@ -1809,8 +1809,8 @@ TEST_F(CentralityGTest, testWeightedTopCloseness) {
 }
 
 TEST_F(CentralityGTest, testGroupClosenessWeighted) {
-	const count n = 20;
-	const count k = 5;
+	const count n = 5;
+	const count k = 3;
 
 	Graph G(n, true, true);
 

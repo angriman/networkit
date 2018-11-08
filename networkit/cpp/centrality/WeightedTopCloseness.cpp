@@ -12,7 +12,8 @@ WeightedTopCloseness::WeightedTopCloseness(const Graph &G, const count k,
                                            const bool secondHeu,
                                            const bool storeTopDist)
     : G(G), k(k), firstHeu(firstHeu), secondHeu(secondHeu),
-      n(G.upperNodeIdBound()), storeTopDist(storeTopDist), kth(infDist), top(n) {
+      n(G.upperNodeIdBound()), storeTopDist(storeTopDist), kth(infDist),
+      top(n) {
 	if (k == 0 || k > n) {
 		throw std::runtime_error("Error: k must be at least 1 and at most n.");
 	}
@@ -26,8 +27,9 @@ void WeightedTopCloseness::init() {
 	farness.assign(n, infDist);
 	reachL.assign(n, 0);
 	dist.assign(n, infDist);
-	topDist.assign(n, infDist);
-
+	if (storeTopDist) {
+		topDist.assign(n, infDist);
+	}
 	reached.assign(n, false);
 	lowerBoundDist.assign(n, infDist);
 	nodesToReset.resize(n);
@@ -231,7 +233,7 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 
 	if (storeTopDist) {
 		if (top.size() == 0) {
-			updateDist = true;	
+			updateDist = true;
 			topNode = s;
 		} else {
 			tmpNode = top.peekMin(top.size() - 1).second;

@@ -1,7 +1,9 @@
 #include "GroupClosenessWeighted.h"
 #include "../auxiliary/Log.h"
+#include "../auxiliary/PrioQueue.h"
 
 namespace NetworKit {
+
 GroupClosenessWeighted::GroupClosenessWeighted(const Graph &G, const count k)
     : G(G), k(k), n(G.upperNodeIdBound()) {
 	if (k == 0 || k > n) {
@@ -9,10 +11,47 @@ GroupClosenessWeighted::GroupClosenessWeighted(const Graph &G, const count k)
 	}
 }
 
-void GroupClosenessWeighted::init() { group.reserve(k); }
+void GroupClosenessWeighted::init() {
+	inGroup.assign(n, false);
+	prio.assign(n, 0.0);
+	group.reserve(k);
+}
+
+void GroupClosenessWeighted::computeInitialBound() {
+	G.parallelForNodes([&](const node u) {
+		prio[u] = 0;
+		double curDist;
+		if (!inGroup[u]) {
+			G.forNeighborsOf(u, [&](const node v, const edgeweight w) {
+				curDist = dist[v];
+				if (w < curDist) {
+					prio[u] -= curDist == infDist ? w : dist[v] - w;
+				}
+			});
+		}
+	});
+}
 
 void GroupClosenessWeighted::run() {
 	init();
+	// TODO safely destroy this object before starting the algorithm.
+	WeightedTopCloseness wtc(G, 1, false, false, true);
+	wtc.run();
+
+	group.push_back(wtc.topkNodesList()[0]);
+	inGroup[group.back()] = true;
+	dist = wtc.getTopNodeDist();
+	tmpDist = dist;
+	computeInitialBound();
+	Aux::PrioQueue<double, node> Q(prio);
+
+	double best = 0;
+
+	while (group.size() < k) {
+
+		break;
+	}
+
 	hasRun = true;
 }
 } // namespace NetworKit
