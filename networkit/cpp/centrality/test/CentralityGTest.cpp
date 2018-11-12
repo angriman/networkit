@@ -1825,4 +1825,25 @@ TEST_F(CentralityGTest, testGroupClosenessWeighted) {
 	GroupClosenessWeighted gcw(G, k);
 	gcw.run();
 }
+
+TEST_F(CentralityGTest, testGroupClosenessWeighted2) {
+	const count n = 30;
+	const count k = 5;
+	Aux::Random::setSeed(1, false);
+
+	Graph G1 = ErdosRenyiGenerator(n, 0.2, true).generate();
+	Graph G2(n, true, true);
+	for (auto e : G1.edges()) {
+		G2.addEdge(e.first, e.second, 1);
+	}
+	G2.indexEdges();
+	omp_set_num_threads(1);
+	TopCloseness cc(G1, k, true, false);
+	cc.run();
+	WeightedTopCloseness wcc(G2, k, true, false);
+	wcc.run();
+	INFO(cc.topkNodesList());
+	INFO(cc.topkScoresList());
+	INFO(wcc.topkNodesList());
+}
 } /* namespace NetworKit */

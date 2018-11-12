@@ -20,14 +20,16 @@ void GroupClosenessWeighted::init() {
 void GroupClosenessWeighted::computeInitialBound() {
 	G.parallelForNodes([&](const node u) {
 		prio[u] = 0;
+		double curPrio = 0.0;
 		double curDist;
 		if (!inGroup[u]) {
 			G.forNeighborsOf(u, [&](const node v, const edgeweight w) {
 				curDist = dist[v];
 				if (w < curDist) {
-					prio[u] -= curDist == infDist ? w : dist[v] - w;
+					curPrio -= curDist == infDist ? w : curDist - w;
 				}
 			});
+			prio[u] = curPrio;
 		}
 	});
 }

@@ -147,17 +147,19 @@ void WeightedTopCloseness::computeBounds() {
 	// TODO: compute an alternative bound
 	G.parallelForNodes([&](const node u) {
 		if (G.degreeOut(u) > 0) {
-			double minWeight = infDist;
-			double numberOfNeighbors = 0;
-			G.forNeighborsOf(u, [&](const node v) {
-				minWeight = std::min(minWeight, G.weight(u, v));
-				++numberOfNeighbors;
-			});
 			const double rL = reachL[u];
-			farness[u] =
-			    minWeight + (minWeight + sortedEdges[0].second) *
-			                    (std::max(0.0, numberOfNeighbors - 1.0) +
-			                     std::max(0.0, rL - 1.0 - numberOfNeighbors));
+			double minWeightNeighbor = infDist;
+			double minWeight = sortedEdges[0].second;
+			farness[u] = 0.0;
+			G.forNeighborsOf(u, [&](const node v) {
+				minWeightNeighbor = std::min(minWeightNeighbor, G.weight(u, v));
+			});
+			G.forNeighborsOf(u, [&](const node v, const edgeweight w) {
+				farness[u] += std::min(w, minWeightNeighbor + minWeight);
+			});
+
+			farness[u] += std::max(0.0, rL - 1.0 - G.degreeOut(u)) *
+			              (minWeightNeighbor + minWeight);
 			farness[u] *= (n - 1) / (rL - 1.0) / (rL - 1.0);
 		} else {
 			farness[u] = infDist;
@@ -168,66 +170,76 @@ void WeightedTopCloseness::computeBounds() {
 void WeightedTopCloseness::bfsBound(const node &s) {}
 
 double WeightedTopCloseness::bfsCut(const node &s) {
-	count nodesToResetCount = 1;
-	count edgesToRestCount = 0;
+	INFO("Running bfscut from ", s);
+	count edgesToResetCount = 0, nodesToResetCount = 1, reachedNodes = 1;
 	nodesToReset[0] = s;
 	reached[s] = true;
 	dist[s] = 0.0;
+	lowerBoundDist[s] = 0.0;
 	Aux::PrioQueue<double, node> pq(dist);
 	const double rL = reachL[s];
-	double d = 0.0, sumDist = 0.0, newDist, lower;
+	double d = 0.0, sumDistLower = 0.0, newDist, lower = 0.0, distCur;
 	bool updateDist = false;
 	edgeweight minWeight = infDist;
 	node cur;
-	count reachedNodes = 1;
+	std::pair<double, node> curPair;
 
 	while (pq.size() > 0) {
-		cur = pq.extractMin().second;
-		if (dist[cur] == infDist) {
+		curPair = pq.extractMin();
+		cur = curPair.second;
+		distCur = curPair.first;
+		if (distCur == infDist) {
+			// All reachable nodes have been visited, exiting the loop.
 			break;
 		}
+		d += distCur;
+		assert(lowerBoundDist[cur] != infDist);
+		sumDistLower -= lowerBoundDist[cur];
 
 		G.forNeighborsOf(cur, [&](const node v, const edgeweight w) {
 			// Maybe a CSRMatrix would be better
 			edgeid eid = G.edgeId(cur, v);
+			assert(visitedEdges[eid] == false);
 			visitedEdges[eid] = true;
-			edgesToReset[edgesToRestCount++] = eid;
-			newDist = dist[cur] + w;
+			edgesToReset[edgesToResetCount++] = eid;
+
+			newDist = distCur + w;
 			if (dist[v] > newDist) {
+				dist[v] = newDist;
 				pq.changeKey(newDist, v);
 				if (!reached[v]) {
 					reached[v] = true;
-					nodesToReset[nodesToResetCount++];
+					nodesToReset[nodesToResetCount++] = v;
 					++reachedNodes;
 				} else {
-					sumDist -= lowerBoundDist[v];
+					sumDistLower -= lowerBoundDist[v];
 				}
-				lowerBoundDist[v] = std::min(newDist, dist[cur] + minWeight);
-				sumDist += lowerBoundDist[v];
-				dist[v] = newDist;
+				lowerBoundDist[v] = std::min(newDist, distCur + minWeight);
+				sumDistLower += lowerBoundDist[v];
 			}
 		});
 
-		d += dist[cur];
-		if (lowerBoundDist[cur] != infDist) {
-			sumDist -= lowerBoundDist[cur];
-		}
+		minWeight = minUnvisitedEdge();
 
+		lower = d + sumDistLower;
 		if (pq.size() > 0) {
 			// Next node to be picked, this distance is correct.
-			newDist = pq.peekMin(0).first;
-			if (newDist == infDist) {
-				break;
+			curPair = pq.peekMin(0);
+			newDist = curPair.first;
+			cur = curPair.second;
+			if (newDist != infDist) {
+				lower += newDist - lowerBoundDist[cur] +
+				         std::max(0.0, rL - reachedNodes) * (newDist + minWeight);
+				lower *= (n - 1) / (rL - 1.0) / (rL - 1.0);
+			} else {
+				lower *= (n - 1) / (reachedNodes - 1.0) / (reachedNodes - 1.0);
 			}
-			cur = pq.peekMin(0).second;
-			minWeight = minUnvisitedEdge();
-			lower = d + newDist + sumDist - lowerBoundDist[cur] +
-			        std::max(0.0, rL - reachedNodes) * (newDist + minWeight);
+		} else {
+			lower *= (n - 1) / (reachedNodes - 1.0) / (reachedNodes - 1.0);
+		}
 
-			lower *= (n - 1) / (rL - 1.0) / (rL - 1.0);
-			if (lower >= kth) {
-				break;
-			}
+		if (lower >= kth) {
+			break;
 		}
 	}
 
@@ -254,8 +266,14 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 		reached[cur] = false;
 	}
 
-	for (count i = 0; i < edgesToRestCount; ++i) {
+	for (count i = 0; i < edgesToResetCount; ++i) {
 		visitedEdges[edgesToReset[i]] = false;
+	}
+
+	for (count i = 0; i < n; ++i) {
+		assert(dist[i] == infDist);
+		assert(lowerBoundDist[i] == infDist);
+		reached[i] == false;
 	}
 
 	return lower;
@@ -277,9 +295,9 @@ void WeightedTopCloseness::run() {
 		auto p = Q.extractMin();
 		s = p.second;
 
-		DEBUG("Priority of node ", s, " is ", p.first);
+		INFO("Priority of node ", s, " is ", p.first);
 		if (G.degreeOut(s) == 0 || farness[s] > kth) {
-			DEBUG("Discarding node ", s);
+			INFO("Discarding node ", s);
 			break;
 		}
 
@@ -287,6 +305,7 @@ void WeightedTopCloseness::run() {
 			bfsBound(s);
 		} else {
 			farness[s] = bfsCut(s);
+			INFO("Farness of ", s, " is ", farness[s]);
 		}
 
 		if (farness[s] < kth) {
