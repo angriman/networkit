@@ -42,7 +42,7 @@ void WeightedTopCloseness::init() {
 	Aux::Parallel::sort(
 	    sortedEdges.begin(), sortedEdges.end(),
 	    [&](const std::pair<index, double> x, const std::pair<index, double> y) {
-		    return x.second < y.second;
+		    return x.second == y.second ? x.first > y.first : x.second < y.second;
 	    });
 }
 
@@ -228,8 +228,10 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 			newDist = curPair.first;
 			cur = curPair.second;
 			if (newDist != infDist) {
-				lower += newDist - lowerBoundDist[cur] +
-				         std::max(0.0, rL - reachedNodes) * (newDist + minWeight);
+				lower += newDist - lowerBoundDist[cur];
+			}
+			if (rL > reachedNodes) {
+				lower += (rL - reachedNodes) * (newDist + minWeight);
 				lower *= (n - 1) / (rL - 1.0) / (rL - 1.0);
 			} else {
 				lower *= (n - 1) / (reachedNodes - 1.0) / (reachedNodes - 1.0);
