@@ -7424,6 +7424,7 @@ cdef extern from "cpp/influencemaximization/LinearThreshold.h":
 		_LinearThreshold(_Graph G, const vector[double]& threshold) except +
 		void performSimulation(vector[node]) except +
 		count getInfluencedNodes() except +
+		vector[bool] getInfluencedVector() except +
 
 cdef class LinearThreshold:
 	cdef _LinearThreshold *_this
@@ -7441,6 +7442,8 @@ cdef class LinearThreshold:
 	def getInfluencedNodes(self):
 		return self._this.getInfluencedNodes()
 
+	def getInfluencedVector(self):
+		return self._this.getInfluencedVector()
 
 cdef extern from "cpp/influencemaximization/TopCentrality.h":
 	cdef cppclass _TopCentrality "NetworKit::TopCentrality"(_Algorithm):
