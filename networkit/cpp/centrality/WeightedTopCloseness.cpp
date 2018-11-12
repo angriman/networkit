@@ -170,7 +170,6 @@ void WeightedTopCloseness::computeBounds() {
 void WeightedTopCloseness::bfsBound(const node &s) {}
 
 double WeightedTopCloseness::bfsCut(const node &s) {
-	INFO("Running bfscut from ", s);
 	count edgesToResetCount = 0, nodesToResetCount = 1, reachedNodes = 1;
 	nodesToReset[0] = s;
 	reached[s] = true;
@@ -272,12 +271,6 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 		visitedEdges[edgesToReset[i]] = false;
 	}
 
-	for (count i = 0; i < n; ++i) {
-		assert(dist[i] == infDist);
-		assert(lowerBoundDist[i] == infDist);
-		reached[i] == false;
-	}
-
 	return lower;
 }
 
@@ -297,9 +290,9 @@ void WeightedTopCloseness::run() {
 		auto p = Q.extractMin();
 		s = p.second;
 
-		INFO("Priority of node ", s, " is ", p.first);
+		DEBUG("Priority of node ", s, " is ", p.first);
 		if (G.degreeOut(s) == 0 || farness[s] > kth) {
-			INFO("Discarding node ", s);
+			DEBUG("Discarding node ", s);
 			break;
 		}
 
@@ -307,7 +300,7 @@ void WeightedTopCloseness::run() {
 			bfsBound(s);
 		} else {
 			farness[s] = bfsCut(s);
-			INFO("Farness of ", s, " is ", farness[s]);
+			DEBUG("Farness of ", s, " is ", farness[s]);
 		}
 
 		if (farness[s] < kth) {

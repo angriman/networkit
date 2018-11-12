@@ -36,7 +36,8 @@ void GroupClosenessWeighted::computeInitialBound() {
 
 void GroupClosenessWeighted::run() {
 	init();
-	// TODO safely destroy this object before starting the algorithm.
+	// TODO to save memory during runtime, safely destroy this object before
+	// starting the algorithm.
 	WeightedTopCloseness wtc(G, 1, false, false, true);
 	wtc.run();
 

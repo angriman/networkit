@@ -412,7 +412,7 @@ double TopCloseness::BFScut(node v, double x, bool *visited, count *distances,
 		visited[u] = false;
 	}
 	if (farnessV < x) {
-		INFO("Sum of distances from ", v, ", is ", sum_dist);
+		DEBUG("Sum of distances from ", v, ", is ", sum_dist);
 		farnessV = sum_dist * (n - 1) / (nd - 1.0) / (nd - 1.0);
 	}
 	return farnessV;
@@ -500,7 +500,7 @@ void TopCloseness::run() {
 
 			} else if (sec_heu) {
 				// MICHELE: we use BFSbound to bound the centrality of all nodes.
-				INFO("    Running BFSbound.");
+				DEBUG("    Running BFSbound.");
 				BFSbound(s, S, &visEdges, toAnalyze);
 				omp_set_lock(&lock);
 				farness[s] = S[s];
@@ -524,10 +524,10 @@ void TopCloseness::run() {
 				DEBUG("    We have improved ", imp, " bounds.");
 			} else {
 				// MICHELE: we use BFScut to bound the centrality of s.
-				INFO("    Running BFScut from ", s, " with x=", kth,
-				     " (degree:", G.degreeOut(s), ").");
+				DEBUG("    Running BFScut from ", s, " with x=", kth,
+				      " (degree:", G.degreeOut(s), ").");
 				farnessS = BFScut(s, kth, visited, distances, pred, &visEdges);
-				INFO("Farness of ", s, " is ", farnessS);
+				DEBUG("Farness of ", s, " is ", farnessS);
 				DEBUG("    Visited edges: ", visEdges, ".");
 				omp_set_lock(&lock);
 				farness[s] = farnessS;
