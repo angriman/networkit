@@ -24,9 +24,14 @@ private:
 	std::vector<double> dist;
 	std::vector<double> tmpDist;
 	std::vector<double> prio;
+	std::vector<std::pair<index, double>> sortedEdges;
+	std::vector<bool> visitedEdges;
 
 	void init();
-	void computeInitialBound(const count &reachableFromTop);
+	void computeInitialBound(const count &reachableFromTop,
+	                         const double &topSumDist);
+	void bfsCut(const node &s);
+	void eraseVisitedEdges(std::vector<index> &topVisitedEdges);
 };
 
 inline std::vector<node> GroupClosenessWeighted::groupMaxCloseness() const {

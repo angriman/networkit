@@ -37,6 +37,7 @@ void WeightedTopCloseness::init() {
 	nodesToReset.resize(n);
 	edgesToReset.resize(G.numberOfEdges());
 	visitedEdges.assign(G.numberOfEdges(), false);
+	topVisitedEdges.reserve(G.numberOfEdges());
 	sortedEdges.resize(G.numberOfEdges());
 	G.parallelForEdges([&](node u, node v, edgeweight ew, edgeid eid) {
 		sortedEdges[eid] = std::make_pair(eid, ew);
@@ -172,7 +173,6 @@ void WeightedTopCloseness::computeBounds() {
 void WeightedTopCloseness::bfsBound(const node &s) {}
 
 double WeightedTopCloseness::bfsCut(const node &s) {
-	count edgesToResetCount = 0, nodesToResetCount = 1;
 	reachedNodes = 1;
 	nodesToReset[0] = s;
 	reached[s] = true;
@@ -247,17 +247,6 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 		}
 	}
 
-	for (count i = 0; i < nodesToResetCount; ++i) {
-		cur = nodesToReset[i];
-		dist[cur] = infDist;
-		lowerBoundDist[cur] = infDist;
-		reached[cur] = false;
-	}
-
-	for (count i = 0; i < edgesToResetCount; ++i) {
-		visitedEdges[edgesToReset[i]] = false;
-	}
-
 	return lower;
 }
 
@@ -267,12 +256,11 @@ void WeightedTopCloseness::run() {
 	computeBounds();
 
 	node tmpNode;
-	bool updateDist;
 
 	Aux::PrioQueue<double, node> Q(farness);
 	DEBUG("Done filling the queue.");
 
-	std::pair<double, node> topPair;
+	std::pair<double, node> topPair, bottomPair;
 	node s;
 	// TODO parallelize
 	while (Q.size() != 0) {
@@ -289,26 +277,29 @@ void WeightedTopCloseness::run() {
 		if (secondHeu) {
 			bfsBound(s);
 		} else {
+			edgesToResetCount = 0;
+			nodesToResetCount = 1;
 			farness[s] = bfsCut(s);
 			DEBUG("Farness of ", s, " is ", farness[s]);
 		}
 
 		if (farness[s] < kth) {
 			top.insert(-farness[s], s);
+			// Pair with highest farness
 			topPair = top.peekMin(0);
 
-			updateDist = false;
 			if (storeTopDist) {
-				tmpNode = topPair.second;
+				// Node with lowest farness (i.e. highest closeness)
+				tmpNode = top.peekMin(top.size() - 1).second;
 				if (tmpNode == s) {
+					// The current node is the one with highest closeness
 					reachableFromTop = reachedNodes;
-					updateDist = true;
 					topSum = d;
-				}
-				if (updateDist) {
 					std::copy(dist.begin(), dist.end(), topDist.begin());
+					topVisitedEdges = edgesToReset;
 				}
 			}
+
 			if (top.size() >= k) {
 				while (top.size() > k) {
 					top.extractMin();
@@ -316,6 +307,17 @@ void WeightedTopCloseness::run() {
 				kth = -topPair.first;
 				DEBUG("new kth = ", kth);
 			}
+		}
+
+		for (count i = 0; i < nodesToResetCount; ++i) {
+			s = nodesToReset[i];
+			dist[s] = infDist;
+			lowerBoundDist[s] = infDist;
+			reached[s] = false;
+		}
+
+		for (count i = 0; i < edgesToResetCount; ++i) {
+			visitedEdges[edgesToReset[i]] = false;
 		}
 	}
 

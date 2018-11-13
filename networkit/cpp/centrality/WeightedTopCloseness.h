@@ -17,6 +17,12 @@ public:
 	std::vector<double> getTopNodeDist() const;
 	count getTopNodeReachable() const;
 	double getTopSum() const;
+	std::vector<std::pair<index, double>> &getSortedEdges();
+	std::vector<index> &getVisitedEdges();
+	std::vector<bool> &getVisitedEdgesVector() {
+		assureFinished();
+		return visitedEdges;
+	}
 
 private:
 	const Graph &G;
@@ -30,6 +36,7 @@ private:
 	double topSum;
 	double d;
 	count reachedNodes, reachableFromTop;
+	count nodesToResetCount, edgesToResetCount;
 
 	std::vector<node> topkNodes;
 	std::vector<double> farness;
@@ -40,6 +47,7 @@ private:
 	std::vector<double> lowerBoundDist;
 	std::vector<std::pair<index, double>> sortedEdges;
 	std::vector<bool> visitedEdges;
+	std::vector<index> topVisitedEdges;
 	std::vector<node> nodesToReset;
 	std::vector<index> edgesToReset;
 
@@ -80,6 +88,17 @@ inline double WeightedTopCloseness::getTopSum() const {
 	checkStoreTopDist();
 	assureFinished();
 	return topSum;
+}
+
+inline std::vector<std::pair<index, double>> &
+WeightedTopCloseness::getSortedEdges() {
+	assureFinished();
+	return sortedEdges;
+}
+
+inline std::vector<index> &WeightedTopCloseness::getVisitedEdges() {
+	assureFinished();
+	return topVisitedEdges;
 }
 } // namespace NetworKit
 #endif

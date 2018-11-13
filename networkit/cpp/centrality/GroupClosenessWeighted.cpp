@@ -15,26 +15,45 @@ void GroupClosenessWeighted::init() {
 	inGroup.assign(n, false);
 	prio.assign(n, 0.0);
 	group.reserve(k);
+	tmpDist.assign(n, infDist);
 }
 
-void GroupClosenessWeighted::computeInitialBound(
-    const count &reachableFromTop) {
-	INFO("Reachable from top: ", reachableFromTop);
-	count newReachable = reachableFromTop;
+void GroupClosenessWeighted::computeInitialBound(const count &reachableFromTop,
+                                                 const double &topSumDist) {
 	G.parallelForNodes([&](const node u) {
-		prio[u] = 0;
+		if (inGroup[u]) {
+			return;
+		}
 		double curPrio = 0.0;
 		double curDist;
-		if (!inGroup[u]) {
-			G.forNeighborsOf(u, [&](const node v, const edgeweight w) {
-				curDist = dist[v];
-				if (w < curDist) {
-					curPrio -= curDist == infDist ? w : curDist - w;
-				}
-			});
-			prio[u] = curPrio;
-		}
+		count newReachable = reachableFromTop;
+		double newSum = topSumDist;
+		G.forNeighborsOf(u, [&](const node v, const edgeweight w) {
+			curDist = dist[v];
+			if (curDist == infDist) {
+				++newReachable;
+				newSum += w;
+			} else if (w < curDist) {
+				newSum -= curDist - w;
+			}
+		});
+		prio[u] = newSum * (n - 1.0) / (newReachable - 1.0) / (newReachable - 1.0);
 	});
+}
+
+void GroupClosenessWeighted::bfsCut(const node &s) {}
+
+void GroupClosenessWeighted::eraseVisitedEdges(
+    std::vector<index> &topVisitedEdges) {
+	for (auto eid : topVisitedEdges) {
+		visitedEdges[eid] = true;
+	}
+
+	auto toErase = sortedEdges.begin();
+	while (visitedEdges[toErase->first]) {
+		++toErase;
+	}
+	sortedEdges.erase(sortedEdges.begin(), toErase);
 }
 
 void GroupClosenessWeighted::run() {
@@ -47,13 +66,16 @@ void GroupClosenessWeighted::run() {
 	group.push_back(wtc.topkNodesList()[0]);
 	inGroup[group.back()] = true;
 	dist = wtc.getTopNodeDist();
-	tmpDist = dist;
-	computeInitialBound(wtc.getTopNodeReachable());
-	Aux::PrioQueue<double, node> Q(prio);
+	sortedEdges = wtc.getSortedEdges();
+	visitedEdges = wtc.getVisitedEdgesVector();
+	eraseVisitedEdges(wtc.getVisitedEdges());
+
+	computeInitialBound(wtc.getTopNodeReachable(), wtc.getTopSum());
 
 	double best = 0;
 
 	while (group.size() < k) {
+		Aux::PrioQueue<double, node> Q(prio);
 
 		break;
 	}
