@@ -26,7 +26,7 @@ private:
 	std::vector<double> prio;
 
 	void init();
-	void computeInitialBound();
+	void computeInitialBound(const count &reachableFromTop);
 };
 
 inline std::vector<node> GroupClosenessWeighted::groupMaxCloseness() const {

@@ -17,7 +17,10 @@ void GroupClosenessWeighted::init() {
 	group.reserve(k);
 }
 
-void GroupClosenessWeighted::computeInitialBound() {
+void GroupClosenessWeighted::computeInitialBound(
+    const count &reachableFromTop) {
+	INFO("Reachable from top: ", reachableFromTop);
+	count newReachable = reachableFromTop;
 	G.parallelForNodes([&](const node u) {
 		prio[u] = 0;
 		double curPrio = 0.0;
@@ -45,7 +48,7 @@ void GroupClosenessWeighted::run() {
 	inGroup[group.back()] = true;
 	dist = wtc.getTopNodeDist();
 	tmpDist = dist;
-	computeInitialBound();
+	computeInitialBound(wtc.getTopNodeReachable());
 	Aux::PrioQueue<double, node> Q(prio);
 
 	double best = 0;

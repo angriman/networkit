@@ -12,6 +12,7 @@
 
 #include "../../auxiliary/Log.h"
 #include "../../auxiliary/Timer.h"
+#include "../../distance/BFS.h"
 #include "../../generators/DorogovtsevMendesGenerator.h"
 #include "../../generators/ErdosRenyiGenerator.h"
 #include "../../io/METISGraphReader.h"
@@ -1807,6 +1808,7 @@ TEST_F(CentralityGTest, testWeightedTopCloseness) {
 	INFO(wtc.topkNodesList());
 	INFO(wtc.getTopNodeDist());
 	INFO("Reachable are ", wtc.getTopNodeReachable());
+	INFO("Top sum = ", wtc.getTopSum());
 }
 
 TEST_F(CentralityGTest, testGroupClosenessWeighted) {
@@ -1827,9 +1829,9 @@ TEST_F(CentralityGTest, testGroupClosenessWeighted) {
 	gcw.run();
 }
 
-TEST_F(CentralityGTest, testGroupClosenessWeighted2) {
+TEST_F(CentralityGTest, testWeightedTopCloseness2) {
 	const count n = 30;
-	const count k = 5;
+	const count k = 1;
 	Aux::Random::setSeed(1, false);
 
 	Graph G1 = ErdosRenyiGenerator(n, 0.2, true).generate();
@@ -1841,10 +1843,22 @@ TEST_F(CentralityGTest, testGroupClosenessWeighted2) {
 	omp_set_num_threads(1);
 	TopCloseness cc(G1, k, true, false);
 	cc.run();
-	WeightedTopCloseness wcc(G2, k, true, false);
+	WeightedTopCloseness wcc(G2, k, true, false, true);
 	wcc.run();
 	INFO(cc.topkNodesList());
 	INFO(cc.topkScoresList());
 	INFO(wcc.topkNodesList());
+	BFS bfs(G2, wcc.topkNodesList().front());
+	bfs.run();
+	count reachable = 0;
+	double sumDist = 0.0;
+	for (double dist : bfs.getDistances()) {
+		if (dist < std::numeric_limits<double>::max()) {
+			++reachable;
+			sumDist += dist;
+		}
+	}
+	EXPECT_EQ(reachable, wcc.getTopNodeReachable());
+	EXPECT_NEAR(sumDist, wcc.getTopSum(), 1e-6);
 }
 } /* namespace NetworKit */

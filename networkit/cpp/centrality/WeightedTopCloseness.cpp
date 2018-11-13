@@ -24,6 +24,7 @@ WeightedTopCloseness::WeightedTopCloseness(const Graph &G, const count k,
 
 void WeightedTopCloseness::init() {
 	reachableFromTop = 0;
+	topSum = 0.0;
 	topkNodes.resize(k);
 	farness.assign(n, infDist);
 	reachL.assign(n, 0);
@@ -171,17 +172,18 @@ void WeightedTopCloseness::computeBounds() {
 void WeightedTopCloseness::bfsBound(const node &s) {}
 
 double WeightedTopCloseness::bfsCut(const node &s) {
-	count edgesToResetCount = 0, nodesToResetCount = 1, reachedNodes = 1;
+	count edgesToResetCount = 0, nodesToResetCount = 1;
+	reachedNodes = 1;
 	nodesToReset[0] = s;
 	reached[s] = true;
 	dist[s] = 0.0;
 	lowerBoundDist[s] = 0.0;
 	Aux::PrioQueue<double, node> pq(dist);
 	const double rL = reachL[s];
-	double d = 0.0, sumDistLower = 0.0, newDist, lower = 0.0, distCur;
-	bool updateDist = false;
+	d = 0.0;
+	double sumDistLower = 0.0, newDist, lower = 0.0, distCur;
 	edgeweight minWeight = infDist;
-	node cur, tmpNode;
+	node cur;
 	std::pair<double, node> curPair;
 
 	while (pq.size() > 0) {
@@ -245,22 +247,6 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 		}
 	}
 
-	if (storeTopDist) {
-		if (top.size() == 0) {
-			updateDist = true;
-			reachableFromTop = reachedNodes;
-		} else {
-			tmpNode = top.peekMin(top.size() - 1).second;
-			if (tmpNode == s) {
-				reachableFromTop = reachedNodes;
-				updateDist = true;
-			}
-		}
-		if (updateDist) {
-			std::copy(dist.begin(), dist.end(), topDist.begin());
-		}
-	}
-
 	for (count i = 0; i < nodesToResetCount; ++i) {
 		cur = nodesToReset[i];
 		dist[cur] = infDist;
@@ -279,6 +265,9 @@ void WeightedTopCloseness::run() {
 	init();
 	computeReachable();
 	computeBounds();
+
+	node tmpNode;
+	bool updateDist;
 
 	Aux::PrioQueue<double, node> Q(farness);
 	DEBUG("Done filling the queue.");
@@ -306,11 +295,24 @@ void WeightedTopCloseness::run() {
 
 		if (farness[s] < kth) {
 			top.insert(-farness[s], s);
+			topPair = top.peekMin(0);
+
+			updateDist = false;
+			if (storeTopDist) {
+				tmpNode = topPair.second;
+				if (tmpNode == s) {
+					reachableFromTop = reachedNodes;
+					updateDist = true;
+					topSum = d;
+				}
+				if (updateDist) {
+					std::copy(dist.begin(), dist.end(), topDist.begin());
+				}
+			}
 			if (top.size() >= k) {
 				while (top.size() > k) {
 					top.extractMin();
 				}
-				topPair = top.peekMin(0);
 				kth = -topPair.first;
 				DEBUG("new kth = ", kth);
 			}
