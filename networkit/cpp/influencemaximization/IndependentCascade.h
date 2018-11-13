@@ -1,4 +1,3 @@
-// Also return data for bar plot (min, max, avg(
 #ifndef INDEPENDENT_CASCADE_H_
 #define INDEPENDENT_CASCADE_H_
 
@@ -17,6 +16,7 @@ public:
 	double getAverage() const;
 	count getMinimum() const;
 	count getMaximum() const;
+	std::vector<double> getInfluencedVector() const;
 
 private:
 	const Graph &G;
@@ -24,6 +24,7 @@ private:
 	count max, min;
 	double avg;
 	bool hasRun;
+	std::vector<double> influencedVector;
 
 	void checkHasRun() const;
 };
@@ -47,6 +48,11 @@ inline count IndependentCascade::getMaximum() const {
 inline count IndependentCascade::getMinimum() const {
 	checkHasRun();
 	return min;
+}
+
+inline std::vector<double> IndependentCascade::getInfluencedVector() const {
+	checkHasRun();
+	return influencedVector;
 }
 
 } // namespace NetworKit

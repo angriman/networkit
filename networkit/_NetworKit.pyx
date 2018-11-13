@@ -7394,6 +7394,7 @@ cdef extern from "cpp/influencemaximization/IndependentCascade.h":
 		double getAverage() except +
 		count getMinimum() except +
 		count getMaximum() except +
+		vector[double] getInfluencedVector() except +
 
 cdef class IndependentCascade:
 	cdef _IndependentCascade *_this
@@ -7412,6 +7413,9 @@ cdef class IndependentCascade:
 
 	def getMaximum(self):
 		return self._this.getMaximum()
+
+	def getInfluencedVector(self):
+		return self._this.getInfluencedVector()
 
 cdef extern from "cpp/influencemaximization/InfluenceMaximization.h":
 	cdef cppclass _InfluenceMaximization "NetworKit::InfluenceMaximization"(_Algorithm):

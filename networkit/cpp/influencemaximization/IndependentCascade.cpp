@@ -8,7 +8,7 @@ namespace NetworKit {
 
 IndependentCascade::IndependentCascade(const Graph &G)
     : G(G), n(G.upperNodeIdBound()), max(0), min(G.upperNodeIdBound()),
-      avg(0.0) {
+      avg(0.0), influencedVector(n) {
 	if (!G.isDirected() || !G.isWeighted()) {
 		throw std::runtime_error(
 		    "Error, the input graph is not directed and weighted.");
@@ -19,6 +19,7 @@ void IndependentCascade::performSimulation(const std::vector<node> &seeds,
                                            const count nIter,
                                            const count randomSeed) {
 	Aux::Random::setSeed(randomSeed, true);
+	std::fill(influencedVector.begin(), influencedVector.end(), 0.0);
 	const count max_threads = omp_get_max_threads();
 	std::vector<std::vector<count>> influencedNodes(max_threads,
 	                                                std::vector<count>(n, 0));
@@ -66,9 +67,19 @@ void IndependentCascade::performSimulation(const std::vector<node> &seeds,
 	for (count i = 0; i < max_threads; ++i) {
 		for (node u = 0; u < n; ++u) {
 			avg += influencedNodes[i][u];
-			if (std::find(seeds.begin(), seeds.end(), u) != seeds.end()) {
-				assert(influencedNodes[i][u] == 0);
-			}
+			influencedVector[u] += influencedNodes[i][u];
+		}
+	}
+
+	std::vector<bool> isSeed(n, false);
+	for (node u : seeds) {
+		isSeed[u] = true;
+	}
+	for (node u = 0; u < n; ++u) {
+		if (isSeed[u]) {
+			influencedVector[u] = 1.0;
+		} else {
+			influencedVector[u] /= (double)nIter;
 		}
 	}
 
