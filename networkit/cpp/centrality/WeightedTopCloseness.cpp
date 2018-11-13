@@ -23,6 +23,7 @@ WeightedTopCloseness::WeightedTopCloseness(const Graph &G, const count k,
 }
 
 void WeightedTopCloseness::init() {
+	reachableFromTop = 0;
 	topkNodes.resize(k);
 	farness.assign(n, infDist);
 	reachL.assign(n, 0);
@@ -180,7 +181,7 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 	double d = 0.0, sumDistLower = 0.0, newDist, lower = 0.0, distCur;
 	bool updateDist = false;
 	edgeweight minWeight = infDist;
-	node cur;
+	node cur, tmpNode;
 	std::pair<double, node> curPair;
 
 	while (pq.size() > 0) {
@@ -247,11 +248,11 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 	if (storeTopDist) {
 		if (top.size() == 0) {
 			updateDist = true;
-			topNode = s;
+			reachableFromTop = reachedNodes;
 		} else {
 			tmpNode = top.peekMin(top.size() - 1).second;
-			if (tmpNode != topNode) {
-				topNode = tmpNode;
+			if (tmpNode == s) {
+				reachableFromTop = reachedNodes;
 				updateDist = true;
 			}
 		}

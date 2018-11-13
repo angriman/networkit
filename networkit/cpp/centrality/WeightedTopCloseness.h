@@ -15,6 +15,7 @@ public:
 	void run() override;
 	std::vector<node> topkNodesList() const;
 	std::vector<double> getTopNodeDist() const;
+	count getTopNodeReachable() const;
 
 private:
 	const Graph &G;
@@ -25,7 +26,8 @@ private:
 	const bool storeTopDist;
 	const double infDist = std::numeric_limits<double>::max();
 	double kth;
-	node tmpNode, topNode;
+	count reachableFromTop;
+
 	std::vector<node> topkNodes;
 	std::vector<double> farness;
 	std::vector<bool> reached;
@@ -57,8 +59,13 @@ inline std::vector<double> WeightedTopCloseness::getTopNodeDist() const {
 	if (!storeTopDist) {
 		throw std::runtime_error("Error, storeTopDist should be set to true");
 	}
+	assureFinished();
 	return topDist;
 }
-} // namespace NetworKit
 
+inline count WeightedTopCloseness::getTopNodeReachable() const {
+	assureFinished();
+	return reachableFromTop;
+}
+} // namespace NetworKit
 #endif

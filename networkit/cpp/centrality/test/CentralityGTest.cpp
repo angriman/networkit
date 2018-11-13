@@ -1806,6 +1806,7 @@ TEST_F(CentralityGTest, testWeightedTopCloseness) {
 
 	INFO(wtc.topkNodesList());
 	INFO(wtc.getTopNodeDist());
+	INFO("Reachable are ", wtc.getTopNodeReachable());
 }
 
 TEST_F(CentralityGTest, testGroupClosenessWeighted) {
