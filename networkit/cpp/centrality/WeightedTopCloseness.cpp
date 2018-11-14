@@ -12,8 +12,8 @@ WeightedTopCloseness::WeightedTopCloseness(const Graph &G, const count k,
                                            const bool secondHeu,
                                            const bool storeTopDist)
     : G(G), k(k), firstHeu(firstHeu), secondHeu(secondHeu),
-      n(G.upperNodeIdBound()), storeTopDist(storeTopDist), kth(infDist),
-      top(n) {
+      n(G.upperNodeIdBound()), storeTopDist(storeTopDist),
+      minWeight(computeMinWeight()), kth(infDist), top(n) {
 	if (k == 0 || k > n) {
 		throw std::runtime_error("Error: k must be at least 1 and at most n.");
 	}
@@ -35,28 +35,19 @@ void WeightedTopCloseness::init() {
 	reached.assign(n, false);
 	lowerBoundDist.assign(n, infDist);
 	nodesToReset.resize(n);
-	edgesToReset.resize(G.numberOfEdges());
-	visitedEdges.assign(G.numberOfEdges(), false);
-	topVisitedEdges.reserve(G.numberOfEdges());
-	sortedEdges.resize(G.numberOfEdges());
-	G.parallelForEdges([&](node u, node v, edgeweight ew, edgeid eid) {
-		sortedEdges[eid] = std::make_pair(eid, ew);
-	});
-	Aux::Parallel::sort(
-	    sortedEdges.begin(), sortedEdges.end(),
-	    [&](const std::pair<index, double> x, const std::pair<index, double> y) {
-		    return x.second == y.second ? x.first > y.first : x.second < y.second;
-	    });
 }
 
-// TODO something better
-double WeightedTopCloseness::minUnvisitedEdge() const {
-	auto minWeightEdge = sortedEdges.begin();
-	while (minWeightEdge != sortedEdges.end() &&
-	       visitedEdges[minWeightEdge->first]) {
-		++minWeightEdge;
+double WeightedTopCloseness::computeMinWeight() const {
+	double result = infDist;
+#pragma omp parallel for reduction(min : result)
+	for (node u = 0; u < n; ++u) {
+		G.forNeighborsOf(u, [&](const node v) {
+			if (G.weight(u, v) < result) {
+				result = G.weight(u, v);
+			}
+		});
 	}
-	return minWeightEdge == sortedEdges.end() ? infDist : minWeightEdge->second;
+	return result;
 }
 
 void WeightedTopCloseness::computeReachable() {
@@ -152,7 +143,6 @@ void WeightedTopCloseness::computeBounds() {
 		if (G.degreeOut(u) > 0) {
 			const double rL = reachL[u];
 			double minWeightNeighbor = infDist;
-			double minWeight = sortedEdges[0].second;
 			farness[u] = 0.0;
 			G.forNeighborsOf(u, [&](const node v) {
 				minWeightNeighbor = std::min(minWeightNeighbor, G.weight(u, v));
@@ -199,12 +189,6 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 		sumDistLower -= lowerBoundDist[cur];
 
 		G.forNeighborsOf(cur, [&](const node v, const edgeweight w) {
-			// Maybe a CSRMatrix would be better
-			edgeid eid = G.edgeId(cur, v);
-			assert(visitedEdges[eid] == false);
-			visitedEdges[eid] = true;
-			edgesToReset[edgesToResetCount++] = eid;
-
 			newDist = distCur + w;
 			if (dist[v] > newDist) {
 				dist[v] = newDist;
@@ -220,8 +204,6 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 				sumDistLower += lowerBoundDist[v];
 			}
 		});
-
-		minWeight = minUnvisitedEdge();
 
 		lower = d + sumDistLower;
 		if (pq.size() > 0) {
@@ -263,7 +245,7 @@ void WeightedTopCloseness::run() {
 	std::pair<double, node> topPair, bottomPair;
 	node s;
 	// TODO parallelize
-	while (Q.size() != 0) {
+	while (Q.size() > 0) {
 		DEBUG("# of nodes to be analyzed: ", Q.size());
 		auto p = Q.extractMin();
 		s = p.second;
@@ -277,7 +259,6 @@ void WeightedTopCloseness::run() {
 		if (secondHeu) {
 			bfsBound(s);
 		} else {
-			edgesToResetCount = 0;
 			nodesToResetCount = 1;
 			farness[s] = bfsCut(s);
 			DEBUG("Farness of ", s, " is ", farness[s]);
@@ -296,7 +277,6 @@ void WeightedTopCloseness::run() {
 					reachableFromTop = reachedNodes;
 					topSum = d;
 					std::copy(dist.begin(), dist.end(), topDist.begin());
-					topVisitedEdges = edgesToReset;
 				}
 			}
 
@@ -314,10 +294,6 @@ void WeightedTopCloseness::run() {
 			dist[s] = infDist;
 			lowerBoundDist[s] = infDist;
 			reached[s] = false;
-		}
-
-		for (count i = 0; i < edgesToResetCount; ++i) {
-			visitedEdges[edgesToReset[i]] = false;
 		}
 	}
 

@@ -19,19 +19,19 @@ private:
 	const count k;
 	const count n;
 	const double infDist = std::numeric_limits<double>::max();
+	count reachable;
+	double minWeight;
 	std::vector<bool> inGroup;
 	std::vector<node> group;
 	std::vector<double> dist;
 	std::vector<double> tmpDist;
 	std::vector<double> prio;
-	std::vector<std::pair<index, double>> sortedEdges;
-	std::vector<bool> visitedEdges;
+	std::vector<count> rL;
 
 	void init();
-	void computeInitialBound(const count &reachableFromTop,
-	                         const double &topSumDist);
+	void computeInitialBound(const std::vector<double> &sortedDist,
+	                         const double &sumDist);
 	void bfsCut(const node &s);
-	void eraseVisitedEdges(std::vector<index> &topVisitedEdges);
 };
 
 inline std::vector<node> GroupClosenessWeighted::groupMaxCloseness() const {

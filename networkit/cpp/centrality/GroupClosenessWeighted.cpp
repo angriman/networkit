@@ -1,5 +1,6 @@
 #include "GroupClosenessWeighted.h"
 #include "../auxiliary/Log.h"
+#include "../auxiliary/Parallel.h"
 #include "../auxiliary/PrioQueue.h"
 
 namespace NetworKit {
@@ -13,48 +14,62 @@ GroupClosenessWeighted::GroupClosenessWeighted(const Graph &G, const count k)
 
 void GroupClosenessWeighted::init() {
 	inGroup.assign(n, false);
-	prio.assign(n, 0.0);
+	prio.assign(n, infDist);
 	group.reserve(k);
 	tmpDist.assign(n, infDist);
 }
 
-void GroupClosenessWeighted::computeInitialBound(const count &reachableFromTop,
-                                                 const double &topSumDist) {
+void GroupClosenessWeighted::computeInitialBound(
+    const std::vector<double> &sortedDist, const double &sumDist) {
 	G.parallelForNodes([&](const node u) {
 		if (inGroup[u]) {
 			return;
 		}
-		double curPrio = 0.0;
-		double curDist;
-		count newReachable = reachableFromTop;
-		double newSum = topSumDist;
+		double imprUpperBound = 0.0, minDistance;
+		double overlap = 0.0;
+		count nearerNeigh = 0;
+		double curDist, minWeightNeigh = infDist;
 		G.forNeighborsOf(u, [&](const node v, const edgeweight w) {
-			curDist = dist[v];
-			if (curDist == infDist) {
-				++newReachable;
-				newSum += w;
-			} else if (w < curDist) {
-				newSum -= curDist - w;
+			minWeightNeigh = std::min(minWeight, w);
+			if (inGroup[v]) {
+				overlap += 1.0;
 			}
 		});
-		prio[u] = newSum * (n - 1.0) / (newReachable - 1.0) / (newReachable - 1.0);
+		G.forNeighborsOf(u, [&](const node v, const edgeweight w) {
+			curDist = dist[v];
+			if (w < curDist) {
+				imprUpperBound += std::min(w, minWeightNeigh + minWeight);
+				++nearerNeigh;
+			}
+		});
+
+		if (nearerNeigh > 0) {
+			minDistance = minWeightNeigh + minWeight;
+			INFO("Node ", u, " has ", minDistance, " min distance");
+			count firstGreater = std::upper_bound(sortedDist.begin() + 1,
+			                                      sortedDist.end(), minDistance) -
+			                     sortedDist.begin();
+			if (rL[u] < n - firstGreater) {
+				firstGreater = n - rL[u];
+			}
+			double nonImprovableSum =
+			    firstGreater < n / 2
+			        ? std::accumulate(sortedDist.begin() + 1,
+			                          sortedDist.begin() + firstGreater, 0.0)
+			        : sumDist - std::accumulate(sortedDist.begin() + firstGreater,
+			                                    sortedDist.end(), 0.0);
+
+			imprUpperBound +=
+			    nonImprovableSum +
+			    std::max(0.0, n - firstGreater - G.degreeOut(u) + overlap - 1.0) *
+			        minDistance;
+		} else {
+			prio[u] = sumDist;
+		}
 	});
 }
 
-void GroupClosenessWeighted::bfsCut(const node &s) {}
-
-void GroupClosenessWeighted::eraseVisitedEdges(
-    std::vector<index> &topVisitedEdges) {
-	for (auto eid : topVisitedEdges) {
-		visitedEdges[eid] = true;
-	}
-
-	auto toErase = sortedEdges.begin();
-	while (visitedEdges[toErase->first]) {
-		++toErase;
-	}
-	sortedEdges.erase(sortedEdges.begin(), toErase);
-}
+void GroupClosenessWeighted::bfsCut(const node &s) { tmpDist[s] = 0.0; }
 
 void GroupClosenessWeighted::run() {
 	init();
@@ -66,17 +81,20 @@ void GroupClosenessWeighted::run() {
 	group.push_back(wtc.topkNodesList()[0]);
 	inGroup[group.back()] = true;
 	dist = wtc.getTopNodeDist();
-	sortedEdges = wtc.getSortedEdges();
-	visitedEdges = wtc.getVisitedEdgesVector();
-	eraseVisitedEdges(wtc.getVisitedEdges());
+	std::vector<double> sortedDist(dist);
+	Aux::Parallel::sort(sortedDist.begin(), sortedDist.end());
+	reachable = wtc.getTopNodeReachable();
+	rL = wtc.getReachL();
+	minWeight = wtc.getMinWeight();
+	computeInitialBound(sortedDist, wtc.getTopSum());
 
-	computeInitialBound(wtc.getTopNodeReachable(), wtc.getTopSum());
-
-	double best = 0;
-
+	node s;
 	while (group.size() < k) {
 		Aux::PrioQueue<double, node> Q(prio);
-
+		while (Q.size() > 0) {
+			s = Q.extractMin().second;
+			INFO("Bfscut from ", s);
+		}
 		break;
 	}
 
