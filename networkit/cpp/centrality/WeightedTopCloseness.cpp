@@ -37,16 +37,13 @@ void WeightedTopCloseness::init() {
 	nodesToReset.resize(n);
 }
 
-double WeightedTopCloseness::computeMinWeight() const {
+double WeightedTopCloseness::computeMinWeight() {
 	double result = infDist;
-#pragma omp parallel for reduction(min : result)
-	for (node u = 0; u < n; ++u) {
-		G.forNeighborsOf(u, [&](const node v) {
-			if (G.weight(u, v) < result) {
-				result = G.weight(u, v);
-			}
-		});
-	}
+	G.forEdges([&](const node u, const node v, const edgeweight w) {
+		if (w < result) {
+			result = w;
+		}
+	});
 	return result;
 }
 
@@ -144,8 +141,10 @@ void WeightedTopCloseness::computeBounds() {
 			const double rL = reachL[u];
 			double minWeightNeighbor = infDist;
 			farness[u] = 0.0;
-			G.forNeighborsOf(u, [&](const node v) {
-				minWeightNeighbor = std::min(minWeightNeighbor, G.weight(u, v));
+			G.forNeighborsOf(u, [&](const node v, const edgeweight w) {
+				if (w < minWeightNeighbor) {
+					minWeightNeighbor = w;
+				}
 			});
 			G.forNeighborsOf(u, [&](const node v, const edgeweight w) {
 				farness[u] += std::min(w, minWeightNeighbor + minWeight);
@@ -168,13 +167,14 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 	reached[s] = true;
 	dist[s] = 0.0;
 	lowerBoundDist[s] = 0.0;
+	// TODO use a heap and AVOID to reallocate at each bfscut!
 	Aux::PrioQueue<double, node> pq(dist);
-	const double rL = reachL[s];
+	const double &rL = reachL[s];
 	d = 0.0;
 	double sumDistLower = 0.0, newDist, lower = 0.0, distCur;
-	edgeweight minWeight = infDist;
 	node cur;
 	std::pair<double, node> curPair;
+	INFO("BFscut from ", s);
 
 	while (pq.size() > 0) {
 		curPair = pq.extractMin();
@@ -215,6 +215,7 @@ double WeightedTopCloseness::bfsCut(const node &s) {
 				lower += newDist - lowerBoundDist[cur];
 			}
 			if (rL > reachedNodes) {
+				// FIXME what if newDist is inf??
 				lower += (rL - reachedNodes) * (newDist + minWeight);
 				lower *= (n - 1) / (rL - 1.0) / (rL - 1.0);
 			} else {
@@ -250,9 +251,9 @@ void WeightedTopCloseness::run() {
 		auto p = Q.extractMin();
 		s = p.second;
 
-		DEBUG("Priority of node ", s, " is ", p.first);
+		INFO("Priority of node ", s, " is ", p.first);
 		if (G.degreeOut(s) == 0 || farness[s] > kth) {
-			DEBUG("Discarding node ", s);
+			INFO("Discarding node ", s);
 			break;
 		}
 
@@ -261,7 +262,7 @@ void WeightedTopCloseness::run() {
 		} else {
 			nodesToResetCount = 1;
 			farness[s] = bfsCut(s);
-			DEBUG("Farness of ", s, " is ", farness[s]);
+			INFO("Farness of ", s, " is ", farness[s]);
 		}
 
 		if (farness[s] < kth) {

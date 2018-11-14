@@ -30,8 +30,8 @@ private:
 	const bool secondHeu;
 	const count n;
 	const bool storeTopDist;
-	const double minWeight;
 	const double infDist = std::numeric_limits<double>::max();
+	const double minWeight;
 	double kth;
 	double topSum;
 	double d;
@@ -55,7 +55,7 @@ private:
 	void bfsBound(const node &s);
 	double bfsCut(const node &s);
 	bool checkStoreTopDist() const;
-	double computeMinWeight() const;
+	double computeMinWeight();
 };
 
 inline std::vector<node> WeightedTopCloseness::topkNodesList() const {
