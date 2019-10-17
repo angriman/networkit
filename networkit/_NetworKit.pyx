@@ -11894,15 +11894,47 @@ def sort2(sample):
 	return result
 
 
+cdef extern from "<networkit/centrality/ApproxEffectiveResistance.hpp>":
+	cdef cppclass _ApproxEffectiveResistance "NetworKit::ApproxEffectiveResistance"(_Algorithm):
+		_ApproxEffectiveResistance(_Graph G, double eps) except +
+		node getRoot() except +
+		vector[double] getApproxEffectiveResistances() except +
+		unordered_map[string, double] profilingResults() except +
+		vector[double] getDiagonal() except +
+
+cdef class ApproxEffectiveResistance(Algorithm):
+	cdef Graph _G
+
+	def __init__(self, Graph G, double eps = 0.1):
+		self._G = G
+		self._this = new _ApproxEffectiveResistance(G._this, eps)
+
+	def getRoot(self):
+		return (<_ApproxEffectiveResistance*>(self._this)).getRoot()
+
+	def getApproxEffectiveResistances(self):
+		return (<_ApproxEffectiveResistance*>(self._this)).getApproxEffectiveResistances()
+
+	def profilingResults(self):
+		return (<_ApproxEffectiveResistance*>(self._this)).profilingResults()
+
+	def getDiagonal(self):
+		return (<_ApproxEffectiveResistance*>(self._this)).getDiagonal()
+
 cdef extern from "<networkit/distance/CommuteTimeDistance.hpp>":
 
 	cdef cppclass _CommuteTimeDistance "NetworKit::CommuteTimeDistance"(_Algorithm):
-		_CommuteTimeDistance(_Graph G, double tol) except +
+		_CommuteTimeDistance(_Graph G, double tol, double lamgTol) except +
 		void runApproximation() except +
 		void runParallelApproximation() except +
 		double distance(node, node) except +
 		double runSinglePair(node, node) except +
 		double runSingleSource(node) except +
+		vector[double] effectiveResistanceSingleSource(node) except +
+		vector[double] effectiveResistanceSingleSourceParallel(node) except +
+		count getElapsedMilliseconds() except +
+		vector[double] getDiagonal(node) except +
+		count getSetupTime() except +
 
 
 cdef class CommuteTimeDistance(Algorithm):
@@ -11920,9 +11952,12 @@ cdef class CommuteTimeDistance(Algorithm):
 	"""
 	cdef Graph _G
 
-	def __cinit__(self,  Graph G, double tol = 0.1):
+	def __cinit__(self,  Graph G, double tol = 0.1, double lamgTol = 1e-5):
 		self._G = G
-		self._this = new _CommuteTimeDistance(G._this, tol)
+		self._this = new _CommuteTimeDistance(G._this, tol, lamgTol)
+
+	def getSetupTime(self):
+		return (<_CommuteTimeDistance*>(self._this)).getSetupTime()
 
 	def runApproximation(self):
 		""" Computes approximation of the ECTD. """
@@ -11947,6 +11982,18 @@ cdef class CommuteTimeDistance(Algorithm):
 		v : node
 		"""
 		return (<_CommuteTimeDistance*>(self._this)).runSinglePair(u, v)
+
+	def effectiveResistanceSingleSource(self, u):
+		return (<_CommuteTimeDistance*>(self._this)).effectiveResistanceSingleSource(u)
+
+	def effectiveResistanceSingleSourceParallel(self, u):
+		return (<_CommuteTimeDistance*>(self._this)).effectiveResistanceSingleSourceParallel(u)
+
+	def getElapsedMilliseconds(self):
+		return (<_CommuteTimeDistance*>(self._this)).getElapsedMilliseconds()
+
+	def getDiagonal(self, u):
+		return (<_CommuteTimeDistance*>(self._this)).getDiagonal(u)
 
 	def runSingleSource(self, u):
 		"""  Returns the sum of the ECTDs from u, without preprocessing.

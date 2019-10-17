@@ -61,6 +61,8 @@ public:
    */
   std::vector<std::vector<node>> getComponents();
 
+  const std::unordered_set<node> &getComponentsOfNode(node u) const { return componentsOfNode[u]; }
+
 private:
   void init();
   void newComponent(std::pair<node, node> e);
