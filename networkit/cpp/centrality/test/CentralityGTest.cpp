@@ -14,6 +14,7 @@
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/centrality/ApproxBetweenness.hpp>
 #include <networkit/centrality/ApproxCloseness.hpp>
+#include <networkit/centrality/ApproxEffectiveResistance.hpp>
 #include <networkit/centrality/ApproxGroupBetweenness.hpp>
 #include <networkit/centrality/Betweenness.hpp>
 #include <networkit/centrality/Closeness.hpp>
@@ -36,10 +37,13 @@
 #include <networkit/centrality/SpanningEdgeCentrality.hpp>
 #include <networkit/centrality/TopCloseness.hpp>
 #include <networkit/centrality/TopHarmonicCloseness.hpp>
+#include <networkit/components/ConnectedComponents.hpp>
+#include <networkit/distance/CommuteTimeDistance.hpp>
 #include <networkit/distance/Dijkstra.hpp>
 #include <networkit/generators/DorogovtsevMendesGenerator.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
 #include <networkit/graph/GraphTools.hpp>
+#include <networkit/io/KONECTGraphReader.hpp>
 #include <networkit/io/METISGraphReader.hpp>
 #include <networkit/io/SNAPGraphReader.hpp>
 #include <networkit/structures/Cover.hpp>
@@ -61,6 +65,99 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, CentralityGTest,
 bool CentralityGTest::isWeighted() const noexcept { return GetParam().first; }
 
 bool CentralityGTest::isDirected() const noexcept { return GetParam().second; }
+
+TEST_F(CentralityGTest, testTolerance) {
+    Aux::Random::setSeed(1, true);
+    auto G = KONECTGraphReader().read("/home/angriman/graphs/advogato");
+    if (G.isDirected())
+        G = G.toUndirected();
+    G = ConnectedComponents::extractLargestConnectedComponent(G, true);
+    G.removeSelfLoops();
+    G.removeMultiEdges();
+
+    Aux::Timer timer;
+    timer.start();
+    CommuteTimeDistance ctdExact(G, 0.1, 1e-12);
+    const auto exactScores = ctdExact.effectiveResistanceSingleSourceParallel(0);
+    timer.stop();
+    INFO("TIME FOR EXACT: ", timer.elapsedMilliseconds());
+
+    timer.start();
+    CommuteTimeDistance ctdApprox(G, 0.1, 1e-2);
+    const auto apxScores = ctdApprox.effectiveResistanceSingleSourceParallel(0);
+    timer.stop();
+    INFO("TIME FOR APPROX: ", timer.elapsedMilliseconds());
+
+    double maxEps = 0;
+    G.forNodes(
+        [&](const node u) { maxEps = std::max(maxEps, std::abs(exactScores[u] - apxScores[u])); });
+    INFO("Max epsilon: ", maxEps);
+}
+
+TEST_F(CentralityGTest, testApproxEffectiveResistance) {
+    Aux::Random::setSeed(1, true);
+    auto getBicTriangle = []() {
+        auto G1 = ErdosRenyiGenerator(100, 0.1).generate();
+        auto G2 = ErdosRenyiGenerator(100, 0.1).generate();
+        auto G = ErdosRenyiGenerator(200, 0.1).generate();
+        G.append(G1);
+        G.append(G2);
+        G.addEdge(199, 200);
+        G.addEdge(199, 300);
+        count newNodes = 3;
+        while (newNodes--)
+            G.addNode();
+        G.addEdge(400, 401);
+        G.addEdge(400, 402);
+        G.addEdge(401, 402);
+        G.addEdge(399, 400);
+
+        return G;
+    };
+
+    auto G = KONECTGraphReader().read("/home/angriman/graphs/advogato");
+    if (G.isDirected())
+        G = G.toUndirected();
+    if (G.isWeighted())
+        G = G.toUnweighted();
+    G = ConnectedComponents::extractLargestConnectedComponent(G, true);
+    G.removeSelfLoops();
+    G.removeMultiEdges();
+    ConnectedComponents cc(G);
+    cc.run();
+    if (cc.numberOfComponents() > 1)
+        throw std::runtime_error("Error: too many components");
+
+    static constexpr double eps = 0.15;
+    static constexpr double tol = 1e-9;
+
+    // Run approximation
+    ApproxEffectiveResistance apx(G, eps);
+    apx.run();
+    return;
+    const auto root = apx.getRoot();
+    const auto apxDiag = apx.getDiagonal();
+
+    // Run n - 1 linear systems
+    CommuteTimeDistance ctd(G, tol);
+
+    const auto exactDiag = ctd.getDiagonal(root);
+    G.forNodes([&](const node u) { EXPECT_NEAR(exactDiag[u], apxDiag[u], eps); });
+}
+
+TEST_F(CentralityGTest, testCommuteTime) {
+    for (count seed = 1; seed < 5; ++seed) {
+        Aux::Random::setSeed(seed, false);
+        auto G = ErdosRenyiGenerator(100, 0.15).generate();
+        G = ConnectedComponents::extractLargestConnectedComponent(G, true);
+        G.removeSelfLoops();
+        G.removeMultiEdges();
+        CommuteTimeDistance ctd(G, 1e-12);
+        const auto seqScores = ctd.effectiveResistanceSingleSource(0);
+        const auto parScores = ctd.effectiveResistanceSingleSourceParallel(0);
+        G.forNodes([&](node u) { EXPECT_NEAR(seqScores[u], parScores[u], 1e-12); });
+    }
+}
 
 TEST_F(CentralityGTest, testBetweennessCentrality) {
     /* Graph:
@@ -231,8 +328,7 @@ TEST_F(CentralityGTest, testKatzTopk) {
     auto exactRanking = exactAlgo.ranking();
     auto topRanking = topAlgo.ranking();
     for (count i = 0; i < std::min(G.numberOfNodes(), count{100}); i++)
-        EXPECT_NEAR(exactAlgo.score(topRanking[i].first),
-                    exactRanking[i].second, 1e-6);
+        EXPECT_NEAR(exactAlgo.score(topRanking[i].first), exactRanking[i].second, 1e-6);
 }
 
 TEST_F(CentralityGTest, testKatzDynamicAddition) {
@@ -293,8 +389,7 @@ TEST_F(CentralityGTest, testKatzDynamicDeletion) {
         INFO("i = ", i);
         G.forNodes([&](node u) {
             if (kc.nPaths[i][u] != kc2.nPaths[i][u]) {
-                INFO("i = ", i, ", node ", u,
-                     ", dyn kc paths: ", kc.nPaths[i][u],
+                INFO("i = ", i, ", node ", u, ", dyn kc paths: ", kc.nPaths[i][u],
                      ", stat paths: ", kc2.nPaths[i][u]);
             }
             EXPECT_EQ(kc.nPaths[i][u], kc2.nPaths[i][u]);
@@ -347,8 +442,7 @@ TEST_F(CentralityGTest, testKatzDynamicBuilding) {
     auto topRanking = topAlgo.ranking();
     auto dynRanking = dynAlgo.ranking();
     for (count i = 0; i < std::min(G.numberOfNodes(), count{100}); i++)
-        EXPECT_FALSE(
-            dynAlgo.areDistinguished(topRanking[i].first, dynRanking[i].first))
+        EXPECT_FALSE(dynAlgo.areDistinguished(topRanking[i].first, dynRanking[i].first))
             << "Nodes " << topRanking[i].first << " and " << dynRanking[i].first
             << " should not be distinguished!";
 }
@@ -404,8 +498,7 @@ TEST_F(CentralityGTest, testKatzDirectedAddition) {
     kc2.run();
 
     for (count i = 0; i <= std::min(kc.levelReached, kc2.levelReached); i++) {
-        G.forNodes(
-            [&](node u) { EXPECT_EQ(kc.nPaths[i][u], kc2.nPaths[i][u]); });
+        G.forNodes([&](node u) { EXPECT_EQ(kc.nPaths[i][u], kc2.nPaths[i][u]); });
     }
     const edgeweight tol = 1e-9;
     G.forNodes([&](node u) {
@@ -948,8 +1041,7 @@ TEST_F(CentralityGTest, testCoreDecomposition) {
 
 TEST_F(CentralityGTest, benchCoreDecompositionLocal) {
     METISGraphReader reader;
-    std::vector<std::string> filenames = {"caidaRouterLevel", "wing",
-                                          "astro-ph", "PGPgiantcompo"};
+    std::vector<std::string> filenames = {"caidaRouterLevel", "wing", "astro-ph", "PGPgiantcompo"};
 
     for (auto f : filenames) {
         std::string filename("input/" + f + ".graph");
@@ -967,11 +1059,10 @@ TEST_F(CentralityGTest, benchCoreDecompositionLocal) {
         timer.start();
         coreDec2.run();
         timer.stop();
-        INFO("Time for bucket queue based k-core decomposition of ", filename,
-             ": ", timer.elapsedTag());
+        INFO("Time for bucket queue based k-core decomposition of ", filename, ": ",
+             timer.elapsedTag());
 
-        G.forNodes(
-            [&](node u) { EXPECT_EQ(coreDec.score(u), coreDec2.score(u)); });
+        G.forNodes([&](node u) { EXPECT_EQ(coreDec.score(u), coreDec2.score(u)); });
     }
 }
 
@@ -1076,9 +1167,8 @@ TEST_F(CentralityGTest, testLocalClusteringCoefficientUndirected) {
     LocalClusteringCoefficient lcc(G);
     lcc.run();
     std::vector<double> lccScores = lcc.scores();
-    std::vector<double> reference = {0.0, 0.0, 0.0, 0.0,
-                                     0.0, 0.0, 0.5, 0.0,
-                                     0.8, 0.8, 0.8, 0.6666666666666666,
+    std::vector<double> reference = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                     0.5, 0.0, 0.8, 0.8, 0.8, 0.6666666666666666,
                                      0.0, 0.8, 0.5, 0.0};
 
     EXPECT_EQ(reference, lccScores);
@@ -1110,9 +1200,8 @@ TEST_F(CentralityGTest, testLocalClusteringCoefficientUndirected2) {
     LocalClusteringCoefficient lcc(G);
     lcc.run();
     std::vector<double> lccScores = lcc.scores();
-    std::vector<double> reference = {0.6666666666666666, 0.6666666666666666,
-                                     0.6666666666666666, 0.6666666666666666,
-                                     0.3333333333333333, 0.3333333333333333};
+    std::vector<double> reference = {0.6666666666666666, 0.6666666666666666, 0.6666666666666666,
+                                     0.6666666666666666, 0.3333333333333333, 0.3333333333333333};
 
     EXPECT_EQ(reference, lccScores);
 }
@@ -1341,6 +1430,30 @@ TEST_P(CentralityGTest, testGroupDegree) {
         return result;
     };
 
+<<<<<<< HEAD
+=======
+    count maxScore = 0;
+
+    do {
+        count curScore = computeGroupDegree(reference, g);
+        if (curScore > maxScore) {
+            maxScore = curScore;
+        }
+    } while (std::next_permutation(reference.begin(), reference.end()));
+
+    EXPECT_TRUE(score > 0.5 * maxScore);
+    EXPECT_TRUE(scorePlusGroup > (1.0 - 1.0 / std::exp(1.0) * (double)(maxScore + k)));
+    EXPECT_EQ(score, gd.scoreOfGroup(gd.groupMaxDegree()));
+    EXPECT_EQ(scorePlusGroup, gdIncludeGroup.scoreOfGroup(gdIncludeGroup.groupMaxDegree()));
+}
+
+TEST_F(CentralityGTest, testGroupDegreeDirected) {
+    Aux::Random::setSeed(42, false);
+    count nodes = 12;
+    Graph g = ErdosRenyiGenerator(nodes, 0.3, true, false).generate();
+    count k = 5;
+
+>>>>>>> Create ApproxEffectiveResistance class and run test
     GroupDegree gd(g, k, false);
     gd.run();
     auto scoreNoGroup = gd.getScore();
@@ -1364,20 +1477,23 @@ TEST_P(CentralityGTest, testGroupDegree) {
     } while (std::next_permutation(reference.begin(), reference.end()));
 
     EXPECT_TRUE(scoreNoGroup > 0.5 * maxScore);
+<<<<<<< HEAD
     EXPECT_TRUE(scorePlusGroup >
                 (1.0 - 1.0 / std::exp(1.0)) * static_cast<double>(maxScore + k));
+=======
+    EXPECT_TRUE(scorePlusGroup > (1.0 - 1.0 / std::exp(1.0)) * (double)(maxScore + k));
+>>>>>>> Create ApproxEffectiveResistance class and run test
     EXPECT_EQ(scoreNoGroup, gd.scoreOfGroup(gd.groupMaxDegree()));
-    EXPECT_EQ(scorePlusGroup,
-              gdIncludeGroup.scoreOfGroup(gdIncludeGroup.groupMaxDegree()));
+    EXPECT_EQ(scorePlusGroup, gdIncludeGroup.scoreOfGroup(gdIncludeGroup.groupMaxDegree()));
 }
 
 TEST_F(CentralityGTest, testGroupBetweennessScore) {
-/** 0           5
- *  | \       / |
- *  1 - 3 - 4 - 6
- *  | /       \ |
- *  2           7
- */
+    /** 0           5
+     *  | \       / |
+     *  1 - 3 - 4 - 6
+     *  | /       \ |
+     *  2           7
+     */
     Graph G(8, false, false);
     G.addEdge(0, 1);
     G.addEdge(1, 2);
@@ -1452,7 +1568,6 @@ TEST_F(CentralityGTest, testGroupBetweennessScore) {
 }
 
 TEST_F(CentralityGTest, runTestApproxGroupBetweennessSmallGraph) {
-
     Aux::Random::setSeed(42, false);
 
     count n = 8;

@@ -1,6 +1,7 @@
 networkit_add_module(centrality
     ApproxBetweenness.cpp
     ApproxCloseness.cpp
+    ApproxEffectiveResistance.cpp
     ApproxGroupBetweenness.cpp
     Betweenness.cpp
     Centrality.cpp

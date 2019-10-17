@@ -29,7 +29,7 @@ public:
      * @param G The graph.
      * @param tol The tolerance used for the approximation
      */
-    CommuteTimeDistance(const Graph& G, double tol = 0.1);
+    CommuteTimeDistance(const Graph& G, double tol = 0.1, double lamgTol = 1e-5);
 
     /**
      * Destructor.
@@ -78,15 +78,42 @@ public:
      */
     double runSingleSource(node u);
 
+    double effectiveResistanceSinglePair(node u, node v);
+
+    std::vector<double> effectiveResistanceSingleSourceParallel(node u);
+    std::vector<double> effectiveResistanceSingleSource(node u);
+
+    std::vector<double> getDiagonal(node root) {
+        const auto r = effectiveResistanceSingleSourceParallel(root);
+        Aux::Timer timer;
+        timer.start();
+        std::vector<double> diagonal(G.upperNodeIdBound());
+        Vector rhs(G.upperNodeIdBound()), result(G.upperNodeIdBound());
+        rhs[root] = 1.0;
+        G.parallelForNodes(
+            [&](const node u) { rhs[u] -= 1.0 / static_cast<double>(G.upperNodeIdBound()); });
+        lamg.solve(rhs, result);
+        G.parallelForNodes(
+            [&](const node u) { diagonal[u] = r[u] - result[root] + 2 * result[u]; });
+        timer.stop();
+        elapsedMilliseconds += timer.elapsedMilliseconds();
+        return diagonal;
+    }
+
+    count getElapsedMilliseconds() const {
+        return elapsedMilliseconds;
+    }
+
 protected:
     const Graph* G;
-    double tol;
+    double tol, lamgTol;
     Lamg<CSRMatrix> lamg;
     uint64_t setupTime;
     std::vector<std::vector<double>> distances;
     std::vector<Vector> solutions;
     bool exactly;
     count k;
+    count elapsedMilliseconds;
 };
 
 } /* namespace NetworKit */
