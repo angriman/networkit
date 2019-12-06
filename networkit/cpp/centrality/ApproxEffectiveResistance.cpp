@@ -308,7 +308,8 @@ void ApproxEffectiveResistance::sampleUST() {
                 // Get a random neighbor within the component
                 node randomNeighbor;
                 do {
-                    randomNeighbor = G.getIthOutEdge(currentNode, generator.nextUInt(G.degree(currentNode)));
+                    randomNeighbor =
+                        G.getIthNeighbor(currentNode, generator.nextUInt(G.degree(currentNode)));
                 } while (status[randomNeighbor] == NodeStatus::NOT_IN_COMPONENT);
 
                 assert(randomNeighbor != none);
@@ -449,8 +450,7 @@ void ApproxEffectiveResistance::aggregateUST() {
 void ApproxEffectiveResistance::run() {
     std::vector<count> ustSamplingTime(omp_get_max_threads());
     std::vector<count> ustAggregationTime(omp_get_max_threads());
-    numberOfUSTs = rootEcc * computeNumberOfUSTs();
-    INFO("# of samples: ", numberOfUSTs);
+    numberOfUSTs = static_cast<count>(std::ceil(rootEcc * computeNumberOfUSTs() / nProcessors));
 #pragma omp parallel for schedule(dynamic)
     for (omp_index i = 0; i < static_cast<omp_index>(numberOfUSTs); ++i) {
         Aux::Timer timer;
