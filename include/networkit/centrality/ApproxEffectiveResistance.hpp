@@ -109,6 +109,10 @@ public:
         return diagonal;
     }
 
+    // When running on a distributed setup, set this to the number of processors
+    // to adjust the number of samples.
+    count nProcessors = 1;
+
 private:
     // Input parameters
     const Graph &G;
