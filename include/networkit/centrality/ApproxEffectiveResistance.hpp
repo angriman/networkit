@@ -75,7 +75,6 @@ public:
     node getRoot() const noexcept { return root; }
 
     std::vector<int> getNonNormalizedData() const {
-        assureFinished();
         std::vector<int> aggregated(G.upperNodeIdBound());
         G.parallelForNodes([&](const node u) {
             for (const auto &threadScores : approxEffResistanceGlobal) {
@@ -87,7 +86,6 @@ public:
 
     // Aggregates per-thread scores into a single vector and returns it
     std::vector<double> getApproxEffectiveResistances() const {
-        assureFinished();
         std::vector<double> result(G.upperNodeIdBound());
         G.parallelForNodes([&](const node u) {
             for (const auto &threadScores : approxEffResistanceGlobal) {
@@ -99,19 +97,13 @@ public:
         return result;
     }
 
-    std::unordered_map<std::string, double> profilingResults() const {
-        assureFinished();
-        return time;
-    }
+    std::unordered_map<std::string, double> profilingResults() const { return time; }
 
-    std::vector<double> getDiagonal() {
-        assureFinished();
-        return diagonal;
-    }
+    std::vector<double> getDiagonal() { return diagonal; }
 
-    count totalNumberOfUSTs() const {
-        return rootEcc * computeNumberOfUSTs();
-    }
+    count totalNumberOfUSTs() const { return rootEcc * computeNumberOfUSTs(); }
+
+    const Vector &resultVector() const { return result; }
 
     // When running on a distributed setup, set this to the number of processors
     // to adjust the number of samples.
