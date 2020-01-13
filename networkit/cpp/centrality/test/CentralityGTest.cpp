@@ -1956,4 +1956,16 @@ TEST_F(CentralityGTest, testDynTopHarmonicClosenessDirected) {
         EXPECT_FLOAT_EQ(scores[j].second, refScores[j].second);
     }
 }
+
+TEST_F(CentralityGTest, testSpielman) {
+    SNAPGraphReader reader;
+    auto G = reader.read("input/wiki-Vote.txt");
+    G = ConnectedComponents::extractLargestConnectedComponent(G, true);
+    SpanningEdgeCentrality sp(G);
+    const auto diag = sp.computeDiagonal(0, 0.1, 1e-6);
+    for (int i = 0; i < 10; ++i) {
+        INFO(diag[i]);
+    }
+}
+
 } /* namespace NetworKit */
