@@ -15,6 +15,7 @@ PermanenceCentrality, TopCloseness, TopHarmonicCloseness, DynTopHarmonicClosenes
 GroupDegree, GroupCloseness, DynBetweennessOneNode, LaplacianCentrality, ApproxGroupBetweenness, DynKatzCentrality,\
 KadabraBetweenness, ApproxEffectiveResistance
 from _NetworKit import _ClosenessVariant as ClosenessVariant
+from _NetworKit import _RootStrategy as RootStrategy
 
 # local imports
 from networkit.algebraic import adjacencyEigenvector, PageRankMatrix, symmetricEigenvectors

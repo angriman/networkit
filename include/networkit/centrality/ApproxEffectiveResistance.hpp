@@ -25,6 +25,12 @@
 
 namespace NetworKit {
 
+enum RootStrategy {
+    MaxDegree,
+    Random,
+    MinApproxEcc
+};
+
 // See https://github.com/wjakob/pcg32
 struct pcg32 {
     /// Initialize the pseudorandom number generator with the \ref seed() function
@@ -109,6 +115,9 @@ public:
     }
 
     count numberOfUSTs = 0;
+    static constexpr count sweeps = 10;
+
+    RootStrategy rootStrategy = RootStrategy::MinApproxEcc;
 
     void solveSingleSystem() {
         ConjugateGradient<CSRMatrix, IdentityPreconditioner> cg(tolerance);
@@ -195,6 +204,8 @@ private:
         G.parallelForNodes(
             [&](const node u) { diagonal[u] = r[u] - result[root] + 2 * result[u]; });
     }
+
+    node approxMinEccNode();
 
     // Debugging methods
     void checkBFSTree() const;
