@@ -109,6 +109,18 @@ public:
     }
 
     count numberOfUSTs = 0;
+
+    void solveSingleSystem() {
+        ConjugateGradient<CSRMatrix, IdentityPreconditioner> cg(tolerance);
+        const auto matrix = CSRMatrix::laplacianMatrix(G);
+        cg.setup(matrix);
+        Vector rhs(G.upperNodeIdBound());
+        rhs[root] = 1.0;
+        G.parallelForNodes(
+            [&](const node u) { rhs[u] -= 1.0 / static_cast<double>(G.numberOfNodes()); });
+        cg.solve(rhs, result);
+    }
+
 private:
     // Input parameters
     const Graph &G;
@@ -176,17 +188,6 @@ private:
     void sampleUST();
     void dfsUST();
     void aggregateUST();
-
-    void solveSingleSystem() {
-        ConjugateGradient<CSRMatrix, IdentityPreconditioner> cg(tolerance);
-        const auto matrix = CSRMatrix::laplacianMatrix(G);
-        cg.setup(matrix);
-        Vector rhs(G.upperNodeIdBound());
-        rhs[root] = 1.0;
-        G.parallelForNodes(
-            [&](const node u) { rhs[u] -= 1.0 / static_cast<double>(G.numberOfNodes()); });
-        cg.solve(rhs, result);
-    }
 
     void computeDiagonal() {
         solveSingleSystem();
