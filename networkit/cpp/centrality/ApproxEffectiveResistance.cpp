@@ -49,6 +49,13 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double epsi
     computeBFSTree();
 }
 
+void ApproxEffectiveResistance::init() {
+    computeNodeSequence();
+    computeBFSTree();
+    didInit = true;
+}
+
+
 node ApproxEffectiveResistance::approxMinEccNode() {
     auto &status = statusGlobal[0];
     std::vector<uint32_t> distance(G.upperNodeIdBound()), eccLowerBound(G.upperNodeIdBound());
@@ -514,6 +521,8 @@ void ApproxEffectiveResistance::aggregateUST() {
 
 void ApproxEffectiveResistance::run() {
 //    numberOfUSTs = static_cast<count>(std::ceil(computeNumberOfUSTs() / nProcessors));
+    if (!didInit)
+        init();
 #pragma omp parallel for schedule(dynamic)
     for (omp_index i = 0; i < static_cast<omp_index>(numberOfUSTs); ++i) {
         sampleUST();

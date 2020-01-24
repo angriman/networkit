@@ -138,6 +138,7 @@ private:
     node root;
     uint32_t rootEcc;
     Vector result;
+    bool didInit = false;
 
     enum class NodeStatus : unsigned char {
         NOT_IN_COMPONENT,
@@ -197,6 +198,7 @@ private:
     void sampleUST();
     void dfsUST();
     void aggregateUST();
+    void init();
 
     void computeDiagonal() {
         solveSingleSystem();

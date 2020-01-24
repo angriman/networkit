@@ -90,6 +90,7 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
 
     // Run approximation
     ApproxEffectiveResistance apx(G, eps);
+    apx.rootStrategy = RootStrategy::MaxDegree;
     apx.run();
     return;
     const auto root = apx.getRoot();
