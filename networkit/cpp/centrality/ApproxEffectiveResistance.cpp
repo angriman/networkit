@@ -49,7 +49,6 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double epsi
 }
 
 void ApproxEffectiveResistance::init() {
-    INFO("Doing init");
     computeNodeSequence();
     computeBFSTree();
     didInit = true;
@@ -522,7 +521,6 @@ void ApproxEffectiveResistance::aggregateUST() {
 }
 
 void ApproxEffectiveResistance::run() {
-//    numberOfUSTs = static_cast<count>(std::ceil(computeNumberOfUSTs() / nProcessors));
     if (!didInit)
         init();
 #pragma omp parallel for schedule(dynamic)
