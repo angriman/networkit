@@ -40,6 +40,7 @@
 #include <networkit/distance/CommuteTimeDistance.hpp>
 #include <networkit/generators/DorogovtsevMendesGenerator.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
+#include <networkit/graph/GraphTools.hpp>
 #include <networkit/io/METISGraphReader.hpp>
 #include <networkit/io/KONECTGraphReader.hpp>
 #include <networkit/io/SNAPGraphReader.hpp>
@@ -71,11 +72,11 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
         return G;
     };
 
-    auto G = KONECTGraphReader().read("/home/angriman/graphs/advogato");
+    auto G = KONECTGraphReader().read("/home/angriman/graphs/livemocha");
     if (G.isDirected())
-        G = G.toUndirected();
+        G = GraphTools::toUndirected(G);
     if (G.isWeighted())
-        G = G.toUnweighted();
+        G = GraphTools::toUnweighted(G);
     G = ConnectedComponents::extractLargestConnectedComponent(G, true);
     G.removeSelfLoops();
     G.removeMultiEdges();

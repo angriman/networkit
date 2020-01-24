@@ -24,6 +24,12 @@
 
 namespace NetworKit {
 
+enum RootStrategy {
+    MaxDegree,
+    Random,
+    MinApproxEcc
+};
+
 // See https://github.com/wjakob/pcg32
 struct pcg32 {
     /// Initialize the pseudorandom number generator with the \ref seed() function
@@ -102,6 +108,10 @@ public:
     std::vector<double> getDiagonal() { return diagonal; }
 
     count totalNumberOfUSTs() const { return rootEcc * computeNumberOfUSTs(); }
+    count numberOfUSTs = 0;
+    static constexpr count sweeps = 10;
+
+    RootStrategy rootStrategy = RootStrategy::MinApproxEcc;
 
     const Vector &resultVector() const { return result; }
 
@@ -113,7 +123,6 @@ private:
     // Input parameters
     const Graph &G;
     const double epsilon, delta, tolerance;
-    count numberOfUSTs;
     node root;
     uint32_t rootEcc;
     Vector result;
@@ -201,6 +210,8 @@ private:
         G.parallelForNodes(
             [&](const node u) { diagonal[u] = r[u] - result[root] + 2 * result[u]; });
     }
+
+    node approxMinEccNode();
 
     // Debugging methods
     void checkBFSTree() const;

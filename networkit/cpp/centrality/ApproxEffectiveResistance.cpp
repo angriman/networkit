@@ -53,6 +53,61 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double epsi
     time["Initialization"] = static_cast<double>(timer.elapsedMicroseconds()) / 1e6;
 }
 
+node ApproxEffectiveResistance::approxMinEccNode() {
+    auto &status = statusGlobal[0];
+    std::vector<uint32_t> distance(G.upperNodeIdBound()), eccLowerBound(G.upperNodeIdBound());
+
+    auto maxDegreeNode = [&]() {
+        node maxDegNode = 0;
+        count maxDeg = 0;
+        G.forNodes([&](const node u) {
+            const auto degU = G.degree(u);
+            if (degU > maxDeg) {
+                maxDeg = degU;
+                maxDegNode = u;
+            }
+        });
+        return maxDegNode;
+    };
+
+    auto doBFS = [&](const node source) {
+        std::queue<node> q;
+        q.push(source);
+        status[source] = NodeStatus::VISITED;
+        distance[source] = 0;
+        node farthest = 0;
+
+        do {
+            const auto u = q.front();
+            q.pop();
+            eccLowerBound[u] = std::max(eccLowerBound[u], distance[u]);
+            farthest = u;
+
+            G.forNeighborsOf(u, [&](const node v) {
+                if (status[v] == NodeStatus::NOT_VISITED) {
+                    q.push(v);
+                    status[v] = NodeStatus::VISITED;
+                    distance[v] = distance[u] + 1;
+                }
+            });
+
+        } while (!q.empty());
+
+        std::fill(status.begin(), status.end(), NodeStatus::NOT_VISITED);
+        return farthest;
+    };
+
+    node source = maxDegreeNode();
+
+    for (int i = 0; i < sweeps; ++i) {
+        source = doBFS(source);
+    }
+
+    // Return node with minimum ecc lower bound
+    return static_cast<node>(std::min_element(eccLowerBound.begin(), eccLowerBound.end())
+                             - eccLowerBound.begin());
+}
+
 void ApproxEffectiveResistance::computeNodeSequence() {
     // We use thread 0's vector
     auto &status = statusGlobal[0];
@@ -102,11 +157,23 @@ void ApproxEffectiveResistance::computeNodeSequence() {
     }
 
     // Set the root to the highest degree node within the largest biconnected component
-    root = std::max_element(sequences.begin(), sequences.end(),
-                            [](const std::vector<node> &c1, const std::vector<node> &c2) {
-                                return c1.size() < c2.size();
-                            })
-               ->front();
+    if (rootStrategy == RootStrategy::MaxDegree) {
+        root = std::max_element(sequences.begin(), sequences.end(),
+                                [](const std::vector<node> &c1, const std::vector<node> &c2) {
+                                    return c1.size() < c2.size();
+                                })
+                   ->front();
+       INFO("Using root strategy MaxDegree");
+    } else if (rootStrategy == RootStrategy::Random) {
+        auto &generator = generators.front();
+        do {
+            root = generator.nextUInt(G.upperNodeIdBound());
+        } while (!G.hasNode(root));
+       INFO("Using root strategy random");
+    } else {
+       INFO("Using root strategy MinApxEcc");
+        root = approxMinEccNode();
+    }
 
     biAnchor.resize(bcc_.numberOfComponents(), none);
     biParent.resize(bcc_.numberOfComponents(), none);
@@ -152,6 +219,8 @@ void ApproxEffectiveResistance::computeNodeSequence() {
             }
         });
     } while (!q.empty());
+
+    INFO("Root eccentricity = ", rootEcc);
 
     if (isDebug) {
         G.forNodes([&](const node u) { assert(status[u] == NodeStatus::VISITED); });
