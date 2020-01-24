@@ -5,10 +5,11 @@
  *      Author: Eugenio Angriman <angrimae@hu-berlin.de>
  */
 
+// networkit-format
+
 #include <cmath>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include <networkit/algebraic/CSRMatrix.hpp>
@@ -75,7 +76,7 @@ public:
     node getRoot() const noexcept { return root; }
 
     std::vector<int> getNonNormalizedData() const {
-        std::vector<int> aggregated(G.upperNodeIdBound());
+        std::vector<int> aggregated(G.upperNodeIdBound(), 0);
         G.parallelForNodes([&](const node u) {
             for (const auto &threadScores : approxEffResistanceGlobal) {
                 aggregated[u] += threadScores[u];
@@ -97,27 +98,25 @@ public:
         return result;
     }
 
-    std::unordered_map<std::string, double> profilingResults() const { return time; }
-
     std::vector<double> getDiagonal() { return diagonal; }
-
-    count totalNumberOfUSTs() const { return rootEcc * computeNumberOfUSTs(); }
-
+    count getRootEccentricity() const { return rootEcc; }
     const Vector &resultVector() const { return result; }
+    count computeNumberOfUSTs() const {
+        return rootEcc
+               * static_cast<count>(
+                     std::ceil(std::log(2.0 * static_cast<double>(G.numberOfEdges()) / delta)
+                               / (2.0 * epsilon * epsilon)));
+    }
 
-    // When running on a distributed setup, set this to the number of processors
-    // to adjust the number of samples.
-    count nProcessors = 1;
-
+    count numberOfUSTs = 0;
 private:
     // Input parameters
     const Graph &G;
     const double epsilon, delta, tolerance;
-    count numberOfUSTs;
+    count sampledUSTs = 0;
     node root;
     uint32_t rootEcc;
     Vector result;
-    std::unordered_map<std::string, double> time;
 
     enum class NodeStatus : unsigned char {
         NOT_IN_COMPONENT,
@@ -165,12 +164,6 @@ private:
                                                                            node v) noexcept {
         return u < v ? std::make_pair(std::make_pair(u, v), true)
                      : std::make_pair(std::make_pair(v, u), false);
-    }
-
-    count computeNumberOfUSTs() const {
-        return static_cast<count>(
-            std::ceil(std::log(2.0 * static_cast<double>(G.numberOfEdges()) / delta)
-                      / (2.0 * epsilon * epsilon)));
     }
 
     bool isBFSEdge(node u, node v) const { return bfsParent[u] == v || bfsParent[v] == u; }

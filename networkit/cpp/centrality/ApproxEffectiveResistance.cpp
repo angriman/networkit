@@ -5,10 +5,11 @@
  *      Author: Eugenio Angriman <angrimae@hu-berlin.de>
  */
 
+// networkit-format
+
 #include <omp.h>
 #include <queue>
 
-#include <networkit/auxiliary/Timer.hpp>
 #include <networkit/centrality/ApproxEffectiveResistance.hpp>
 
 static constexpr bool isDebug = false;
@@ -29,8 +30,6 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double epsi
         throw std::runtime_error("Error: the graph should have at leasts two vertices");
     }
 
-    Aux::Timer timer;
-    timer.start();
     const auto n = G.upperNodeIdBound();
     statusGlobal.resize(omp_get_max_threads(), std::vector<NodeStatus>(n, NodeStatus::NOT_VISITED));
     parentGlobal.resize(omp_get_max_threads(), std::vector<node>(n, none));
@@ -48,9 +47,6 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double epsi
 
     computeNodeSequence();
     computeBFSTree();
-
-    timer.stop();
-    time["Initialization"] = static_cast<double>(timer.elapsedMicroseconds()) / 1e6;
 }
 
 void ApproxEffectiveResistance::computeNodeSequence() {
@@ -448,35 +444,20 @@ void ApproxEffectiveResistance::aggregateUST() {
 }
 
 void ApproxEffectiveResistance::run() {
-    std::vector<count> ustSamplingTime(omp_get_max_threads());
-    std::vector<count> ustAggregationTime(omp_get_max_threads());
-    numberOfUSTs = static_cast<count>(std::ceil(rootEcc * computeNumberOfUSTs() / nProcessors));
+//    numberOfUSTs = static_cast<count>(std::ceil(computeNumberOfUSTs() / nProcessors));
 #pragma omp parallel for schedule(dynamic)
     for (omp_index i = 0; i < static_cast<omp_index>(numberOfUSTs); ++i) {
-        Aux::Timer timer;
-        timer.start();
         sampleUST();
-        timer.stop();
-        ustSamplingTime[omp_get_thread_num()] += timer.elapsedNanoseconds();
 
-        timer.start();
         // Update effective resistance values using sampled UST
         aggregateUST();
-        timer.stop();
-        ustAggregationTime[omp_get_thread_num()] += timer.elapsedNanoseconds();
     }
 
-    for (omp_index i = 1; i < omp_get_max_threads(); ++i) {
-        ustSamplingTime[0] += ustSamplingTime[i];
-        ustAggregationTime[0] += ustAggregationTime[i];
-    }
-
-    time["UST sampling"] = static_cast<double>(ustSamplingTime[0]) / 1e9;
-    time["UST aggregation"] = static_cast<double>(ustAggregationTime[0]) / 1e9;
+    sampledUSTs += numberOfUSTs;
 
     hasRun = true;
 
-    computeDiagonal();
+//    computeDiagonal();
 }
 
 /*
