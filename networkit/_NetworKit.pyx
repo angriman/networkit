@@ -11900,7 +11900,7 @@ cdef extern from "<networkit/centrality/ApproxEffectiveResistance.hpp>" namespac
 		Random = 1
 		MinApproxEcc = 2
 
-class _ROotStrategy(object):
+class _RootStrategy(object):
 	maxdegree = MaxDegree
 	random = Random
 	minapproxecc = MinApproxEcc
