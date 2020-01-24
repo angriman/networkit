@@ -127,6 +127,7 @@ private:
     uint32_t rootEcc;
     Vector result;
     std::unordered_map<std::string, double> time;
+    bool didInit = false;
 
     enum class NodeStatus : unsigned char {
         NOT_IN_COMPONENT,
@@ -192,6 +193,7 @@ private:
     void sampleUST();
     void dfsUST();
     void aggregateUST();
+    void init();
 
     void solveSingleSystem() {
         ConjugateGradient<CSRMatrix, IdentityPreconditioner> cg(tolerance);

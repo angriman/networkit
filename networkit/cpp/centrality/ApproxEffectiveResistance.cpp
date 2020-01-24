@@ -46,11 +46,14 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double epsi
     bfsParent.resize(n, none);
     diagonal.resize(n);
 
-    computeNodeSequence();
-    computeBFSTree();
-
     timer.stop();
     time["Initialization"] = static_cast<double>(timer.elapsedMicroseconds()) / 1e6;
+}
+
+void ApproxEffectiveResistance::init() {
+    computeNodeSequence();
+    computeBFSTree();
+    didInit = true;
 }
 
 node ApproxEffectiveResistance::approxMinEccNode() {
@@ -517,6 +520,8 @@ void ApproxEffectiveResistance::aggregateUST() {
 }
 
 void ApproxEffectiveResistance::run() {
+    if (!didInit)
+        init();
     std::vector<count> ustSamplingTime(omp_get_max_threads());
     std::vector<count> ustAggregationTime(omp_get_max_threads());
     numberOfUSTs = static_cast<count>(std::ceil(rootEcc * computeNumberOfUSTs() / nProcessors));
