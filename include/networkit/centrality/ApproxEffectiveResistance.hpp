@@ -25,11 +25,7 @@
 
 namespace NetworKit {
 
-enum RootStrategy {
-    MaxDegree,
-    Random,
-    MinApproxEcc
-};
+enum RootStrategy { MaxDegree, Random, MinApproxEcc };
 
 // See https://github.com/wjakob/pcg32
 struct pcg32 {
@@ -130,6 +126,8 @@ public:
         cg.solve(rhs, result);
     }
 
+    void init();
+
 private:
     // Input parameters
     const Graph &G;
@@ -198,7 +196,6 @@ private:
     void sampleUST();
     void dfsUST();
     void aggregateUST();
-    void init();
 
     void computeDiagonal() {
         solveSingleSystem();
