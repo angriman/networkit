@@ -30,6 +30,8 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double epsi
         throw std::runtime_error("Error: the graph should have at leasts two vertices");
     }
 
+    INFO("This is the distributed version");
+
     const auto n = G.upperNodeIdBound();
     statusGlobal.resize(omp_get_max_threads(), std::vector<NodeStatus>(n, NodeStatus::NOT_VISITED));
     parentGlobal.resize(omp_get_max_threads(), std::vector<node>(n, none));
@@ -44,21 +46,19 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double epsi
 
     bfsParent.resize(n, none);
     diagonal.resize(n);
-
-    computeNodeSequence();
-    computeBFSTree();
 }
 
 void ApproxEffectiveResistance::init() {
+    INFO("Doing init");
     computeNodeSequence();
     computeBFSTree();
     didInit = true;
 }
 
-
 node ApproxEffectiveResistance::approxMinEccNode() {
     auto &status = statusGlobal[0];
-    std::vector<uint32_t> distance(G.upperNodeIdBound()), eccLowerBound(G.upperNodeIdBound());
+    std::vector<uint32_t> distance(G.upperNodeIdBound());
+    std::vector<uint32_t> eccLowerBound(G.upperNodeIdBound());
 
     auto maxDegreeNode = [&]() {
         node maxDegNode = 0;
@@ -224,6 +224,8 @@ void ApproxEffectiveResistance::computeNodeSequence() {
     } while (!q.empty());
 
     INFO("Root eccentricity = ", rootEcc);
+    INFO("Root = ", root);
+    assert(G.hasNode(root));
 
     if (isDebug) {
         G.forNodes([&](const node u) { assert(status[u] == NodeStatus::VISITED); });

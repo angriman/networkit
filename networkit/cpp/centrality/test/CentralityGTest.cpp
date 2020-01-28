@@ -72,7 +72,8 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
         return G;
     };
 
-    auto G = KONECTGraphReader().read("/home/angriman/graphs/livemocha");
+    INFO("Reading graph");
+    auto G = KONECTGraphReader().read("/home/angriman/graphs/flixster");
     if (G.isDirected())
         G = GraphTools::toUndirected(G);
     if (G.isWeighted())
@@ -85,12 +86,13 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
     if (cc.numberOfComponents() > 1)
         throw std::runtime_error("Error: too many components");
 
+    INFO("Done");
     static constexpr double eps = 0.15;
     static constexpr double tol = 1e-9;
 
     // Run approximation
     ApproxEffectiveResistance apx(G, eps);
-    apx.rootStrategy = RootStrategy::MaxDegree;
+    apx.rootStrategy = RootStrategy::MinApproxEcc;
     apx.run();
     return;
     const auto root = apx.getRoot();
