@@ -123,7 +123,8 @@ public:
         rhs[root] = 1.0;
         G.parallelForNodes(
             [&](const node u) { rhs[u] -= 1.0 / static_cast<double>(G.numberOfNodes()); });
-        cg.solve(rhs, result);
+        auto status = cg.solve(rhs, result);
+        INFO("#of iterations = ", status.numIters);
     }
 
     void init();
