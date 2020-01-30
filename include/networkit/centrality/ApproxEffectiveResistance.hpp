@@ -115,7 +115,7 @@ public:
 
     RootStrategy rootStrategy = RootStrategy::MinApproxEcc;
 
-    void solveSingleSystem() {
+    count solveSingleSystem() {
         ConjugateGradient<CSRMatrix, IdentityPreconditioner> cg(tolerance);
         const auto matrix = CSRMatrix::laplacianMatrix(G);
         cg.setup(matrix);
@@ -124,7 +124,7 @@ public:
         G.parallelForNodes(
             [&](const node u) { rhs[u] -= 1.0 / static_cast<double>(G.numberOfNodes()); });
         auto status = cg.solve(rhs, result);
-        INFO("#of iterations = ", status.numIters);
+        return status.numIters;
     }
 
     void init();
