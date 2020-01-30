@@ -22,6 +22,28 @@ namespace NetworKit {
 
 class ConjugateGradientGTest : public testing::Test {};
 
+TEST_F(ConjugateGradientGTest, testRun) {
+    METISGraphReader reader;
+    omp_set_num_threads(1);
+    const auto G = ConnectedComponents::extractLargestConnectedComponent(
+        reader.read("input/astro-ph.graph"), true);
+    const auto n = G.numberOfNodes();
+    Vector rhs(n, 0), resultCG(n);
+    node u = G.randomNode();
+    node v = G.randomNode();
+    while (v == u)
+        v = G.randomNode();
+
+    rhs[u] = 1;
+    rhs[v] = -1;
+    const auto L = CSRMatrix::laplacianMatrix(G);
+    static constexpr double tol = 1e-6;
+
+    ConjugateGradient<CSRMatrix, IdentityPreconditioner> cg(tol);
+    cg.setupConnected(L);
+    cg.solve(rhs, resultCG);
+}
+
 TEST_F(ConjugateGradientGTest, testSmallGraph) {
     METISGraphReader reader;
     const auto G = ConnectedComponents::extractLargestConnectedComponent(
