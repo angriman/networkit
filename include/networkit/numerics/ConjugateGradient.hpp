@@ -79,12 +79,11 @@ SolverStatus ConjugateGradient<Matrix, Preconditioner>::solve(const Vector &rhs,
     // Main loop. See:
     // http://en.wikipedia.org/wiki/Conjugate_gradient_method#The_resulting_algorithm
     Vector residual_dir(result.getDimension(), 0); // = rhs - matrix*result;
-    // TODO exchange rowIdx <-> i
 #pragma omp parallel for
     for (omp_index rowIdx = 0; rowIdx < static_cast<omp_index>(matrix.numberOfRows()); ++rowIdx) {
-        for (index i = matrix.rowIdxAt(rowIdx); i < matrix.rowIdxAt(rowIdx + 1); ++i) {
-            residual_dir[rowIdx] += matrix.nonZerosAt(i) * result[matrix.columnIdxAt(i)];
-        }
+        matrix.forNonZeroElementsInRow(rowIdx, [&](const index colIdx, const double elem) {
+            residual_dir[rowIdx] += elem * result[colIdx];
+        });
         residual_dir[rowIdx] = -residual_dir[rowIdx] + rhs[rowIdx];
     }
 
