@@ -6,6 +6,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <random>
+#include <string>
 
 #include <networkit/algebraic/Vector.hpp>
 #include <networkit/io/METISGraphReader.hpp>
@@ -39,7 +41,7 @@ TEST_F(LAMGGTest, testSmallGraphs) {
     MultiLevelSetup<CSRMatrix> setup(gaussSmoother);
     Aux::Timer timer;
     for (index i = 0; i < GRAPH_INSTANCES.size(); ++i) {
-        string graph = GRAPH_INSTANCES[i];
+        std::string graph = GRAPH_INSTANCES[i];
         Graph G = reader.read(graph);
         ConnectedComponents con(G);
         con.run();
@@ -101,8 +103,8 @@ Vector LAMGGTest::randVector(count dimension, double lower, double upper) const 
 
 
 Vector LAMGGTest::randZeroSum(const Graph& G, size_t seed) const {
-    mt19937 rand(seed);
-    auto rand_value = uniform_real_distribution<double>(-1.0, 1.0);
+    std::mt19937 rand(seed);
+    auto rand_value = std::uniform_real_distribution<double>(-1.0, 1.0);
     ConnectedComponents con(G);
     count n = G.numberOfNodes();
     con.run();
