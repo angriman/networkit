@@ -25,19 +25,22 @@ class ConjugateGradientGTest : public testing::Test {};
 TEST_F(ConjugateGradientGTest, testSmallGraph) {
     METISGraphReader reader;
     const auto G = ConnectedComponents::extractLargestConnectedComponent(
-        reader.read("input/power.graph"), true);
+        reader.read("input/celegans_metabolic.graph"), true);
     const auto n = G.numberOfNodes();
-    Vector rhs(n), resultLamg(n), resultCG(n);
-    for (index i = 0; i < n; ++i) {
-        rhs[i] = 2.0 * Aux::Random::probability() - 1.0;
-        rhs[i] *= rhs[i];
-    }
+    Vector rhs(n, 0), resultLamg(n), resultCG(n);
+    node u = G.randomNode();
+    node v = G.randomNode();
+    while (v == u)
+        v = G.randomNode();
 
+    rhs[u] = 1;
+    rhs[v] = -1;
     const auto L = CSRMatrix::laplacianMatrix(G);
-    static constexpr double tol = 1e-9;
+    static constexpr double tol = 1e-6;
     Lamg<CSRMatrix> solver(tol);
     solver.setupConnected(L);
     solver.solve(rhs, resultLamg);
+    INFO("LAMG SOLVED");
 
     ConjugateGradient<CSRMatrix, IdentityPreconditioner> cg(tol);
     cg.setupConnected(L);

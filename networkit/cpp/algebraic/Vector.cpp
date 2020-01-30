@@ -61,7 +61,8 @@ bool Vector::operator!=(const Vector &other) const {
 double Vector::innerProduct(const Vector &v1, const Vector &v2) {
     assert(v1.getDimension() == v2.getDimension());
     double scalar = 0.0;
-    for (index i = 0; i < v1.getDimension(); ++i) {
+#pragma omp parallel for reduction(+ : scalar)
+    for (omp_index i = 0; i < static_cast<omp_index>(v1.getDimension()); ++i) {
         scalar += v1[i] * v2[i];
     }
 

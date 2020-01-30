@@ -202,6 +202,21 @@ public:
      */
     double operator()(const index i, const index j) const;
 
+    index rowIdxAt(index i) const {
+        assert(i < rowIdx.size());
+        return rowIdx[i];
+    }
+
+    index columnIdxAt(index i) const {
+        assert(i < columnIdx.size());
+        return columnIdx[i];
+    }
+
+    double nonZerosAt(index i) const {
+        assert(i < nonZeros.size());
+        return nonZeros[i];
+    }
+
     /**
      * Set the matrix at position (@a i, @a j) to @a value.
      * @note This operation can be linear in the number of non-zeros due to vector element movements
