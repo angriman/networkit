@@ -523,7 +523,7 @@ void ApproxEffectiveResistance::aggregateUST() {
 void ApproxEffectiveResistance::run() {
     if (!didInit)
         init();
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(guided)
     for (omp_index i = 0; i < static_cast<omp_index>(numberOfUSTs); ++i) {
         sampleUST();
 
