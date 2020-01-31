@@ -14,8 +14,10 @@
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/components/ConnectedComponents.hpp>
 #include <networkit/io/METISGraphReader.hpp>
+#include <networkit/io/NetworkitBinaryReader.hpp>
 #include <networkit/numerics/ConjugateGradient.hpp>
 #include <networkit/numerics/LAMG/Lamg.hpp>
+#include <networkit/graph/GraphTools.hpp>
 #include <networkit/numerics/Preconditioner/IdentityPreconditioner.hpp>
 
 namespace NetworKit {
@@ -23,10 +25,16 @@ namespace NetworKit {
 class ConjugateGradientGTest : public testing::Test {};
 
 TEST_F(ConjugateGradientGTest, testRun) {
-    METISGraphReader reader;
-    omp_set_num_threads(1);
-    const auto G = ConnectedComponents::extractLargestConnectedComponent(
-        reader.read("input/astro-ph.graph"), true);
+    Aux::Timer timer;
+    timer.start();
+    auto G = NetworkitBinaryReader().read("/home/angriman/graphs/hyves.nkb");
+    G = ConnectedComponents::extractLargestConnectedComponent(G, true);
+    G = GraphTools::getCompactedGraph(G, GraphTools::getContinuousNodeIds(G));
+    G = GraphTools::toUndirected(G);
+    G = GraphTools::toUnweighted(G);
+    G.removeSelfLoops();
+    G.removeMultiEdges();
+
     const auto n = G.numberOfNodes();
     Vector rhs(n, 0), resultCG(n);
     node u = G.randomNode();
@@ -41,7 +49,13 @@ TEST_F(ConjugateGradientGTest, testRun) {
 
     ConjugateGradient<CSRMatrix, IdentityPreconditioner> cg(tol);
     cg.setupConnected(L);
-    cg.solve(rhs, resultCG);
+    timer.stop();
+    INFO("Time spent not to solve: ", timer.elapsedMilliseconds(), " ms");
+    timer.start();
+    auto status = cg.solve(rhs, resultCG);
+    timer.stop();
+    INFO("Time spent solve: ", timer.elapsedMilliseconds(), " ms");
+    INFO("Number of iterations: ", status.numIters);
 }
 
 TEST_F(ConjugateGradientGTest, testSmallGraph) {

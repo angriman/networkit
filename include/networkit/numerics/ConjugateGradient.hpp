@@ -107,7 +107,7 @@ SolverStatus ConjugateGradient<Matrix, Preconditioner>::solve(const Vector &rhs,
 
         // Computing denominator of \alpha_k (i.e., p_k^T A p_k)
         double denominator = 0;
-#pragma omp parallel for reduction(+ : denominator)
+#pragma omp parallel for reduction(+ : denominator) schedule(guided)
         for (omp_index row = 0; row < static_cast<omp_index>(n); ++row) {
             // Multiply A(row:) with conjugate_dir (i.e, get the resulting vector of A * p_k)
             double vecEntry = 0;
