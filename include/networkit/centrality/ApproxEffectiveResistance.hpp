@@ -24,11 +24,7 @@
 
 namespace NetworKit {
 
-enum RootStrategy {
-    MaxDegree,
-    Random,
-    MinApproxEcc
-};
+enum RootStrategy { MaxDegree, Random, MinApproxEcc };
 
 // See https://github.com/wjakob/pcg32
 struct pcg32 {
@@ -105,7 +101,10 @@ public:
 
     std::unordered_map<std::string, double> profilingResults() const { return time; }
 
-    std::vector<double> getDiagonal() { return diagonal; }
+    std::vector<double> getDiagonal() {
+        computeDiagonal();
+        return diagonal;
+    }
 
     count totalNumberOfUSTs() const { return rootEcc * computeNumberOfUSTs(); }
     count numberOfUSTs = 0;

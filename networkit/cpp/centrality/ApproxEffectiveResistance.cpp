@@ -525,7 +525,7 @@ void ApproxEffectiveResistance::run() {
     std::vector<count> ustSamplingTime(omp_get_max_threads());
     std::vector<count> ustAggregationTime(omp_get_max_threads());
     numberOfUSTs = static_cast<count>(std::ceil(rootEcc * computeNumberOfUSTs() / nProcessors));
-#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(guided)
     for (omp_index i = 0; i < static_cast<omp_index>(numberOfUSTs); ++i) {
         Aux::Timer timer;
         timer.start();
@@ -549,8 +549,6 @@ void ApproxEffectiveResistance::run() {
     time["UST aggregation"] = static_cast<double>(ustAggregationTime[0]) / 1e9;
 
     hasRun = true;
-
-    computeDiagonal();
 }
 
 /*
