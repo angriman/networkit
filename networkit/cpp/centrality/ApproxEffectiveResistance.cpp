@@ -18,7 +18,8 @@ namespace NetworKit {
 ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double epsilon,
                                                      double tolerance)
     : G(G), epsilon(epsilon), delta(1.0 / static_cast<double>(G.numberOfNodes())),
-      tolerance(tolerance), bcc(new BiconnectedComponents(G)), result(G.upperNodeIdBound()) {
+      tolerance(tolerance), bcc(new BiconnectedComponents(G)), result(G.upperNodeIdBound()),
+      x(G.numberOfNodes()), b(G.numberOfNodes()), L(G.numberOfNodes(), G.numberOfNodes()) {
     if (G.isDirected()) {
         throw std::runtime_error("Error: the input graph must be undirected.");
     }
@@ -45,6 +46,17 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double epsi
 
     bfsParent.resize(n, none);
     diagonal.resize(n);
+
+    G.forNodes([&](const int u) { b[u] = -1.0 / static_cast<double>(n); });
+    std::vector<Eigen::Triplet<double>> triplets;
+    triplets.reserve(n + 2 * G.numberOfEdges());
+    G.forNodes([&](const int u) {
+        triplets.push_back({u, u, (double)G.degree(u)});
+        G.forNeighborsOf(u, [&](const int v) { triplets.push_back({u, v, -1.0}); });
+    });
+    L.setFromTriplets(triplets.begin(), triplets.end());
+    cg.setTolerance(tolerance);
+    cg.compute(L);
 
     timer.stop();
     time["Initialization"] = static_cast<double>(timer.elapsedMicroseconds()) / 1e6;
@@ -166,17 +178,19 @@ void ApproxEffectiveResistance::computeNodeSequence() {
                                     return c1.size() < c2.size();
                                 })
                    ->front();
-       INFO("Using root strategy MaxDegree");
+        INFO("Using root strategy MaxDegree");
     } else if (rootStrategy == RootStrategy::Random) {
         auto &generator = generators.front();
         do {
             root = generator.nextUInt(G.upperNodeIdBound());
         } while (!G.hasNode(root));
-       INFO("Using root strategy random");
+        INFO("Using root strategy random");
     } else {
-       INFO("Using root strategy MinApxEcc");
+        INFO("Using root strategy MinApxEcc");
         root = approxMinEccNode();
     }
+
+    b[root] += 1.0;
 
     biAnchor.resize(bcc_.numberOfComponents(), none);
     biParent.resize(bcc_.numberOfComponents(), none);

@@ -72,7 +72,7 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
         return G;
     };
 
-    auto G = KONECTGraphReader().read("/home/angriman/graphs/livemocha");
+    auto G = KONECTGraphReader().read("/home/angriman/graphs/advogato");
     if (G.isDirected())
         G = GraphTools::toUndirected(G);
     if (G.isWeighted())

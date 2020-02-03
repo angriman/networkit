@@ -10,6 +10,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <Eigen/Sparse>
 
 #include <networkit/algebraic/CSRMatrix.hpp>
 #include <networkit/algebraic/Vector.hpp>
@@ -17,8 +18,6 @@
 #include <networkit/base/Algorithm.hpp>
 #include <networkit/components/BiconnectedComponents.hpp>
 #include <networkit/graph/Graph.hpp>
-#include <networkit/numerics/ConjugateGradient.hpp>
-#include <networkit/numerics/Preconditioner/IdentityPreconditioner.hpp>
 
 #define PCG32_MULT 0x5851f42d4c957f2dULL
 
@@ -112,18 +111,9 @@ public:
 
     RootStrategy rootStrategy = RootStrategy::MinApproxEcc;
 
-    const Vector &resultVector() const { return result; }
-
     count solveSingleSystem() {
-        ConjugateGradient<CSRMatrix, IdentityPreconditioner> cg(tolerance);
-        const auto matrix = CSRMatrix::laplacianMatrix(G);
-        cg.setup(matrix);
-        Vector rhs(G.upperNodeIdBound());
-        rhs[root] = 1.0;
-        G.parallelForNodes(
-            [&](const node u) { rhs[u] -= 1.0 / static_cast<double>(G.numberOfNodes()); });
-        auto status = cg.solve(rhs, result);
-        return status.numIters;
+        x = cg.solve(b);
+        return cg.iterations();
     }
 
     // When running on a distributed setup, set this to the number of processors
@@ -136,9 +126,12 @@ private:
     const double epsilon, delta, tolerance;
     node root;
     uint32_t rootEcc;
-    Vector result;
+    Eigen::VectorXd result;
     std::unordered_map<std::string, double> time;
     bool didInit = false;
+    Eigen::VectorXd x, b;
+    Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower | Eigen::Upper> cg;
+    Eigen::SparseMatrix<double> L;
 
     enum class NodeStatus : unsigned char {
         NOT_IN_COMPONENT,
@@ -209,8 +202,10 @@ private:
     void computeDiagonal() {
         solveSingleSystem();
         const auto r = getApproxEffectiveResistances();
-        G.parallelForNodes(
-            [&](const node u) { diagonal[u] = r[u] - result[root] + 2 * result[u]; });
+        G.parallelForNodes([&](const node u) {
+            diagonal[u] =
+                r[u] - static_cast<double>(result[root]) + 2 * static_cast<double>(result[u]);
+        });
     }
 
     node approxMinEccNode();
