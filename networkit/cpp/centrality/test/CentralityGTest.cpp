@@ -103,7 +103,6 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
     G.forNodes([&](const node u) { EXPECT_NEAR(exactDiag[u], apxDiag[u], eps); });
 }
 
-
 TEST_F(CentralityGTest, testBetweennessCentrality) {
     /* Graph:
      0    3
@@ -1964,7 +1963,7 @@ TEST_F(CentralityGTest, testSpielman) {
     auto G = reader.read("input/wiki-Vote.txt");
     G = ConnectedComponents::extractLargestConnectedComponent(G, true);
     SpanningEdgeCentrality sp(G);
-    const auto diag = sp.computeDiagonal(0, 0.1, 1e-6);
+    const auto diag = sp.computeDiagonal(0.5, 1e-6);
     for (int i = 0; i < 10; ++i) {
         INFO(diag[i]);
     }

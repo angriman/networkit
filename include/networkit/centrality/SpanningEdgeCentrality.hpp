@@ -54,7 +54,7 @@ public:
      */
     void runApproximation();
 
-    std::vector<double> computeDiagonal(node root, double epsilon, double tol);
+    std::vector<double> computeDiagonal(double epsilon, double tol);
 
     /**
      * Compute approximation by JL projection in parallel. This solves k linear systems in parallel, where k is log(n)/(tol^2).

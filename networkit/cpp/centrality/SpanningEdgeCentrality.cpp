@@ -5,22 +5,21 @@
  *      Author: henningm
  */
 
-
-#include <networkit/centrality/SpanningEdgeCentrality.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Timer.hpp>
-#include <networkit/numerics/ConjugateGradient.hpp>
-#include <networkit/numerics/Preconditioner/IdentityPreconditioner.hpp>
+#include <networkit/centrality/SpanningEdgeCentrality.hpp>
+#include <networkit/numerics/LAMG/Lamg.hpp>
 
 #include <fstream>
-#include <sstream>
 #include <random>
+#include <sstream>
 
 #include <omp.h>
 
 namespace NetworKit {
 
-SpanningEdgeCentrality::SpanningEdgeCentrality(const Graph& G, double tol): Centrality(G), tol(tol), lamg(1e-5) {
+SpanningEdgeCentrality::SpanningEdgeCentrality(const Graph &G, double tol)
+    : Centrality(G), tol(tol), lamg(1e-5) {
     // prepare LAMG
     CSRMatrix matrix = CSRMatrix::laplacianMatrix(G);
     Aux::Timer t;
@@ -72,7 +71,7 @@ void SpanningEdgeCentrality::runApproximation() {
     const count m = G.numberOfEdges();
     double epsilon2 = tol * tol;
     const count k = ceil(log2(n)) / epsilon2;
-    double randTab[3] = {1/sqrt(k), -1/sqrt(k)};
+    double randTab[3] = {1 / sqrt(k), -1 / sqrt(k)};
     Vector solution(n);
     scoreData.clear();
     scoreData.resize(m, 0.0);
@@ -88,8 +87,7 @@ void SpanningEdgeCentrality::runApproximation() {
             if (u < v) {
                 rhs[u] += r;
                 rhs[v] -= r;
-            }
-            else {
+            } else {
                 rhs[u] -= r;
                 rhs[v] += r;
             }
@@ -106,65 +104,58 @@ void SpanningEdgeCentrality::runApproximation() {
     hasRun = true;
 }
 
-std::vector<double> SpanningEdgeCentrality::computeDiagonal(node root, double epsilon, double tol) {
+std::vector<double> SpanningEdgeCentrality::computeDiagonal(double epsilon, double tol) {
     const auto n = G.numberOfNodes();
     const count k = std::ceil(log2(n)) / (epsilon * epsilon);
-    constexpr double p = 0.5;
-    const double proj = 1./std::sqrt(static_cast<double>(k));
+    static constexpr double p = 0.5;
+    const double proj = 1. / std::sqrt(static_cast<double>(k));
+    const omp_index n_threads = omp_get_max_threads();
 
-    std::vector<std::mt19937_64> generators(omp_get_max_threads(), Aux::Random::getURNG());
-    std::vector<std::uniform_real_distribution<double>> distributions(omp_get_max_threads(), std::uniform_real_distribution<double>(0, 1));
-    std::vector<Vector> rhss(omp_get_max_threads(), Vector(G.upperNodeIdBound()));
-    std::vector<Vector> solutions(omp_get_max_threads(), Vector(G.upperNodeIdBound()));
-    ConjugateGradient<CSRMatrix, IdentityPreconditioner> solver(tol);
-    solver.setup(CSRMatrix::laplacianMatrix(G));
-//    std::vector<ConjugateGradient<CSRMatrix, IdentityPreconditioner>> solvers(omp_get_max_threads(), tol);
-//#pragma omp parallel
-//    {
-//        solvers[omp_get_thread_num()].setup(CSRMatrix::laplacianMatrix(G));
-//    }
+    std::vector<std::mt19937_64> generators(n_threads, Aux::Random::getURNG());
+    std::vector<std::uniform_real_distribution<double>> distributions(
+        n_threads, std::uniform_real_distribution<double>(0, 1));
+    std::vector<Vector> rhss(n_threads, Vector(G.upperNodeIdBound()));
+    std::vector<Vector> solutions(n_threads, Vector(G.upperNodeIdBound()));
+    Lamg<CSRMatrix> solver(tol);
+    solver.setupConnected(CSRMatrix::laplacianMatrix(G));
 
-    std::vector<std::vector<double>> diags(omp_get_max_threads(), std::vector<double>(G.upperNodeIdBound(), 0));
+    std::vector<std::vector<double>> diags(n_threads, std::vector<double>(G.upperNodeIdBound(), 0));
 
-//#pragma omp parallel for
-    for (omp_index i = 0; i < static_cast<omp_index>(k); i+= k) {
+    for (omp_index i = 0; i < static_cast<omp_index>(k); i += n_threads) {
 #pragma omp parallel
         {
-        auto &gen = generators[omp_get_thread_num()];
-        auto &distr = distributions[omp_get_thread_num()];
-        auto &rhs = rhss[omp_get_thread_num()];
+            auto &gen = generators[omp_get_thread_num()];
+            auto &distr = distributions[omp_get_thread_num()];
+            auto &rhs = rhss[omp_get_thread_num()];
 
-        rhs.forElements([](double &elem) { elem = 0; });
-        G.forEdges([&](const node u, const node v) {
-            const auto r = distr(gen) >= p ? proj : -proj;
-            if (u < v) {
-                rhs[u] += r;
-                rhs[v] -= r;
-            } else {
-                rhs[u] -= r;
-                rhs[v] += r;
-            }
-        });
-
+            rhs.forElements([](double &elem) { elem = 0; });
+            G.forEdges([&](const node u, const node v) {
+                const auto r = distr(gen) >= p ? proj : -proj;
+                if (u < v) {
+                    rhs[u] += r;
+                    rhs[v] -= r;
+                } else {
+                    rhs[u] -= r;
+                    rhs[v] += r;
+                }
+            });
         }
         solver.parallelSolve(rhss, solutions);
 
 #pragma omp parallel
         {
-        auto &diag = diags[omp_get_thread_num()];
-        auto &solution = solutions[omp_get_thread_num()];
-        G.forNodes([&](const node u) {
-            const auto diff = solution[root] - solution[u];
-            diag[u] += diff * diff;
-        });
+            auto &diag = diags[omp_get_thread_num()];
+            auto &solution = solutions[omp_get_thread_num()];
+            G.forNodes([&](const node u) { diag[u] += solution[u] * solution[u]; });
         }
     }
 
-    for (size_t i = 1; i < diags.size(); ++i) {
-        G.parallelForNodes([&diags, i](const node u) {
+    G.parallelForNodes([&diags, k](const node u) {
+        for (size_t i = 1; i < diags.size(); ++i) {
             diags[0][u] += diags[i][u];
-        });
-    }
+        }
+        diags[0][u] /= static_cast<double>(k);
+    });
 
     return diags[0];
 }
@@ -174,7 +165,7 @@ void SpanningEdgeCentrality::runParallelApproximation() {
     const count m = G.numberOfEdges();
     double epsilon2 = tol * tol;
     const count k = ceil(log2(n)) / epsilon2;
-    double randTab[3] = {1/sqrt(k), -1/sqrt(k)};
+    double randTab[3] = {1 / sqrt(k), -1 / sqrt(k)};
     std::vector<Vector> solutions(k, Vector(n));
     std::vector<Vector> rhs(k, Vector(n));
     scoreData.clear();
@@ -190,8 +181,7 @@ void SpanningEdgeCentrality::runParallelApproximation() {
             if (u < v) {
                 rhs[i][u] += r;
                 rhs[i][v] -= r;
-            }
-            else {
+            } else {
                 rhs[i][u] -= r;
                 rhs[i][v] += r;
             }
@@ -216,7 +206,7 @@ uint64_t SpanningEdgeCentrality::runApproximationAndWriteVectors(const std::stri
     const count m = G.numberOfEdges();
     const double epsilon2 = tol * tol;
     const count k = ceil(log(n)) / epsilon2;
-    double randTab[3] = {1/sqrt(k), -1/sqrt(k)};
+    double randTab[3] = {1 / sqrt(k), -1 / sqrt(k)};
     Vector solution(n);
     scoreData.clear();
     scoreData.resize(m, 0.0);
@@ -232,8 +222,7 @@ uint64_t SpanningEdgeCentrality::runApproximationAndWriteVectors(const std::stri
             if (u < v) {
                 rhs[u] += r;
                 rhs[v] -= r;
-            }
-            else {
+            } else {
                 rhs[u] -= r;
                 rhs[v] += r;
             }
@@ -252,7 +241,6 @@ uint64_t SpanningEdgeCentrality::runApproximationAndWriteVectors(const std::stri
     return t.elapsedMilliseconds();
 }
 
-
 double SpanningEdgeCentrality::runForEdge(node u, node v) {
     count n = G.numberOfNodes();
 
@@ -269,5 +257,4 @@ double SpanningEdgeCentrality::runForEdge(node u, node v) {
     return fabs(solution[u] - solution[v]); // TODO: fix weighted case, fix edge IDs!
 }
 
-
-}
+} // namespace NetworKit

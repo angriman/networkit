@@ -12076,7 +12076,7 @@ cdef extern from "<networkit/centrality/SpanningEdgeCentrality.hpp>":
 		void runApproximation() except +
 		void runParallelApproximation() except +
 		vector[double] scores() except +
-		vector[double] computeDiagonal(node root, double epsilon, double tol) except +
+		vector[double] computeDiagonal(double epsilon, double tol) except +
 
 cdef class SpanningEdgeCentrality(Algorithm):
 	""" Computes the Spanning Edge centrality for the edges of the graph.
@@ -12096,8 +12096,8 @@ cdef class SpanningEdgeCentrality(Algorithm):
 		self._G = G
 		self._this = new _SpanningEdgeCentrality(G._this, tol)
 
-	def computeDiagonal(self, root, epsilon, tol):
-		return (<_SpanningEdgeCentrality*>(self._this)).computeDiagonal(root, epsilon, tol)
+	def computeDiagonal(self, epsilon, tol):
+		return (<_SpanningEdgeCentrality*>(self._this)).computeDiagonal(epsilon, tol)
 
 	def runApproximation(self):
 		""" Computes approximation of the Spanning Edge Centrality. This solves k linear systems, where k is log(n)/(tol^2). The empirical running time is O(km), where n is the number of nodes
