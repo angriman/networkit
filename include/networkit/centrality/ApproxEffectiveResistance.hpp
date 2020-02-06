@@ -104,7 +104,7 @@ public:
     count getRootEccentricity() const { return rootEcc; }
     const Vector &resultVector() const { return result; }
     count computeNumberOfUSTs() const {
-        return rootEcc
+        return rootEcc * rootEcc
                * static_cast<count>(
                      std::ceil(std::log(2.0 * static_cast<double>(G.numberOfEdges()) / delta)
                                / (2.0 * epsilon * epsilon)));
