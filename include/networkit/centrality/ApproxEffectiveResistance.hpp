@@ -105,7 +105,7 @@ public:
         return diagonal;
     }
 
-    count totalNumberOfUSTs() const { return rootEcc * computeNumberOfUSTs(); }
+    count totalNumberOfUSTs() const { return rootEcc * rootEcc * computeNumberOfUSTs(); }
     count numberOfUSTs = 0;
     static constexpr count sweeps = 10;
 
@@ -115,10 +115,6 @@ public:
         x = cg.solve(b);
         return cg.iterations();
     }
-
-    // When running on a distributed setup, set this to the number of processors
-    // to adjust the number of samples.
-    count nProcessors = 1;
 
 private:
     // Input parameters
