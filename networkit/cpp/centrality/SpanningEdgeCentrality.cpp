@@ -104,6 +104,136 @@ void SpanningEdgeCentrality::runApproximation() {
     hasRun = true;
 }
 
+  
+  
+// Approximation algo to compute diagonal of pseudoinverse explicitly.
+// Based on random vectors ( Hutchinson estimator ).
+// Input: # of samples, tolerance.
+  std::vector<double> SpanningEdgeCentrality::computeDiagonalHadaEst(int k, double tol) {
+    if ((k % 4)!= 0)
+      throw std::runtime_error("Error. \n Number of samples must be a multiple of 4.");
+    
+    const auto n = G.numberOfNodes();
+    int numbits = ceil(log(n)/log(2));
+    const int next_pow = pow(2, numbits);
+    numbits++;
+    // create the hadamard binary representation
+    std::vector<std::vector<double>> Hadabin(next_pow, std::vector<double>(numbits));
+    for (int l = 0; l < next_pow; l++) {
+      int i = 0;
+      int n = l;
+      while (n > 0) { 
+	Hadabin[l][i] = n % 2;
+	n = n / 2;
+	i++;
+      }
+    }
+        
+    const omp_index n_threads = omp_get_max_threads();
+    std::vector<Vector> rhss(n_threads, Vector(G.upperNodeIdBound()));
+    std::vector<Vector> solutions(n_threads, Vector(G.upperNodeIdBound()));
+    Lamg<CSRMatrix> solver(tol);
+    solver.setupConnected(CSRMatrix::laplacianMatrix(G));
+
+    std::vector<std::vector<double>> diags(n_threads, std::vector<double>(G.upperNodeIdBound(), 0));
+
+    for (omp_index i = 0; i < static_cast<omp_index>(k); i += n_threads) {
+#pragma omp parallel
+      {
+	// create Hadamard vectors from formula: H(k,j) = (-1)^( dot(Hadabin(j,:), Hadabin(k,:)));
+	auto &rhs = rhss[omp_get_thread_num()];
+	Vector t  = Vector(Hadabin[omp_get_thread_num()]);
+	for (uint64_t i = 0; i < G.upperNodeIdBound(); i++) {
+	  rhs[i] = pow(-1, Vector::innerProduct(t,Vector(Hadabin[i]))); 
+	}       
+      }
+      solver.parallelSolve(rhss, solutions);
+      
+#pragma omp parallel
+      {
+	auto &diag = diags[omp_get_thread_num()];
+	auto &solution = solutions[omp_get_thread_num()];
+	G.forNodes([&](const node u) { diag[u] += solution[u] * solution[u]; });
+      }
+    }
+    
+    G.parallelForNodes([&diags, k](const node u) {
+        for (size_t i = 1; i < diags.size(); ++i) {
+	  diags[0][u] += diags[i][u];
+        }
+        diags[0][u] /= static_cast<double>(k);
+      });
+    
+    return diags[0];
+}
+
+
+
+  
+
+
+  
+  
+// Approximation algo to compute diagonal of pseudoinverse explicitly.
+// Based on random vectors ( Hutchinson estimator ).
+// Input: # of samples, tolerance.
+  std::vector<double> SpanningEdgeCentrality::computeDiagonalRandomEst(int k, double tol) {
+    const auto n = G.numberOfNodes();
+
+    count n_half = std::floor(n/2);
+    
+    const omp_index n_threads = omp_get_max_threads();
+    
+    std::vector<Vector> rhss(n_threads);
+    std::vector<Vector> solutions(n_threads, Vector(G.upperNodeIdBound()));
+    Lamg<CSRMatrix> solver(tol);
+    solver.setupConnected(CSRMatrix::laplacianMatrix(G));
+
+    std::vector<std::vector<double>> diags(n_threads, std::vector<double>(G.upperNodeIdBound(), 0));
+
+    for (omp_index i = 0; i < static_cast<omp_index>(k); i += n_threads) {
+#pragma omp parallel
+      {
+
+	auto &rhs = rhss[omp_get_thread_num()];
+	std::vector<double> in(G.upperNodeIdBound(), 1.0);
+	std::fill(in.begin() + n_half, in.end(), -1.0);
+	auto rng = std::default_random_engine {}; 
+	std::shuffle(in.begin(), in.end(), rng);
+
+	rhs = Vector(in);
+
+	if ((n % 2) == 1) {
+	double rsum = 0.0;
+	rhs.forElements([&](const double &value) {
+	    rsum += value;
+	  });
+	rsum = rsum/n;
+	rhs.forElements([&](double &value) { value -= rsum; });
+	}
+      }
+      solver.parallelSolve(rhss, solutions);
+      
+#pragma omp parallel
+        {
+            auto &diag = diags[omp_get_thread_num()];
+            auto &solution = solutions[omp_get_thread_num()];
+            G.forNodes([&](const node u) { diag[u] += solution[u] * solution[u]; });
+        }
+    }
+
+    G.parallelForNodes([&diags, k](const node u) {
+        for (size_t i = 1; i < diags.size(); ++i) {
+            diags[0][u] += diags[i][u];
+        }
+        diags[0][u] /= static_cast<double>(k);
+    });
+
+    return diags[0];
+}
+
+
+  
 std::vector<double> SpanningEdgeCentrality::computeDiagonal(double epsilon, double tol) {
     const auto n = G.numberOfNodes();
     const count k = std::ceil(log2(n)) / (epsilon * epsilon);

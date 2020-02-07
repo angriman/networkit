@@ -59,6 +59,19 @@ public:
     /**
      * Compute approximation by JL projection in parallel. This solves k linear systems in parallel, where k is log(n)/(tol^2).
      */
+  
+    std::vector<double> computeDiagonalRandomEst(int k, double tol);
+
+    /**
+     * Compute approximation with random vectors estimator (Hutchinson estimator). This solves k linear systems in parallel, where k is the number of samples, (should be log(n)/(tol^2)).
+     */
+
+     std::vector<double> computeDiagonalHadaEst(int k, double tol);
+
+    /**
+     * Compute approximation with Hadamard vectors. This solves k linear systems in parallel, where k is the number of samples, (should be log(n)/(tol^2)).
+     */
+  
     void runParallelApproximation();
 
     /**

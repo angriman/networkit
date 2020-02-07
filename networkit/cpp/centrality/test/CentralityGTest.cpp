@@ -1959,8 +1959,9 @@ TEST_F(CentralityGTest, testDynTopHarmonicClosenessDirected) {
 }
 
 TEST_F(CentralityGTest, testSpielman) {
-    SNAPGraphReader reader;
-    auto G = reader.read("input/wiki-Vote.txt");
+  //SNAPGraphReader reader;
+  // auto G = reader.read("input/wiki-Vote.txt");
+    auto G = KONECTGraphReader().read("../../../../../data/KonnectFormat/smallsize/out.dolphins");
     G = ConnectedComponents::extractLargestConnectedComponent(G, true);
     SpanningEdgeCentrality sp(G);
     const auto diag = sp.computeDiagonal(0.5, 1e-6);
@@ -1968,5 +1969,32 @@ TEST_F(CentralityGTest, testSpielman) {
         INFO(diag[i]);
     }
 }
+
+TEST_F(CentralityGTest, testRandomVectorDiagonalEstimator) {
+  //  SNAPGraphReader reader;
+  //  auto G = reader.read("input/wiki-Vote.txt");
+  auto G = KONECTGraphReader().read("../../../../../data/KonnectFormat/smallsize/out.dolphins");
+  G = ConnectedComponents::extractLargestConnectedComponent(G, true);
+  SpanningEdgeCentrality sp(G);
+  const auto diag = sp.computeDiagonalRandomEst(30, 1e-6);
+    for (int i = 0; i < 10; ++i) {
+      INFO(diag[i]);
+    }
+}
+
+TEST_F(CentralityGTest, testHadaVectorDiagonalEstimator) {
+  //  SNAPGraphReader reader;
+  //  auto G = reader.read("input/wiki-Vote.txt");
+  auto G = KONECTGraphReader().read("../../../../../data/KonnectFormat/smallsize/out.dolphins");
+  G = ConnectedComponents::extractLargestConnectedComponent(G, true);
+  SpanningEdgeCentrality sp(G);
+  const auto diag = sp.computeDiagonalHadaEst(32, 1e-6);
+    for (int i = 0; i < 10; ++i) {
+      INFO(diag[i]);
+    }
+}
+
+
+  
 
 } /* namespace NetworKit */
