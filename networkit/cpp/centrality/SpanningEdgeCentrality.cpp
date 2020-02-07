@@ -187,7 +187,7 @@ std::vector<double> SpanningEdgeCentrality::computeDiagonalRandomEst(count k, do
     }
 
     auto rng = std::default_random_engine{1};
-    Vector t(n), q(n);
+    std::vector<double> t(n), q(n);
     for (count i = 0; i < k; ++i) {
         std::shuffle(randomVector.begin(), randomVector.end(), rng);
         auto rhs = Vector(randomVector);
@@ -198,11 +198,10 @@ std::vector<double> SpanningEdgeCentrality::computeDiagonalRandomEst(count k, do
         }
     }
 
-    std::vector<double> result(n);
     for (count i = 0; i < n; ++i) {
-        result[i] = t[i] / q[i];
+        t[i] /= q[i];
     }
-    return result;
+    return t;
 }
 
 std::vector<double> SpanningEdgeCentrality::computeDiagonal(double epsilon, double tol) {
