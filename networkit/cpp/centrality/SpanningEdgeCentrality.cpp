@@ -173,52 +173,36 @@ std::vector<double> SpanningEdgeCentrality::computeDiagonalRandomEst(count k, do
     const auto n = G.numberOfNodes();
     count n_half = n / 2;
 
-    const omp_index n_threads = omp_get_max_threads();
-
-    std::vector<Vector> rhss(n_threads);
-    std::vector<Vector> solutions(n_threads, Vector(G.upperNodeIdBound()));
+    Vector solution(n);
     Lamg<CSRMatrix> solver(tol);
     solver.setupConnected(CSRMatrix::laplacianMatrix(G));
 
-    std::vector<std::vector<double>> diags(n_threads, std::vector<double>(G.upperNodeIdBound(), 0));
+    std::vector<double> randomVector(n, 1.0);
+    std::fill(randomVector.begin() + n_half, randomVector.end(), -1.0);
+    if (n % 2) {
+        double minus =
+            std::accumulate(randomVector.begin(), randomVector.end(), 0) / static_cast<double>(n);
+        std::for_each(randomVector.begin(), randomVector.end(),
+                      [&minus](double &elem) { elem -= minus; });
+    }
 
-    for (omp_index i = 0; i < static_cast<omp_index>(k); i += n_threads) {
-#pragma omp parallel
-        {
-
-            auto &rhs = rhss[omp_get_thread_num()];
-            std::vector<double> in(G.upperNodeIdBound(), 1.0);
-            std::fill(in.begin() + n_half, in.end(), -1.0);
-            auto rng = std::default_random_engine{};
-            std::shuffle(in.begin(), in.end(), rng);
-
-            rhs = Vector(in);
-
-            if (n % 2) {
-                double rsum = 0.0;
-                rhs.forElements([&](const double &value) { rsum += value; });
-                rsum = rsum / n;
-                rhs.forElements([&](double &value) { value -= rsum; });
-            }
-        }
-        solver.parallelSolve(rhss, solutions);
-
-#pragma omp parallel
-        {
-            auto &diag = diags[omp_get_thread_num()];
-            auto &solution = solutions[omp_get_thread_num()];
-            G.forNodes([&](const node u) { diag[u] += solution[u] * solution[u]; });
+    auto rng = std::default_random_engine{1};
+    Vector t(n), q(n);
+    for (count i = 0; i < k; ++i) {
+        std::shuffle(randomVector.begin(), randomVector.end(), rng);
+        auto rhs = Vector(randomVector);
+        solver.solve(rhs, solution);
+        for (count i = 0; i < n; ++i) {
+            t[i] += solution[i] * randomVector[i];
+            q[i] += randomVector[i] * randomVector[i];
         }
     }
 
-    G.parallelForNodes([&diags, k](const node u) {
-        for (size_t i = 1; i < diags.size(); ++i) {
-            diags[0][u] += diags[i][u];
-        }
-        diags[0][u] /= static_cast<double>(k);
-    });
-
-    return diags[0];
+    std::vector<double> result(n);
+    for (count i = 0; i < n; ++i) {
+        result[i] = t[i] / q[i];
+    }
+    return result;
 }
 
 std::vector<double> SpanningEdgeCentrality::computeDiagonal(double epsilon, double tol) {

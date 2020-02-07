@@ -1971,9 +1971,8 @@ TEST_F(CentralityGTest, testSpielman) {
 }
 
 TEST_F(CentralityGTest, testRandomVectorDiagonalEstimator) {
-  //  SNAPGraphReader reader;
-  //  auto G = reader.read("input/wiki-Vote.txt");
-  auto G = KONECTGraphReader().read("../../../../../data/KonnectFormat/smallsize/out.dolphins");
+  SNAPGraphReader reader;
+  auto G = reader.read("input/wiki-Vote.txt");
   G = ConnectedComponents::extractLargestConnectedComponent(G, true);
   SpanningEdgeCentrality sp(G);
   const auto diag = sp.computeDiagonalRandomEst(30, 1e-6);
@@ -1983,9 +1982,8 @@ TEST_F(CentralityGTest, testRandomVectorDiagonalEstimator) {
 }
 
 TEST_F(CentralityGTest, testHadaVectorDiagonalEstimator) {
-  //  SNAPGraphReader reader;
-  //  auto G = reader.read("input/wiki-Vote.txt");
-  auto G = KONECTGraphReader().read("../../../../../data/KonnectFormat/smallsize/out.dolphins");
+  SNAPGraphReader reader;
+  auto G = reader.read("input/wiki-Vote.txt");
   G = ConnectedComponents::extractLargestConnectedComponent(G, true);
   SpanningEdgeCentrality sp(G);
   const auto diag = sp.computeDiagonalHadaEst(32, 1e-6);
