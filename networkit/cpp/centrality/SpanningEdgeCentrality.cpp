@@ -108,56 +108,56 @@ void SpanningEdgeCentrality::runApproximation() {
 // Based on random vectors ( Hutchinson estimator ).
 // Input: # of samples, tolerance.
 std::vector<double> SpanningEdgeCentrality::computeDiagonalHadaEst(count k, double tol) {
-  if (k % 4)
-    throw std::runtime_error("Error. \n Number of samples must be a multiple of 4.");
+    if (k % 4)
+        throw std::runtime_error("Error. \n Number of samples must be a multiple of 4.");
 
-  const auto n = G.numberOfNodes();
-  count numbits = ceil(log(n) / log(2));
-  const count next_pow = pow(2, numbits);
-  numbits++;
+    const auto n = G.numberOfNodes();
+    count numbits = ceil(log(n) / log(2));
+    const count next_pow = pow(2, numbits);
+    numbits++;
     // create the hadamard binary representation
-  std::vector<Vector> Hadabin(next_pow, Vector(numbits));
-  for (count l = 0; l < next_pow; l++) {
-    count i = 0;
-    count x = l;
-    while (x) {
+    std::vector<Vector> Hadabin(next_pow, Vector(numbits));
+    for (count l = 0; l < next_pow; l++) {
+        count i = 0;
+        count x = l;
+        while (x) {
             Hadabin[l][i] = x % 2;
             x /= 2;
             i++;
+        }
     }
-  }
 
-  Vector solution(n);
-  Lamg<CSRMatrix> solver(tol);
-  solver.setupConnected(CSRMatrix::laplacianMatrix(G));
+    Vector solution(n);
+    Lamg<CSRMatrix> solver(tol);
+    solver.setupConnected(CSRMatrix::laplacianMatrix(G));
 
-  Vector ts(n), q(n);
-  std::vector<double> r(n);
-  for (count i = 0; i < k; ++i) {
-    // create Hadamard vectors from formula: H(k,j) = (-1)^( dot(Hadabin(j,:),
-    // Hadabin(k,:)));
+    Vector ts(n), q(n);
+    std::vector<double> r(n);
+    for (count i = 0; i < k; ++i) {
+        // create Hadamard vectors from formula: H(k,j) = (-1)^( dot(Hadabin(j,:),
+        // Hadabin(k,:)));
 
-    auto &t = Hadabin[i];
-    for (index j = 0; j < r.size(); j++) {
-      r[j] = pow(-1, Vector::innerProduct(t, Hadabin[j]));
+        auto &t = Hadabin[i];
+        for (index j = 0; j < r.size(); j++) {
+            r[j] = pow(-1, Vector::innerProduct(t, Hadabin[j]));
+        }
+        auto rhs = Vector(r);
+        solver.solve(rhs, solution);
+
+        for (count j = 0; j < n; ++j) {
+            assert(j < solution.getDimension());
+            assert(j < ts.getDimension());
+            ts[j] += solution[j] * r[j];
+            q[j] += r[j] * r[j];
+        }
     }
-    auto rhs = Vector(r);
-    solver.solve(rhs, solution);
-      
-    for (count j = 0; j < n; ++j) {
-      assert(j < solution.getDimension());
-      assert(j < ts.getDimension());
-      ts[j] += solution[j] * r[j];
-      q[j] += r[j] * r[j];
-      }
-  }
-    
-  std::vector<double> result(n);
-  for (count i = 0; i < n; ++i) {
-    result[i] = ts[i] / q[i];
-  }
-    
-  return result;
+
+    std::vector<double> result(n);
+    for (count i = 0; i < n; ++i) {
+        result[i] = ts[i] / q[i];
+    }
+
+    return result;
 }
 
 // Approximation algo to compute diagonal of pseudoinverse explicitly.
