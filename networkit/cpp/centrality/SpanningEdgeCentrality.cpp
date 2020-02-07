@@ -131,33 +131,32 @@ std::vector<double> SpanningEdgeCentrality::computeDiagonalHadaEst(count k, doub
     Lamg<CSRMatrix> solver(tol);
     solver.setupConnected(CSRMatrix::laplacianMatrix(G));
 
-    Vector ts(n), q(n);
-    std::vector<double> r(n);
+    Vector q(n), randomVector(n);
+    std::vector<double> ts(n);
     for (count i = 0; i < k; ++i) {
         // create Hadamard vectors from formula: H(k,j) = (-1)^( dot(Hadabin(j,:),
         // Hadabin(k,:)));
 
         auto &t = Hadabin[i];
-        for (index j = 0; j < r.size(); j++) {
-            r[j] = pow(-1, Vector::innerProduct(t, Hadabin[j]));
-        }
-        auto rhs = Vector(r);
-        solver.solve(rhs, solution);
+        randomVector.forElementsWithIdx([&](double &entry, const index j) {
+            entry = static_cast<count>(Vector::innerProduct(t, Hadabin[j])) % 2 ? -1 : 1;
+        });
+
+        solver.solve(randomVector, solution);
 
         for (count j = 0; j < n; ++j) {
             assert(j < solution.getDimension());
             assert(j < ts.getDimension());
-            ts[j] += solution[j] * r[j];
-            q[j] += r[j] * r[j];
+            ts[j] += solution[j] * randomVector[j];
+            q[j] += randomVector[j] * randomVector[j];
         }
     }
 
-    std::vector<double> result(n);
     for (count i = 0; i < n; ++i) {
-        result[i] = ts[i] / q[i];
+        ts[i] /= q[i];
     }
 
-    return result;
+    return ts;
 }
 
 // Approximation algo to compute diagonal of pseudoinverse explicitly.

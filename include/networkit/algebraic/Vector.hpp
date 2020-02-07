@@ -268,6 +268,10 @@ public:
     /**
      * Iterate over all elements of the vector and call handler (lambda closure).
      */
+    template<typename L> void forElementsWithIdx(L handle);
+    /**
+     * Iterate over all elements of the vector and call handler (lambda closure).
+     */
     template<typename L> void forElements(L handle) const;
 
     /**
@@ -337,6 +341,12 @@ inline void Vector::forElements(L handle) {
     }
 }
 
+template<typename L>
+inline void Vector::forElementsWithIdx(L handle) {
+    for (uint64_t i = 0; i < getDimension(); i++) {
+        handle(values[i], i);
+    }
+}
 template<typename L>
 inline void Vector::forElements(L handle) const {
     for (uint64_t i = 0; i < getDimension(); i++) {
