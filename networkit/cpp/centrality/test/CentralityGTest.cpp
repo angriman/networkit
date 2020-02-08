@@ -73,7 +73,7 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
     };
 
     INFO("Reading graph");
-    auto G = KONECTGraphReader().read("/home/angriman/graphs/flixster");
+    auto G = KONECTGraphReader().read("/home/angriman/graphs/advogato");
     if (G.isDirected())
         G = GraphTools::toUndirected(G);
     if (G.isWeighted())
@@ -87,7 +87,7 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
         throw std::runtime_error("Error: too many components");
 
     INFO("Done");
-    static constexpr double eps = 0.15;
+    static constexpr double eps = 0.1;
     static constexpr double tol = 1e-9;
 
     // Run approximation
