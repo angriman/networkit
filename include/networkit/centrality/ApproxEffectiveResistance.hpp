@@ -76,6 +76,7 @@ public:
     void run() override;
 
     node getRoot() const noexcept { return root; }
+    node getRootEcc() const noexcept { return rootEcc; }
 
     std::vector<int> getNonNormalizedData() const {
         std::vector<int> aggregated(G.upperNodeIdBound(), 0);
