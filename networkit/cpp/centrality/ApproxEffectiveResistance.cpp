@@ -16,9 +16,9 @@ static constexpr bool isDebug = false;
 
 namespace NetworKit {
 
-ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double epsilon,
+ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inputEpsilon,
                                                      double tolerance)
-    : G(G), epsilon(epsilon), delta(1.0 / static_cast<double>(G.numberOfNodes())),
+    : G(G), epsilon(0.7*inputEpsilon), delta(1.0 / static_cast<double>(G.numberOfNodes())),
       tolerance(tolerance), bcc(new BiconnectedComponents(G)), result(G.upperNodeIdBound()) {
     if (G.isDirected()) {
         throw std::runtime_error("Error: the input graph must be undirected.");
