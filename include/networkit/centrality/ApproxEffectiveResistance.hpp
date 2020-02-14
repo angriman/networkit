@@ -113,6 +113,9 @@ public:
 
     count numberOfUSTs = 0;
     static constexpr count sweeps = 10;
+    double getEpsilon() const {
+        return epsilon;
+    }
 
     RootStrategy rootStrategy = RootStrategy::MinApproxEcc;
 
