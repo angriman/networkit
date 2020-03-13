@@ -14,7 +14,7 @@
 
 namespace NetworKit {
 
-CommuteTimeDistance::CommuteTimeDistance(const Graph& G, double tol): Algorithm(), G(&G), tol(tol), lamg(1e-5) {
+CommuteTimeDistance::CommuteTimeDistance(const Graph& G, double tol, double lamgTol): Algorithm(), G(&G), tol(tol), lamg(1e-5), lamgTol(lamgTol) {
     // main purpose of method: preparing LAMG
 
     // construct matrix from graph
@@ -187,7 +187,7 @@ double CommuteTimeDistance::runSinglePair(node u, node v) {
 }
 
 double CommuteTimeDistance::effectiveResistanceSinglePair(node u, node v) {
-    count n = G.numberOfNodes();
+    count n = G->numberOfNodes();
 
     // set up solution vector and status
     Vector solution(n);
@@ -204,7 +204,7 @@ double CommuteTimeDistance::effectiveResistanceSinglePair(node u, node v) {
 }
 
 std::vector<double> CommuteTimeDistance::effectiveResistanceSingleSource(node u) {
-    const count n = G.numberOfNodes();
+    const count n = G->numberOfNodes();
     std::vector<double> result(n);
     Vector solution(n);
     Vector rhs(n, 0.0);
@@ -212,7 +212,7 @@ std::vector<double> CommuteTimeDistance::effectiveResistanceSingleSource(node u)
 
     Aux::Timer timer;
     timer.start();
-    G.forNodes([&](const node v) {
+    G->forNodes([&](const node v) {
         rhs = zeroVector;
         solution = zeroVector;
         rhs[u] = +1.0;
@@ -227,7 +227,7 @@ std::vector<double> CommuteTimeDistance::effectiveResistanceSingleSource(node u)
 }
 
 std::vector<double> CommuteTimeDistance::effectiveResistanceSingleSourceParallel(node u) {
-    count n = G.numberOfNodes();
+    count n = G->numberOfNodes();
     std::vector<double> result(n);
 
     // Solution vectors: one per thread
@@ -280,7 +280,6 @@ std::vector<double> CommuteTimeDistance::effectiveResistanceSingleSourceParallel
     timer.stop();
     elapsedMilliseconds = timer.elapsedMilliseconds();
     return result;
->>>>>>> Create ApproxEffectiveResistance class and run test
 }
 
 double CommuteTimeDistance::runSingleSource(node u) {

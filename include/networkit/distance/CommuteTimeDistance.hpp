@@ -25,7 +25,7 @@ class CommuteTimeDistance final : public Algorithm {
 
 public:
     /**
-     * Constructs the CommuteTimeDistance class for the given Graph @a G.
+     * Constructs the CommuteTimeDistance class for the given Graph @a G->
      * @param G The graph.
      * @param tol The tolerance used for the approximation
      */
@@ -87,13 +87,13 @@ public:
         const auto r = effectiveResistanceSingleSourceParallel(root);
         Aux::Timer timer;
         timer.start();
-        std::vector<double> diagonal(G.upperNodeIdBound());
-        Vector rhs(G.upperNodeIdBound()), result(G.upperNodeIdBound());
+        std::vector<double> diagonal(G->upperNodeIdBound());
+        Vector rhs(G->upperNodeIdBound()), result(G->upperNodeIdBound());
         rhs[root] = 1.0;
-        G.parallelForNodes(
-            [&](const node u) { rhs[u] -= 1.0 / static_cast<double>(G.upperNodeIdBound()); });
+        G->parallelForNodes(
+            [&](const node u) { rhs[u] -= 1.0 / static_cast<double>(G->upperNodeIdBound()); });
         lamg.solve(rhs, result);
-        G.parallelForNodes(
+        G->parallelForNodes(
             [&](const node u) { diagonal[u] = r[u] - result[root] + 2 * result[u]; });
         timer.stop();
         elapsedMilliseconds += timer.elapsedMilliseconds();
