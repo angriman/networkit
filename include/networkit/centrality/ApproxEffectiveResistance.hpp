@@ -7,6 +7,9 @@
 
 // networkit-format
 
+#ifndef NETWORKIT_CENTRALITY_APPROX_EFFECTIVE_RESISTANCE_HPP_
+#define NETWORKIT_CENTRALITY_APPROX_EFFECTIVE_RESISTANCE_HPP_
+
 #include <cmath>
 #include <memory>
 #include <string>
@@ -219,3 +222,5 @@ private:
 };
 
 } // namespace NetworKit
+
+#endif // NETWORKIT_CENTRALITY_APPROX_EFFECTIVE_RESISTANCE_HPP_
