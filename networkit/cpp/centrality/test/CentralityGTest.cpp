@@ -92,17 +92,11 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
 
     // Run approximation
     ApproxEffectiveResistance apx(G, eps);
-    apx.rootStrategy = RootStrategy::MinApproxEcc;
+    apx.numberOfUSTs = 4384;
     apx.run();
-    return;
-    const auto root = apx.getRoot();
-    const auto apxDiag = apx.getDiagonal();
-
-    // Run n - 1 linear systems
-    CommuteTimeDistance ctd(G, tol);
-
-    const auto exactDiag = ctd.getDiagonal(root);
-    G.forNodes([&](const node u) { EXPECT_NEAR(exactDiag[u], apxDiag[u], eps); });
+    INFO(apx.timeToSample);
+    INFO(apx.timeDFS);
+    INFO(apx.timeToAggregate);
 }
 
 

@@ -10,16 +10,16 @@
 #include <omp.h>
 #include <queue>
 
+#include <networkit/auxiliary/Timer.hpp>
 #include <networkit/centrality/ApproxEffectiveResistance.hpp>
 
 static constexpr bool isDebug = false;
 
 namespace NetworKit {
 
-ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inputEpsilon,
-                                                     double tolerance)
-    : G(G), epsilon(0.7*inputEpsilon), delta(1.0 / static_cast<double>(G.numberOfNodes())),
-      tolerance(tolerance), bcc(new BiconnectedComponents(G)), result(G.upperNodeIdBound()) {
+ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inputEpsilon)
+    : G(G), epsilon(0.7 * inputEpsilon), delta(1.0 / static_cast<double>(G.numberOfNodes())),
+      bcc(new BiconnectedComponents(G)) {
     if (G.isDirected()) {
         throw std::runtime_error("Error: the input graph must be undirected.");
     }
@@ -45,7 +45,9 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inpu
     }
 
     bfsParent.resize(n, none);
-    diagonal.resize(n);
+    samplingTime.resize(omp_get_max_threads(), 0);
+    dfsTime.resize(omp_get_max_threads(), 0);
+    aggregationTime.resize(omp_get_max_threads(), 0);
 }
 
 void ApproxEffectiveResistance::init() {
@@ -159,23 +161,7 @@ void ApproxEffectiveResistance::computeNodeSequence() {
     }
 
     // Set the root to the highest degree node within the largest biconnected component
-    if (rootStrategy == RootStrategy::MaxDegree) {
-        root = std::max_element(sequences.begin(), sequences.end(),
-                                [](const std::vector<node> &c1, const std::vector<node> &c2) {
-                                    return c1.size() < c2.size();
-                                })
-                   ->front();
-       INFO("Using root strategy MaxDegree");
-    } else if (rootStrategy == RootStrategy::Random) {
-        auto &generator = generators.front();
-        do {
-            root = generator.nextUInt(G.upperNodeIdBound());
-        } while (!G.hasNode(root));
-       INFO("Using root strategy random");
-    } else {
-       INFO("Using root strategy MinApxEcc");
-        root = approxMinEccNode();
-    }
+    root = approxMinEccNode();
 
     biAnchor.resize(bcc_.numberOfComponents(), none);
     biParent.resize(bcc_.numberOfComponents(), none);
@@ -482,7 +468,6 @@ void ApproxEffectiveResistance::dfsUST() {
 }
 
 void ApproxEffectiveResistance::aggregateUST() {
-    dfsUST();
     if (isDebug)
         checkTimeStamps();
 
@@ -521,21 +506,31 @@ void ApproxEffectiveResistance::aggregateUST() {
 }
 
 void ApproxEffectiveResistance::run() {
-    if (!didInit)
-        init();
 #pragma omp parallel for
     for (omp_index i = 0; i < static_cast<omp_index>(numberOfUSTs); ++i) {
+        Aux::Timer timer;
+        timer.start();
         sampleUST();
-
+        timer.stop();
+        samplingTime[omp_get_thread_num()] += timer.elapsedNanoseconds();
+        timer.start();
+        dfsUST();
+        timer.stop();
+        dfsTime[omp_get_thread_num()] += timer.elapsedNanoseconds();
         // Update effective resistance values using sampled UST
+        timer.start();
         aggregateUST();
+        timer.stop();
+        aggregationTime[omp_get_thread_num()] += timer.elapsedNanoseconds();
     }
 
-    sampledUSTs += numberOfUSTs;
-
+    timeToSample = 0, timeDFS = 0, timeToAggregate = 0;
+    for (index i = 0; i < omp_get_max_threads(); ++i) {
+        timeToSample += ((double)samplingTime[i]) / 1e9;
+        timeDFS += ((double)dfsTime[i]) / 1e9;
+        timeToAggregate += ((double)aggregationTime[i]) / 1e9;
+    }
     hasRun = true;
-
-    //    computeDiagonal();
 }
 
 /*

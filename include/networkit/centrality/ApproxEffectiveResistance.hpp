@@ -15,20 +15,14 @@
 #include <string>
 #include <vector>
 
-#include <networkit/algebraic/CSRMatrix.hpp>
-#include <networkit/algebraic/Vector.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/base/Algorithm.hpp>
 #include <networkit/components/BiconnectedComponents.hpp>
 #include <networkit/graph/Graph.hpp>
-#include <networkit/numerics/ConjugateGradient.hpp>
-#include <networkit/numerics/Preconditioner/IdentityPreconditioner.hpp>
 
 #define PCG32_MULT 0x5851f42d4c957f2dULL
 
 namespace NetworKit {
-
-enum RootStrategy { MaxDegree, Random, MinApproxEcc };
 
 // See https://github.com/wjakob/pcg32
 struct pcg32 {
@@ -72,7 +66,7 @@ struct pcg32 {
 class ApproxEffectiveResistance final : public Algorithm {
 
 public:
-    ApproxEffectiveResistance(const Graph &G, double epsilon = 0.1, double tolerance = 1e-6);
+    ApproxEffectiveResistance(const Graph &G, double epsilon = 0.1);
 
     ~ApproxEffectiveResistance() = default;
 
@@ -104,48 +98,31 @@ public:
         return result;
     }
 
-    std::vector<double> getDiagonal() { return diagonal; }
     count getRootEccentricity() const { return rootEcc; }
-    const Vector &resultVector() const { return result; }
     count computeNumberOfUSTs() const {
         return rootEcc * rootEcc
                * static_cast<count>(
-                     std::ceil(std::log(2.0 * static_cast<double>(G.numberOfEdges()) / delta)
-                               / (2.0 * epsilon * epsilon)));
+                   std::ceil(std::log(2.0 * static_cast<double>(G.numberOfEdges()) / delta)
+                             / (2.0 * epsilon * epsilon)));
     }
 
     count numberOfUSTs = 0;
-    static constexpr count sweeps = 10;
-    double getEpsilon() const {
-        return epsilon;
-    }
-
-    RootStrategy rootStrategy = RootStrategy::MinApproxEcc;
-
-    count solveSingleSystem() {
-        ConjugateGradient<CSRMatrix, IdentityPreconditioner> cg(tolerance);
-        const auto matrix = CSRMatrix::laplacianMatrix(G);
-        cg.setup(matrix);
-        Vector rhs(G.upperNodeIdBound());
-        rhs[root] = 1.0;
-        G.parallelForNodes(
-            [&](const node u) { rhs[u] -= 1.0 / static_cast<double>(G.numberOfNodes()); });
-        auto status = cg.solve(rhs, result);
-        return status.numIters;
-    }
+    double getEpsilon() const { return epsilon; }
+    double timeToSample, timeDFS, timeToAggregate;
 
     void init();
 
 private:
     // Input parameters
     const Graph &G;
-    const double epsilon, delta, tolerance;
+    const double epsilon, delta;
     count sampledUSTs = 0;
     node root;
     uint32_t rootEcc;
-    Vector result;
     bool didInit = false;
+    std::vector<count> samplingTime, dfsTime, aggregationTime;
 
+    static constexpr int sweeps = 10;
     enum class NodeStatus : unsigned char {
         NOT_IN_COMPONENT,
         IN_SPANNING_TREE,
@@ -185,17 +162,6 @@ private:
     // Parent pointers of the bfs tree
     std::vector<node> bfsParent;
 
-    std::vector<double> diagonal;
-
-    // Creates an entry for the map that contains the bfs-tree edges:
-    static constexpr std::pair<std::pair<node, node>, bool> edgeToMapEntry(node u,
-                                                                           node v) noexcept {
-        return u < v ? std::make_pair(std::make_pair(u, v), true)
-                     : std::make_pair(std::make_pair(v, u), false);
-    }
-
-    bool isBFSEdge(node u, node v) const { return bfsParent[u] == v || bfsParent[v] == u; }
-
     // Nodes sequences: Wilson's algorithm runs faster if we start the random walks following a
     // specific sequence of nodes. In this function we compute those sequences.
     void computeNodeSequence();
@@ -204,13 +170,6 @@ private:
     void sampleUST();
     void dfsUST();
     void aggregateUST();
-
-    void computeDiagonal() {
-        solveSingleSystem();
-        const auto r = getApproxEffectiveResistances();
-        G.parallelForNodes(
-            [&](const node u) { diagonal[u] = r[u] - result[root] + 2 * result[u]; });
-    }
 
     node approxMinEccNode();
 
