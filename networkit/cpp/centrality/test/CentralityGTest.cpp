@@ -92,7 +92,8 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
 
     // Run approximation
     ApproxEffectiveResistance apx(G, eps);
-    apx.numberOfUSTs = 4384;
+    apx.init();
+    apx.numberOfUSTs = 10000;
     apx.run();
     INFO(apx.timeToSample);
     INFO(apx.timeDFS);
