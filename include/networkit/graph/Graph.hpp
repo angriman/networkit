@@ -1795,8 +1795,6 @@ public:
      * neighbor exists.
      */
     node getIthNeighbor(node u, index i) const {
-        if (!hasNode(u) || i >= outEdges[u].size())
-            return none;
         return outEdges[u][i];
     }
 
