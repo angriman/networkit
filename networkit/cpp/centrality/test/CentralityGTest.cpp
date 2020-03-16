@@ -43,6 +43,7 @@
 #include <networkit/graph/GraphTools.hpp>
 #include <networkit/io/METISGraphReader.hpp>
 #include <networkit/io/KONECTGraphReader.hpp>
+#include <networkit/io/NetworkitBinaryReader.hpp>
 #include <networkit/io/SNAPGraphReader.hpp>
 #include <networkit/structures/Cover.hpp>
 #include <networkit/structures/Partition.hpp>
@@ -73,18 +74,20 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
     };
 
     INFO("Reading graph");
-    auto G = KONECTGraphReader().read("/home/angriman/graphs/advogato");
-    if (G.isDirected())
-        G = GraphTools::toUndirected(G);
+    auto G = NetworkitBinaryReader().read("/home/angriman/graphs/livemocha.nkb");
+//    if (G.isDirected())
+//        G = GraphTools::toUndirected(G);
     if (G.isWeighted())
         G = GraphTools::toUnweighted(G);
-    G = ConnectedComponents::extractLargestConnectedComponent(G, true);
-    G.removeSelfLoops();
     G.removeMultiEdges();
-    ConnectedComponents cc(G);
-    cc.run();
-    if (cc.numberOfComponents() > 1)
-        throw std::runtime_error("Error: too many components");
+    G.removeSelfLoops();
+//    G = ConnectedComponents::extractLargestConnectedComponent(G, true);
+//    G.removeSelfLoops();
+//    G.removeMultiEdges();
+//    ConnectedComponents cc(G);
+//    cc.run();
+//    if (cc.numberOfComponents() > 1)
+//        throw std::runtime_error("Error: too many components");
 
     INFO("Done");
     static constexpr double eps = 0.1;
@@ -93,7 +96,7 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
     // Run approximation
     ApproxEffectiveResistance apx(G, eps);
     apx.init();
-    apx.numberOfUSTs = 10000;
+    apx.numberOfUSTs = 1000;
     apx.run();
     INFO(apx.timeToSample);
     INFO(apx.timeDFS);
