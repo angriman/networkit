@@ -43,8 +43,9 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inpu
     ustAdjListGlobal.resize(omp_get_max_threads(), std::vector<std::vector<small_node>>(n));
 #pragma omp parallel
     {
-        G.forNodes(
-            [&](const small_node u) { ustAdjListGlobal[omp_get_thread_num()][u].reserve(G.degree(u)); });
+        G.forNodes([&](const small_node u) {
+            ustAdjListGlobal[omp_get_thread_num()][u].reserve(G.degree(u));
+        });
     }
     bfsParent.resize(n, inf);
     samplingTime.resize(omp_get_max_threads(), 0);
@@ -111,7 +112,7 @@ small_node ApproxEffectiveResistance::approxMinEccNode() {
 
     // Return node with minimum ecc lower bound
     return static_cast<small_node>(std::min_element(eccLowerBound.begin(), eccLowerBound.end())
-                             - eccLowerBound.begin());
+                                   - eccLowerBound.begin());
 }
 
 void ApproxEffectiveResistance::computeNodeSequence() {
@@ -281,7 +282,7 @@ void ApproxEffectiveResistance::sampleUST() {
             // Happens when the current component is the root component in the topological
             // order. In this case, the root plays the anchor's role.
             if (curAnchor == inf) {
-                const auto v = (sequence.front() == root) ? sequence.back() : sequence.front();
+                const auto v = (sequence.front() == root) ? sequence[1] : sequence[0];
                 assert(sequence.front() == root || sequence.back() == root);
                 assert(v != root);
                 parent[v] = root;
@@ -307,18 +308,18 @@ void ApproxEffectiveResistance::sampleUST() {
         const auto curAnchorParent = (curAnchor != inf) ? parent[curAnchor] : inf;
 
         // All the remaining nodes in the components need to be visited.
-        for (auto it = sequence.begin() + 1; it < sequence.end(); ++it) {
-            status[*it] = NodeStatus::NOT_VISITED;
-        }
+        std::for_each(sequence.begin() + 1, sequence.end(),
+                      [&status](const small_node u) { status[u] = NodeStatus::NOT_VISITED; });
 
+        uint32_t nodesInSpanningTree = 1;
         // Iterate over the remaining nodes to create the spanning tree.
-        for (auto it = sequence.begin() + 1; it < sequence.end(); ++it) {
-            auto currentNode = *it;
-
-            if (status[currentNode] == NodeStatus::IN_SPANNING_TREE) {
+        for (auto it = sequence.begin() + 1; it != sequence.end(); ++it) {
+            const small_node walkStart = *it;
+            if (status[walkStart] == NodeStatus::IN_SPANNING_TREE) {
                 // Node already added to the spanning tree
                 continue;
             }
+            small_node currentNode = walkStart;
 
             // Start a new random walk from the current node.
             do {
@@ -340,9 +341,11 @@ void ApproxEffectiveResistance::sampleUST() {
             assert(status[walkEnd] == NodeStatus::IN_SPANNING_TREE);
             // Add the random walk to the spanning tree; eventually, reverse the path if the
             // anchor/root is encountered
-            for (currentNode = *it; currentNode != walkEnd; currentNode = parent[currentNode]) {
+            for (currentNode = walkStart; currentNode != walkEnd;
+                 currentNode = parent[currentNode]) {
 
                 status[currentNode] = NodeStatus::IN_SPANNING_TREE;
+                ++nodesInSpanningTree;
                 if (currentNode == curAnchor || currentNode == root) {
 
                     // Anchor of current component in the walk, we have to reverse the
@@ -369,6 +372,9 @@ void ApproxEffectiveResistance::sampleUST() {
                     break;
                 }
             }
+
+            if (nodesInSpanningTree == sequence.size())
+                break;
         }
 
         for (const auto u : sequence)
@@ -421,12 +427,11 @@ void ApproxEffectiveResistance::dfsUST() {
             ++iter;
         }
     } while (!stack.empty());
-
 }
 
 void ApproxEffectiveResistance::aggregateUST() {
 #ifndef NDEBUG
-        checkTimeStamps();
+    checkTimeStamps();
 #endif
 
     auto &approxEffResistance = approxEffResistanceGlobal[omp_get_thread_num()];
@@ -534,7 +539,8 @@ void ApproxEffectiveResistance::checkBFSTree() const {
     });
 }
 
-void ApproxEffectiveResistance::checkTwoNodesSequence(const std::vector<small_node> &sequence) const {
+void ApproxEffectiveResistance::checkTwoNodesSequence(
+    const std::vector<small_node> &sequence) const {
     const std::vector<small_node> &parent = parentGlobal[omp_get_thread_num()];
     for (small_node u : sequence) {
         if (u == root) {
