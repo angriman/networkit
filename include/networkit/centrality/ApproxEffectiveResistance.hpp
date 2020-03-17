@@ -166,6 +166,9 @@ private:
     // specific sequence of nodes. In this function we compute those sequences.
     void computeNodeSequence();
 
+    // Adjacency list for trees: additional data structure to speed-up the DFS
+    std::vector<std::vector<std::vector<node>>> ustAdjListGlobal;
+
     void computeBFSTree();
     void sampleUST();
     void dfsUST();

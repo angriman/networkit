@@ -74,7 +74,7 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
     };
 
     INFO("Reading graph");
-    auto G = NetworkitBinaryReader().read("/home/angriman/graphs/livemocha.nkb");
+    auto G = NetworkitBinaryReader().read("/home/angriman/graphs/advogato.nkb");
 //    if (G.isDirected())
 //        G = GraphTools::toUndirected(G);
     if (G.isWeighted())
@@ -96,7 +96,7 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
     // Run approximation
     ApproxEffectiveResistance apx(G, eps);
     apx.init();
-    apx.numberOfUSTs = 7000;
+    apx.numberOfUSTs = 10;
     apx.run();
     INFO(apx.timeToSample);
     INFO(apx.timeDFS);

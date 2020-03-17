@@ -13,8 +13,6 @@
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/centrality/ApproxEffectiveResistance.hpp>
 
-static constexpr bool isDebug = false;
-
 namespace NetworKit {
 
 ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inputEpsilon)
@@ -30,8 +28,6 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inpu
         throw std::runtime_error("Error: the graph should have at leasts two vertices");
     }
 
-    INFO("This is the distributed version");
-
     const auto n = G.upperNodeIdBound();
     statusGlobal.resize(omp_get_max_threads(), std::vector<NodeStatus>(n, NodeStatus::NOT_VISITED));
     parentGlobal.resize(omp_get_max_threads(), std::vector<node>(n, none));
@@ -44,6 +40,12 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inpu
         generators.back().seed(Aux::Random::integer());
     }
 
+    ustAdjListGlobal.resize(omp_get_max_threads(), std::vector<std::vector<node>>(n));
+#pragma omp parallel
+    {
+        G.forNodes(
+            [&](const node u) { ustAdjListGlobal[omp_get_thread_num()][u].reserve(G.degree(u)); });
+    }
     bfsParent.resize(n, none);
     samplingTime.resize(omp_get_max_threads(), 0);
     dfsTime.resize(omp_get_max_threads(), 0);
@@ -166,9 +168,9 @@ void ApproxEffectiveResistance::computeNodeSequence() {
     biAnchor.resize(bcc_.numberOfComponents(), none);
     biParent.resize(bcc_.numberOfComponents(), none);
 
-    if (isDebug) {
-        G.forNodes([&](const node u) { assert(status[u] == NodeStatus::NOT_VISITED); });
-    }
+#ifndef NDEBUG
+    G.forNodes([&](const node u) { assert(status[u] == NodeStatus::NOT_VISITED); });
+#endif
 
     // Topological order of biconnected components: tree of biconnected components starting from the
     // root's biconencted component. If the root is in multiple biconencted components, we take one
@@ -210,14 +212,13 @@ void ApproxEffectiveResistance::computeNodeSequence() {
 
     INFO("Root eccentricity = ", rootEcc);
     INFO("Root = ", root);
-    assert(G.hasNode(root));
 
-    if (isDebug) {
-        G.forNodes([&](const node u) { assert(status[u] == NodeStatus::VISITED); });
-        assert(topOrder.size() == bcc_.numberOfComponents());
-        assert(std::unordered_set<index>(topOrder.begin(), topOrder.end()).size()
-               == bcc_.numberOfComponents());
-    }
+#ifndef NDEBUG
+    G.forNodes([&](const node u) { assert(status[u] == NodeStatus::VISITED); });
+    assert(topOrder.size() == bcc_.numberOfComponents());
+    assert(std::unordered_set<index>(topOrder.begin(), topOrder.end()).size()
+           == bcc_.numberOfComponents());
+#endif
 }
 
 void ApproxEffectiveResistance::computeBFSTree() {
@@ -241,17 +242,19 @@ void ApproxEffectiveResistance::computeBFSTree() {
         });
     } while (!queue.empty());
 
-    if (isDebug) {
-        checkBFSTree();
-    }
+#ifndef NDEBUG
+    checkBFSTree();
+#endif
 }
 
 void ApproxEffectiveResistance::sampleUST() {
     // Getting thread-local vectors
     auto &status = statusGlobal[omp_get_thread_num()];
     auto &parent = parentGlobal[omp_get_thread_num()];
+    auto &adjList = ustAdjListGlobal[omp_get_thread_num()];
     std::fill(status.begin(), status.end(), NodeStatus::NOT_IN_COMPONENT);
     std::fill(parent.begin(), parent.end(), none);
+    G.forNodes([&adjList](const node u) { adjList[u].clear(); });
 
     auto &generator = generators[omp_get_thread_num()];
 
@@ -291,56 +294,11 @@ void ApproxEffectiveResistance::sampleUST() {
                     updateParentOfAnchor();
                 }
             }
-            if (isDebug) {
-                checkTwoNodesSequence(sequence);
-            }
+#ifndef NDEBUG
+            checkTwoNodesSequence(sequence);
+#endif
             continue;
         }
-
-        if (sequence.size() == 3) {
-            // 3-vertex clique: we pick two edges at random
-            std::pair<node, node> nonAnchors({none, none});
-            if (curAnchor == none) {
-                assert(!componentIndex);
-                curAnchor = root;
-            }
-
-            for (const auto v : sequence) {
-                if (v != curAnchor) {
-                    if (nonAnchors.first == none) {
-                        nonAnchors.first = v;
-                    } else {
-                        nonAnchors.second = v;
-                        break;
-                    }
-                }
-            }
-
-            switch (generator.nextUInt(3)) {
-            case 0:
-                parent[nonAnchors.first] = curAnchor;
-                parent[nonAnchors.second] = nonAnchors.first;
-                break;
-            case 1:
-                parent[nonAnchors.first] = curAnchor;
-                parent[nonAnchors.second] = curAnchor;
-                break;
-            case 2:
-                parent[nonAnchors.first] = nonAnchors.second;
-                parent[nonAnchors.second] = curAnchor;
-                break;
-            default:
-                throw std::runtime_error("Unexpected random integer");
-                break;
-            }
-
-            if (parent[curAnchor] == none) {
-                updateParentOfAnchor();
-            }
-            continue;
-        }
-
-        // Components with > 3 vertices.
 
         // We start building the spanning tree from the first node of the
         // sequence.
@@ -413,63 +371,63 @@ void ApproxEffectiveResistance::sampleUST() {
             }
         }
 
-        for (const auto u : sequence) {
-            assert(status[u] == NodeStatus::IN_SPANNING_TREE);
+        for (const auto u : sequence)
             status[u] = NodeStatus::NOT_IN_COMPONENT;
-        }
     }
 
-    // For debugging
-    if (isDebug) {
-        checkUST();
+    uint32_t visitedNodes = 0;
+    for (node u : G.nodeRange()) {
+        while (status[u] == NodeStatus::NOT_IN_COMPONENT) {
+            status[u] = NodeStatus::NOT_VISITED;
+            ++visitedNodes;
+            node parentU = parent[u];
+            if (parent[u] != none) {
+                adjList[parentU].push_back(u);
+                u = parentU;
+            } else
+                break;
+        }
+        if (visitedNodes == G.numberOfNodes())
+            break;
     }
+
+#ifndef NDEBUG
+    checkUST();
+#endif
 }
 
 void ApproxEffectiveResistance::dfsUST() {
-    // Parent pointers in the UST
-    const auto &parent = parentGlobal[omp_get_thread_num()];
-
     auto &tVisit = tVisitGlobal[omp_get_thread_num()];
     auto &tFinish = tFinishGlobal[omp_get_thread_num()];
+    const auto &adjList = ustAdjListGlobal[omp_get_thread_num()];
 
     auto &status = statusGlobal[omp_get_thread_num()];
-    std::fill(status.begin(), status.end(), NodeStatus::NOT_VISITED);
 
-    std::stack<std::pair<node, Graph::NeighborIterator>> stack;
-    stack.push({root, G.neighborRange(root).begin()});
-    status[root] = NodeStatus::VISITED;
+    std::stack<std::pair<node, std::vector<node>::const_iterator>> stack;
+    stack.push({root, adjList[root].begin()});
 
     uint32_t timestamp = 0;
     do {
-        const auto u = stack.top().first;
+        const node u = stack.top().first;
         auto &iter = stack.top().second;
-        assert(status[u] == NodeStatus::VISITED);
-        const auto end = G.neighborRange(u).end();
 
-        for (; iter != end; ++iter) {
-            if (parent[*iter] == u && status[*iter] != NodeStatus::VISITED) {
-                status[*iter] = NodeStatus::VISITED;
-                tVisit[*iter] = ++timestamp;
-                stack.push({*iter, G.neighborRange(*iter).begin()});
-                break;
-            }
-        }
-
-        if (iter == end) {
+        if (iter == adjList[u].end()) {
             stack.pop();
             tFinish[u] = ++timestamp;
+        } else {
+            tVisit[*iter] = ++timestamp;
+            stack.push({*iter, adjList[*iter].begin()});
+            assert(parentGlobal[omp_get_thread_num()][*iter] == u);
+            ++iter;
         }
     } while (!stack.empty());
 
-    if (isDebug) {
-        G.forNodes([&](const node u) { assert(status[u] == NodeStatus::VISITED); });
-        assert(!tVisit[root]);
-    }
 }
 
 void ApproxEffectiveResistance::aggregateUST() {
-    if (isDebug)
+#ifndef NDEBUG
         checkTimeStamps();
+#endif
 
     auto &approxEffResistance = approxEffResistanceGlobal[omp_get_thread_num()];
     const auto &tVisit = tVisitGlobal[omp_get_thread_num()];
@@ -533,6 +491,7 @@ void ApproxEffectiveResistance::run() {
     hasRun = true;
 }
 
+#ifndef NDEBUG
 /*
  * Methods for sanity check.
  */
@@ -604,5 +563,7 @@ void ApproxEffectiveResistance::checkTimeStamps() const {
         assert(tVisit[u] < 2 * G.numberOfNodes());
     });
 }
+
+#endif // NDEBUG
 
 } // namespace NetworKit
