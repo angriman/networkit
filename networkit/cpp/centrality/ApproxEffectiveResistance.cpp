@@ -30,7 +30,7 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inpu
 
     const auto n = G.upperNodeIdBound();
     statusGlobal.resize(omp_get_max_threads(), std::vector<NodeStatus>(n, NodeStatus::NOT_VISITED));
-    parentGlobal.resize(omp_get_max_threads(), std::vector<node>(n, none));
+    parentGlobal.resize(omp_get_max_threads(), std::vector<small_node>(n, inf));
     approxEffResistanceGlobal.resize(omp_get_max_threads(), std::vector<int>(n));
     tVisitGlobal.resize(omp_get_max_threads(), std::vector<uint32_t>(n));
     tFinishGlobal.resize(omp_get_max_threads(), std::vector<uint32_t>(n));
@@ -40,13 +40,13 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inpu
         generators.back().seed(Aux::Random::integer());
     }
 
-    ustAdjListGlobal.resize(omp_get_max_threads(), std::vector<std::vector<node>>(n));
+    ustAdjListGlobal.resize(omp_get_max_threads(), std::vector<std::vector<small_node>>(n));
 #pragma omp parallel
     {
         G.forNodes(
-            [&](const node u) { ustAdjListGlobal[omp_get_thread_num()][u].reserve(G.degree(u)); });
+            [&](const small_node u) { ustAdjListGlobal[omp_get_thread_num()][u].reserve(G.degree(u)); });
     }
-    bfsParent.resize(n, none);
+    bfsParent.resize(n, inf);
     samplingTime.resize(omp_get_max_threads(), 0);
     dfsTime.resize(omp_get_max_threads(), 0);
     aggregationTime.resize(omp_get_max_threads(), 0);
@@ -58,15 +58,15 @@ void ApproxEffectiveResistance::init() {
     didInit = true;
 }
 
-node ApproxEffectiveResistance::approxMinEccNode() {
+small_node ApproxEffectiveResistance::approxMinEccNode() {
     auto &status = statusGlobal[0];
     std::vector<uint32_t> distance(G.upperNodeIdBound());
     std::vector<uint32_t> eccLowerBound(G.upperNodeIdBound());
 
     auto maxDegreeNode = [&]() {
-        node maxDegNode = 0;
+        small_node maxDegNode = 0;
         count maxDeg = 0;
-        G.forNodes([&](const node u) {
+        G.forNodes([&](const small_node u) {
             const auto degU = G.degree(u);
             if (degU > maxDeg) {
                 maxDeg = degU;
@@ -76,12 +76,12 @@ node ApproxEffectiveResistance::approxMinEccNode() {
         return maxDegNode;
     };
 
-    auto doBFS = [&](const node source) {
-        std::queue<node> q;
+    auto doBFS = [&](const small_node source) {
+        std::queue<small_node> q;
         q.push(source);
         status[source] = NodeStatus::VISITED;
         distance[source] = 0;
-        node farthest = 0;
+        small_node farthest = 0;
 
         do {
             const auto u = q.front();
@@ -89,7 +89,7 @@ node ApproxEffectiveResistance::approxMinEccNode() {
             eccLowerBound[u] = std::max(eccLowerBound[u], distance[u]);
             farthest = u;
 
-            G.forNeighborsOf(u, [&](const node v) {
+            G.forNeighborsOf(u, [&](const small_node v) {
                 if (status[v] == NodeStatus::NOT_VISITED) {
                     q.push(v);
                     status[v] = NodeStatus::VISITED;
@@ -103,14 +103,14 @@ node ApproxEffectiveResistance::approxMinEccNode() {
         return farthest;
     };
 
-    node source = maxDegreeNode();
+    small_node source = maxDegreeNode();
 
     for (int i = 0; i < sweeps; ++i) {
         source = doBFS(source);
     }
 
     // Return node with minimum ecc lower bound
-    return static_cast<node>(std::min_element(eccLowerBound.begin(), eccLowerBound.end())
+    return static_cast<small_node>(std::min_element(eccLowerBound.begin(), eccLowerBound.end())
                              - eccLowerBound.begin());
 }
 
@@ -123,13 +123,13 @@ void ApproxEffectiveResistance::computeNodeSequence() {
     bcc_.run();
     auto components = bcc_.getComponents();
 
-    std::queue<node> queue;
-    std::vector<node> curSequence;
+    std::queue<small_node> queue;
+    std::vector<small_node> curSequence;
 
     for (const auto &curComponent : components) {
         // Biconnected components with 3 nodes or less can be handled trivially.
-        if (curComponent.size() <= 3) {
-            sequences.push_back(std::move(curComponent));
+        if (curComponent.size() == 2) {
+            sequences.push_back({(small_node)curComponent[0], (small_node)curComponent[1]});
             continue;
         }
 
@@ -151,7 +151,7 @@ void ApproxEffectiveResistance::computeNodeSequence() {
             const auto u = queue.front();
             queue.pop();
             curSequence.push_back(u);
-            G.forNeighborsOf(u, [&](const node v) {
+            G.forNeighborsOf(u, [&](const small_node v) {
                 if (status[v] == NodeStatus::VISITED) {
                     status[v] = NodeStatus::NOT_VISITED;
                     queue.push(v);
@@ -165,17 +165,17 @@ void ApproxEffectiveResistance::computeNodeSequence() {
     // Set the root to the highest degree node within the largest biconnected component
     root = approxMinEccNode();
 
-    biAnchor.resize(bcc_.numberOfComponents(), none);
-    biParent.resize(bcc_.numberOfComponents(), none);
+    biAnchor.resize(bcc_.numberOfComponents(), inf);
+    biParent.resize(bcc_.numberOfComponents(), inf);
 
 #ifndef NDEBUG
-    G.forNodes([&](const node u) { assert(status[u] == NodeStatus::NOT_VISITED); });
+    G.forNodes([&](const small_node u) { assert(status[u] == NodeStatus::NOT_VISITED); });
 #endif
 
     // Topological order of biconnected components: tree of biconnected components starting from the
     // root's biconencted component. If the root is in multiple biconencted components, we take one
     // of them arbitrarily select one of them.
-    std::queue<std::pair<node, index>> q;
+    std::queue<std::pair<small_node, index>> q;
     const auto &rootComps = bcc_.getComponentsOfNode(root);
     q.push({root, *(rootComps.begin())});
 
@@ -188,18 +188,18 @@ void ApproxEffectiveResistance::computeNodeSequence() {
     do {
         const auto front = q.front();
         q.pop();
-        G.forNeighborsOf(front.first, [&](const node v) {
+        G.forNeighborsOf(front.first, [&](const small_node v) {
             if (status[v] == NodeStatus::NOT_VISITED) {
                 distance[v] = distance[front.first] + 1;
                 rootEcc = std::max(rootEcc, distance[v]);
                 const auto &vComps = bcc_.getComponentsOfNode(v);
                 for (const auto vComponentIndex : vComps) {
                     // Check if a new biconnected components has been found.
-                    if (vComponentIndex != front.second && biAnchor[vComponentIndex] == none
+                    if (vComponentIndex != front.second && biAnchor[vComponentIndex] == inf
                         && rootComps.find(vComponentIndex) == rootComps.end()) {
                         // The anchor cannot be the root, because the anchor does not have a parent.
-                        // We handle biAnchor = none cases later.
-                        biAnchor[vComponentIndex] = (v == root) ? none : v;
+                        // We handle biAnchor = inf cases later.
+                        biAnchor[vComponentIndex] = (v == root) ? inf : v;
                         biParent[vComponentIndex] = front.second;
                         topOrder.push_back(vComponentIndex);
                     }
@@ -214,7 +214,7 @@ void ApproxEffectiveResistance::computeNodeSequence() {
     INFO("Root = ", root);
 
 #ifndef NDEBUG
-    G.forNodes([&](const node u) { assert(status[u] == NodeStatus::VISITED); });
+    G.forNodes([&](const small_node u) { assert(status[u] == NodeStatus::VISITED); });
     assert(topOrder.size() == bcc_.numberOfComponents());
     assert(std::unordered_set<index>(topOrder.begin(), topOrder.end()).size()
            == bcc_.numberOfComponents());
@@ -226,14 +226,14 @@ void ApproxEffectiveResistance::computeBFSTree() {
     auto &status = statusGlobal[0];
     std::fill(status.begin(), status.end(), NodeStatus::NOT_VISITED);
 
-    std::queue<node> queue;
+    std::queue<small_node> queue;
     queue.push(root);
     status[root] = NodeStatus::VISITED;
 
     do {
         const auto currentNode = queue.front();
         queue.pop();
-        G.forNeighborsOf(currentNode, [&](const node v) {
+        G.forNeighborsOf(currentNode, [&](const small_node v) {
             if (status[v] == NodeStatus::NOT_VISITED) {
                 status[v] = NodeStatus::VISITED;
                 queue.push(v);
@@ -253,8 +253,8 @@ void ApproxEffectiveResistance::sampleUST() {
     auto &parent = parentGlobal[omp_get_thread_num()];
     auto &adjList = ustAdjListGlobal[omp_get_thread_num()];
     std::fill(status.begin(), status.end(), NodeStatus::NOT_IN_COMPONENT);
-    std::fill(parent.begin(), parent.end(), none);
-    G.forNodes([&adjList](const node u) { adjList[u].clear(); });
+    std::fill(parent.begin(), parent.end(), inf);
+    G.forNodes([&adjList](const small_node u) { adjList[u].clear(); });
 
     auto &generator = generators[omp_get_thread_num()];
 
@@ -274,13 +274,13 @@ void ApproxEffectiveResistance::sampleUST() {
                     break;
                 }
             }
-            assert(parent[curAnchor] != none);
+            assert(parent[curAnchor] != inf);
         };
 
         if (sequence.size() == 2) {
             // Happens when the current component is the root component in the topological
             // order. In this case, the root plays the anchor's role.
-            if (curAnchor == none) {
+            if (curAnchor == inf) {
                 const auto v = (sequence.front() == root) ? sequence.back() : sequence.front();
                 assert(sequence.front() == root || sequence.back() == root);
                 assert(v != root);
@@ -290,7 +290,7 @@ void ApproxEffectiveResistance::sampleUST() {
                 assert(v != curAnchor);
                 assert(v != root);
                 parent[v] = curAnchor;
-                if (parent[curAnchor] == none) {
+                if (parent[curAnchor] == inf) {
                     updateParentOfAnchor();
                 }
             }
@@ -304,7 +304,7 @@ void ApproxEffectiveResistance::sampleUST() {
         // sequence.
         // Root of the spanning tree
         status[sequence[0]] = NodeStatus::IN_SPANNING_TREE;
-        const auto curAnchorParent = (curAnchor != none) ? parent[curAnchor] : none;
+        const auto curAnchorParent = (curAnchor != inf) ? parent[curAnchor] : inf;
 
         // All the remaining nodes in the components need to be visited.
         for (auto it = sequence.begin() + 1; it < sequence.end(); ++it) {
@@ -323,13 +323,13 @@ void ApproxEffectiveResistance::sampleUST() {
             // Start a new random walk from the current node.
             do {
                 // Get a random neighbor within the component
-                node randomNeighbor;
+                small_node randomNeighbor;
                 do {
                     randomNeighbor =
                         G.getIthNeighbor(currentNode, generator.nextUInt(G.degree(currentNode)));
                 } while (status[randomNeighbor] == NodeStatus::NOT_IN_COMPONENT);
 
-                assert(randomNeighbor != none);
+                assert(randomNeighbor != inf);
                 parent[currentNode] = randomNeighbor;
                 currentNode = randomNeighbor;
 
@@ -348,7 +348,7 @@ void ApproxEffectiveResistance::sampleUST() {
                     // Anchor of current component in the walk, we have to reverse the
                     // parent pointers
                     auto next = parent[currentNode];
-                    auto nextParent = none;
+                    auto nextParent = inf;
                     auto tmp = currentNode;
                     do {
                         status[next] = NodeStatus::IN_SPANNING_TREE;
@@ -356,12 +356,12 @@ void ApproxEffectiveResistance::sampleUST() {
                         parent[next] = currentNode;
                         currentNode = next;
                         next = nextParent;
-                    } while (next != none);
+                    } while (next != inf);
 
                     if (tmp == root)
-                        parent[root] = none;
-                    else if (parent[curAnchor] == none) {
-                        // Not none if articulation node visited by the parent component before
+                        parent[root] = inf;
+                    else if (parent[curAnchor] == inf) {
+                        // Not inf if articulation node visited by the parent component before
                         updateParentOfAnchor();
                     } else
                         parent[curAnchor] = curAnchorParent;
@@ -376,12 +376,12 @@ void ApproxEffectiveResistance::sampleUST() {
     }
 
     uint32_t visitedNodes = 0;
-    for (node u : G.nodeRange()) {
+    for (small_node u : G.nodeRange()) {
         while (status[u] == NodeStatus::NOT_IN_COMPONENT) {
             status[u] = NodeStatus::NOT_VISITED;
             ++visitedNodes;
-            node parentU = parent[u];
-            if (parent[u] != none) {
+            small_node parentU = parent[u];
+            if (parent[u] != inf) {
                 adjList[parentU].push_back(u);
                 u = parentU;
             } else
@@ -403,12 +403,12 @@ void ApproxEffectiveResistance::dfsUST() {
 
     auto &status = statusGlobal[omp_get_thread_num()];
 
-    std::stack<std::pair<node, std::vector<node>::const_iterator>> stack;
+    std::stack<std::pair<small_node, std::vector<small_node>::const_iterator>> stack;
     stack.push({root, adjList[root].begin()});
 
     uint32_t timestamp = 0;
     do {
-        const node u = stack.top().first;
+        const small_node u = stack.top().first;
         auto &iter = stack.top().second;
 
         if (iter == adjList[u].end()) {
@@ -435,16 +435,16 @@ void ApproxEffectiveResistance::aggregateUST() {
     const auto &parent = parentGlobal[omp_get_thread_num()];
 
     // Doing aggregation
-    G.forNodes([&](const node u) {
-        node p = bfsParent[u];
-        node c = u;
+    G.forNodes([&](const small_node u) {
+        small_node p = bfsParent[u];
+        small_node c = u;
         auto goUp = [&]() {
             c = p;
             p = bfsParent[p];
         };
-        while (p != none) {
+        while (p != inf) {
             // Edge in BSTree: e1 -> e2
-            node e1 = p, e2 = c;
+            small_node e1 = p, e2 = c;
             bool reverse = false;
             if (e1 != parent[e2]) {
                 if (e2 != parent[e1]) {
@@ -499,11 +499,11 @@ void ApproxEffectiveResistance::checkUST() const {
     std::vector<bool> visitedNodes(G.upperNodeIdBound());
     const auto &parent = parentGlobal[omp_get_thread_num()];
     // To debug
-    G.forNodes([&](node u) {
+    G.forNodes([&](small_node u) {
         if (u == root) {
-            assert(parent[u] == none);
+            assert(parent[u] == inf);
         } else {
-            assert(parent[u] != none);
+            assert(parent[u] != inf);
             std::fill(visitedNodes.begin(), visitedNodes.end(), 0);
             visitedNodes[u] = 1;
             auto start = u;
@@ -517,9 +517,9 @@ void ApproxEffectiveResistance::checkUST() const {
 }
 
 void ApproxEffectiveResistance::checkBFSTree() const {
-    G.forNodes([&](node u) {
+    G.forNodes([&](small_node u) {
         if (u == root) {
-            assert(bfsParent[u] == none);
+            assert(bfsParent[u] == inf);
         } else {
             std::vector<bool> visited(G.upperNodeIdBound());
             visited[u] = true;
@@ -534,11 +534,11 @@ void ApproxEffectiveResistance::checkBFSTree() const {
     });
 }
 
-void ApproxEffectiveResistance::checkTwoNodesSequence(const std::vector<node> &sequence) const {
-    const std::vector<node> &parent = parentGlobal[omp_get_thread_num()];
-    for (node u : sequence) {
+void ApproxEffectiveResistance::checkTwoNodesSequence(const std::vector<small_node> &sequence) const {
+    const std::vector<small_node> &parent = parentGlobal[omp_get_thread_num()];
+    for (small_node u : sequence) {
         if (u == root) {
-            assert(parent[u] == none);
+            assert(parent[u] == inf);
         } else {
             std::vector<bool> visited(G.upperNodeIdBound());
             visited[u] = true;
@@ -554,7 +554,7 @@ void ApproxEffectiveResistance::checkTwoNodesSequence(const std::vector<node> &s
 void ApproxEffectiveResistance::checkTimeStamps() const {
     const auto &tVisit = tVisitGlobal[omp_get_thread_num()];
     const auto &tFinish = tFinishGlobal[omp_get_thread_num()];
-    G.forNodes([&](const node u) {
+    G.forNodes([&](const small_node u) {
         assert(tVisit[u] < tFinish[u]);
         if (u == root)
             assert(tVisit[u] == 0);

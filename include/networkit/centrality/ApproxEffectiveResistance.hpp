@@ -24,6 +24,9 @@
 
 namespace NetworKit {
 
+using small_node = uint32_t;
+static constexpr small_node inf = std::numeric_limits<small_node>::max();
+
 // See https://github.com/wjakob/pcg32
 struct pcg32 {
     /// Initialize the pseudorandom number generator with the \ref seed() function
@@ -72,12 +75,12 @@ public:
 
     void run() override;
 
-    node getRoot() const noexcept { return root; }
-    node getRootEcc() const noexcept { return rootEcc; }
+    small_node getRoot() const noexcept { return root; }
+    small_node getRootEcc() const noexcept { return rootEcc; }
 
     std::vector<int> getNonNormalizedData() const {
         std::vector<int> aggregated(G.upperNodeIdBound(), 0);
-        G.parallelForNodes([&](const node u) {
+        G.parallelForNodes([&](const small_node u) {
             for (const auto &threadScores : approxEffResistanceGlobal) {
                 aggregated[u] += threadScores[u];
             }
@@ -88,7 +91,7 @@ public:
     // Aggregates per-thread scores into a single vector and returns it
     std::vector<double> getApproxEffectiveResistances() const {
         std::vector<double> result(G.upperNodeIdBound());
-        G.parallelForNodes([&](const node u) {
+        G.parallelForNodes([&](const small_node u) {
             for (const auto &threadScores : approxEffResistanceGlobal) {
                 result[u] += static_cast<double>(threadScores[u]);
             }
@@ -117,7 +120,7 @@ private:
     const Graph &G;
     const double epsilon, delta;
     count sampledUSTs = 0;
-    node root;
+    small_node root;
     uint32_t rootEcc;
     bool didInit = false;
     std::vector<count> samplingTime, dfsTime, aggregationTime;
@@ -136,16 +139,16 @@ private:
     std::unique_ptr<BiconnectedComponents> bcc;
 
     // Nodes in each biconnected components sorted by their degree.
-    std::vector<std::vector<node>> sequences;
+    std::vector<std::vector<small_node>> sequences;
 
     // Pointers to the parent of the UST, one vector per thread
-    std::vector<std::vector<node>> parentGlobal;
+    std::vector<std::vector<small_node>> parentGlobal;
 
     // Index of the parent component of the current component (after the topological order has been
     // determined)
     std::vector<index> biParent;
     // Node within the bionnected component that points to the node in the parent component
-    std::vector<node> biAnchor;
+    std::vector<small_node> biAnchor;
 
     // Topological order of the biconencted components
     std::vector<index> topOrder;
@@ -160,26 +163,26 @@ private:
     std::vector<pcg32> generators;
 
     // Parent pointers of the bfs tree
-    std::vector<node> bfsParent;
+    std::vector<small_node> bfsParent;
 
     // Nodes sequences: Wilson's algorithm runs faster if we start the random walks following a
     // specific sequence of nodes. In this function we compute those sequences.
     void computeNodeSequence();
 
     // Adjacency list for trees: additional data structure to speed-up the DFS
-    std::vector<std::vector<std::vector<node>>> ustAdjListGlobal;
+    std::vector<std::vector<std::vector<small_node>>> ustAdjListGlobal;
 
     void computeBFSTree();
     void sampleUST();
     void dfsUST();
     void aggregateUST();
 
-    node approxMinEccNode();
+    small_node approxMinEccNode();
 
     // Debugging methods
     void checkBFSTree() const;
     void checkUST() const;
-    void checkTwoNodesSequence(const std::vector<node> &sequence) const;
+    void checkTwoNodesSequence(const std::vector<small_node> &sequence) const;
     void checkTimeStamps() const;
 };
 
