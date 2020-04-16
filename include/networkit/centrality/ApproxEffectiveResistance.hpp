@@ -170,7 +170,8 @@ private:
     void computeNodeSequence();
 
     // Adjacency list for trees: additional data structure to speed-up the DFS
-    std::vector<std::vector<std::vector<small_node>>> ustAdjListGlobal;
+    std::vector<std::vector<small_node>> ustChildPtrGlobal;
+    std::vector<std::vector<small_node>> ustSiblingPtrGlobal;
 
     void computeBFSTree();
     void sampleUST();

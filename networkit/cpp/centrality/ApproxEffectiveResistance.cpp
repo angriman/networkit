@@ -40,13 +40,8 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inpu
         generators.back().seed(Aux::Random::integer());
     }
 
-    ustAdjListGlobal.resize(omp_get_max_threads(), std::vector<std::vector<small_node>>(n));
-#pragma omp parallel
-    {
-        G.forNodes([&](const small_node u) {
-            ustAdjListGlobal[omp_get_thread_num()][u].reserve(G.degree(u));
-        });
-    }
+    ustChildPtrGlobal.resize(omp_get_max_threads(), std::vector<small_node>(n));
+    ustSiblingPtrGlobal.resize(omp_get_max_threads(), std::vector<small_node>(n));
     bfsParent.resize(n, inf);
     samplingTime.resize(omp_get_max_threads(), 0);
     dfsTime.resize(omp_get_max_threads(), 0);
@@ -252,10 +247,12 @@ void ApproxEffectiveResistance::sampleUST() {
     // Getting thread-local vectors
     auto &status = statusGlobal[omp_get_thread_num()];
     auto &parent = parentGlobal[omp_get_thread_num()];
-    auto &adjList = ustAdjListGlobal[omp_get_thread_num()];
+    auto &childPtr = ustChildPtrGlobal[omp_get_thread_num()];
+    auto &siblingPtr = ustSiblingPtrGlobal[omp_get_thread_num()];
     std::fill(status.begin(), status.end(), NodeStatus::NOT_IN_COMPONENT);
     std::fill(parent.begin(), parent.end(), inf);
-    G.forNodes([&adjList](const small_node u) { adjList[u].clear(); });
+    std::fill(childPtr.begin(), childPtr.end(), inf);
+    std::fill(siblingPtr.begin(), siblingPtr.end(), inf);
 
     auto &generator = generators[omp_get_thread_num()];
 
@@ -388,7 +385,10 @@ void ApproxEffectiveResistance::sampleUST() {
             ++visitedNodes;
             small_node parentU = parent[u];
             if (parent[u] != inf) {
-                adjList[parentU].push_back(u);
+                assert(siblingPtr[u] == inf);
+                if(childPtr[parentU] != inf)
+                    siblingPtr[u] = childPtr[parentU];
+                childPtr[parentU] = u;
                 u = parentU;
             } else
                 break;
@@ -405,26 +405,28 @@ void ApproxEffectiveResistance::sampleUST() {
 void ApproxEffectiveResistance::dfsUST() {
     auto &tVisit = tVisitGlobal[omp_get_thread_num()];
     auto &tFinish = tFinishGlobal[omp_get_thread_num()];
-    const auto &adjList = ustAdjListGlobal[omp_get_thread_num()];
+    const auto &childPtr = ustChildPtrGlobal[omp_get_thread_num()];
+    const auto &siblingPtr = ustSiblingPtrGlobal[omp_get_thread_num()];
 
     auto &status = statusGlobal[omp_get_thread_num()];
 
-    std::stack<std::pair<small_node, std::vector<small_node>::const_iterator>> stack;
-    stack.push({root, adjList[root].begin()});
+    std::stack<std::pair<small_node, small_node>> stack;
+    stack.push({root, childPtr[root]});
 
     uint32_t timestamp = 0;
     do {
+        // v is a child of u that has not been visited yet.
         const small_node u = stack.top().first;
-        auto &iter = stack.top().second;
+        const small_node v = stack.top().second;
 
-        if (iter == adjList[u].end()) {
+        if (v == inf) {
             stack.pop();
             tFinish[u] = ++timestamp;
         } else {
-            tVisit[*iter] = ++timestamp;
-            stack.push({*iter, adjList[*iter].begin()});
-            assert(parentGlobal[omp_get_thread_num()][*iter] == u);
-            ++iter;
+            stack.top().second = siblingPtr[v];
+            tVisit[v] = ++timestamp;
+            stack.push({v, childPtr[v]});
+            assert(parentGlobal[omp_get_thread_num()][v] == u);
         }
     } while (!stack.empty());
 }
