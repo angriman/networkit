@@ -15,6 +15,8 @@
 #include <string>
 #include <vector>
 
+#include <Eigen/Sparse>
+
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/base/Algorithm.hpp>
 #include <networkit/components/BiconnectedComponents.hpp>
@@ -107,6 +109,38 @@ public:
                * static_cast<count>(
                    std::ceil(std::log(2.0 * static_cast<double>(G.numberOfEdges()) / delta)
                              / (2.0 * epsilon * epsilon)));
+    }
+
+    Eigen::SparseMatrix<double> getLaplacian() const {
+        const int n = G.numberOfNodes(), m = G.numberOfEdges();
+
+        std::vector<Eigen::Triplet<double>> triplets;
+        triplets.reserve(n + 2 * m);
+        G.forNodes([&](const int u) {
+            triplets.emplace_back(u, u, G.degree(u));
+            G.forNeighborsOf(u,
+                             [&](const int v, const edgeweight) {assert(u < n); assert(v < n); triplets.emplace_back(u, v, -1); });
+        });
+
+        Eigen::SparseMatrix<double> L(n, n);
+        L.setFromTriplets(triplets.begin(), triplets.end());
+
+        return L;
+    }
+
+    std::vector<double> getDiagonal() const {
+        const count n = G.numberOfNodes(), m = G.numberOfEdges();
+        auto R = getApproxEffectiveResistances();
+        Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower | Eigen::Upper> cg;
+        cg.setTolerance(epsilon / (10.0 * std::sqrt((double)(n * m) * std::log(n))));
+        auto L = getLaplacian();
+        cg.compute(L);
+        Eigen::VectorXd rhs(n);
+        G.parallelForNodes([&](const node u) { rhs[u] = -1.0 / static_cast<double>(n); });
+        rhs[root] += 1.;
+        const auto sol = cg.solve(rhs);
+        G.parallelForNodes([&](const node v) { R[v] = R[v] - sol[root] + 2. * sol[v]; });
+        return R;
     }
 
     count numberOfUSTs = 0;

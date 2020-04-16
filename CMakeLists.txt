@@ -230,6 +230,7 @@ if(NETWORKIT_BUILD_CORE AND NETWORKIT_MONOLITH)
 	target_link_libraries(networkit PRIVATE tlx OpenMP::OpenMP_CXX)
 	target_include_directories(networkit BEFORE PUBLIC "${PROJECT_SOURCE_DIR}/include")
 	target_include_directories(networkit PUBLIC "${PROJECT_SOURCE_DIR}/extlibs/ttmath/")
+	target_include_directories(networkit PUBLIC "${PROJECT_SOURCE_DIR}/extlibs/eigen/")
 endif()
 
 if(NETWORKIT_PYTHON)

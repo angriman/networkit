@@ -74,33 +74,27 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
     };
 
     INFO("Reading graph");
-    auto G = NetworkitBinaryReader().read("/home/angriman/graphs/slashdot-zoo.nkb");
-//    if (G.isDirected())
-//        G = GraphTools::toUndirected(G);
+    auto G = KONECTGraphReader().read("/home/angriman/graphs/moreno_lesmis");
+    if (G.isDirected())
+        G = GraphTools::toUndirected(G);
     if (G.isWeighted())
         G = GraphTools::toUnweighted(G);
+    G = ConnectedComponents::extractLargestConnectedComponent(G, true);
+    G = GraphTools::getCompactedGraph(G, GraphTools::getContinuousNodeIds(G));
     G.removeMultiEdges();
     G.removeSelfLoops();
-//    G = ConnectedComponents::extractLargestConnectedComponent(G, true);
-//    G.removeSelfLoops();
-//    G.removeMultiEdges();
-//    ConnectedComponents cc(G);
-//    cc.run();
-//    if (cc.numberOfComponents() > 1)
-//        throw std::runtime_error("Error: too many components");
-
     INFO("Done");
-    static constexpr double eps = 0.1;
+    static constexpr double eps = 0.01;
     static constexpr double tol = 1e-9;
 
     // Run approximation
     ApproxEffectiveResistance apx(G, eps);
     apx.init();
-    apx.numberOfUSTs = 5000;
     apx.run();
     INFO(apx.timeToSample);
     INFO(apx.timeDFS);
     INFO(apx.timeToAggregate);
+    INFO(apx.getDiagonal());
 }
 
 

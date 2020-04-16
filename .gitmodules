@@ -4,3 +4,6 @@
 [submodule "extlibs/tlx"]
 	path = extlibs/tlx
 	url = https://github.com/tlx/tlx
+[submodule "extlibs/eigen"]
+	path = extlibs/eigen
+	url = https://gitlab.com/libeigen/eigen.git

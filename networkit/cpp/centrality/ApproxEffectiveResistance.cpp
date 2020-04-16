@@ -471,6 +471,7 @@ void ApproxEffectiveResistance::aggregateUST() {
 }
 
 void ApproxEffectiveResistance::run() {
+    numberOfUSTs = computeNumberOfUSTs();
 #pragma omp parallel for
     for (omp_index i = 0; i < static_cast<omp_index>(numberOfUSTs); ++i) {
         Aux::Timer timer;

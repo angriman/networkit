@@ -12024,25 +12024,12 @@ def sort2(sample):
 	sort(result.begin(),result.end())
 	return result
 
-cdef extern from "<networkit/centrality/ApproxEffectiveResistance.hpp>" namespace "NetworKit":
-
-	cdef enum RootStrategy:
-		MaxDegree = 0
-		Random = 1
-		MinApproxEcc = 2
-
-class _RootStrategy(object):
-	maxdegree = MaxDegree
-	random = Random
-	minapproxecc = MinApproxEcc
-
 cdef extern from "<networkit/centrality/ApproxEffectiveResistance.hpp>":
 	cdef cppclass _ApproxEffectiveResistance "NetworKit::ApproxEffectiveResistance"(_Algorithm):
 		_ApproxEffectiveResistance(_Graph G, double eps) except +
 		node getRoot() except +
 		vector[double] getApproxEffectiveResistances() except +
 		vector[double] getDiagonal() except +
-		RootStrategy rootStrategy
 
 cdef class ApproxEffectiveResistance(Algorithm):
 	cdef Graph _G
@@ -12053,12 +12040,6 @@ cdef class ApproxEffectiveResistance(Algorithm):
 
 	def getRoot(self):
 		return (<_ApproxEffectiveResistance*>(self._this)).getRoot()
-
-	property rootStrategy:
-		def __get__(self):
-			return (<_ApproxEffectiveResistance*>self._this).rootStrategy
-		def __set__(self, rootStrategy):
-			(<_ApproxEffectiveResistance*>self._this).rootStrategy = rootStrategy
 
 	def getApproxEffectiveResistances(self):
 		return (<_ApproxEffectiveResistance*>(self._this)).getApproxEffectiveResistances()
