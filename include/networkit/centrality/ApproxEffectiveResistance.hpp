@@ -14,6 +14,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <Eigen/Sparse>
 
@@ -80,6 +81,7 @@ public:
     small_node getRoot() const noexcept { return root; }
     small_node getRootEcc() const noexcept { return rootEcc; }
 
+    std::unordered_map<std::string, double> profilingResults() const { return time; }
     std::vector<int> getNonNormalizedData() const {
         std::vector<int> aggregated(G.upperNodeIdBound(), 0);
         G.parallelForNodes([&](const small_node u) {
@@ -166,6 +168,7 @@ private:
         NOT_VISITED,
         VISITED
     };
+    std::unordered_map<std::string, double> time;
 
     // Used to mark the status of each node, one vector per thread
     std::vector<std::vector<NodeStatus>> statusGlobal;

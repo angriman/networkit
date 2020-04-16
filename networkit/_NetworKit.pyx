@@ -12030,6 +12030,7 @@ cdef extern from "<networkit/centrality/ApproxEffectiveResistance.hpp>":
 		node getRoot() except +
 		vector[double] getApproxEffectiveResistances() except +
 		vector[double] getDiagonal() except +
+		unordered_map[string, double] profilingResults() except +
 
 cdef class ApproxEffectiveResistance(Algorithm):
 	cdef Graph _G
@@ -12037,6 +12038,9 @@ cdef class ApproxEffectiveResistance(Algorithm):
 	def __init__(self, Graph G, double eps = 0.1):
 		self._G = G
 		self._this = new _ApproxEffectiveResistance(G._this, eps)
+
+	def profilingResults(self):
+		return (<_ApproxEffectiveResistance*>(self._this)).profilingResults()
 
 	def getRoot(self):
 		return (<_ApproxEffectiveResistance*>(self._this)).getRoot()

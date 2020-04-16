@@ -28,6 +28,8 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inpu
         throw std::runtime_error("Error: the graph should have at leasts two vertices");
     }
 
+    Aux::Timer timer;
+    timer.start();
     const auto n = G.upperNodeIdBound();
     statusGlobal.resize(omp_get_max_threads(), std::vector<NodeStatus>(n, NodeStatus::NOT_VISITED));
     parentGlobal.resize(omp_get_max_threads(), std::vector<small_node>(n, inf));
@@ -46,11 +48,20 @@ ApproxEffectiveResistance::ApproxEffectiveResistance(const Graph &G, double inpu
     samplingTime.resize(omp_get_max_threads(), 0);
     dfsTime.resize(omp_get_max_threads(), 0);
     aggregationTime.resize(omp_get_max_threads(), 0);
+    timer.stop();
+    time["Initialization"] = static_cast<double>(timer.elapsedMicroseconds()) / 1e6;
 }
 
 void ApproxEffectiveResistance::init() {
+    Aux::Timer timer;
+    timer.start();
     computeNodeSequence();
+    timer.stop();
+    time["biconnected"] = timer.elapsedMicroseconds() / 1e6;
+    timer.start();
     computeBFSTree();
+    timer.stop();
+    time["bfs tree"] = timer.elapsedMicroseconds() / 1e6;
     didInit = true;
 }
 
@@ -471,6 +482,8 @@ void ApproxEffectiveResistance::aggregateUST() {
 }
 
 void ApproxEffectiveResistance::run() {
+    Aux::Timer totalTimer;
+    totalTimer.start();
     numberOfUSTs = computeNumberOfUSTs();
 #pragma omp parallel for
     for (omp_index i = 0; i < static_cast<omp_index>(numberOfUSTs); ++i) {
@@ -490,6 +503,8 @@ void ApproxEffectiveResistance::run() {
         aggregationTime[omp_get_thread_num()] += timer.elapsedNanoseconds();
     }
 
+    totalTimer.stop();
+    time["total"] = totalTimer.elapsedMicroseconds() / 1e6;
     timeToSample = 0, timeDFS = 0, timeToAggregate = 0;
     for (index i = 0; i < omp_get_max_threads(); ++i) {
         timeToSample += ((double)samplingTime[i]) / 1e9;
