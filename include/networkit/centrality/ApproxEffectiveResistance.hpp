@@ -82,6 +82,7 @@ public:
     small_node getRootEcc() const noexcept { return rootEcc; }
 
     std::unordered_map<std::string, double> profilingResults() const { return time; }
+
     std::vector<int> getNonNormalizedData() const {
         std::vector<int> aggregated(G.upperNodeIdBound(), 0);
         G.parallelForNodes([&](const small_node u) {

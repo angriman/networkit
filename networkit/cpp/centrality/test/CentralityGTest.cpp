@@ -74,7 +74,7 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
     };
 
     INFO("Reading graph");
-    auto G = KONECTGraphReader().read("/home/angriman/graphs/moreno_lesmis");
+    auto G = NetworkitBinaryReader().read("/home/angriman/graphs/advogato.nkb");
     if (G.isDirected())
         G = GraphTools::toUndirected(G);
     if (G.isWeighted())
@@ -84,7 +84,7 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
     G.removeMultiEdges();
     G.removeSelfLoops();
     INFO("Done");
-    static constexpr double eps = 0.01;
+    static constexpr double eps = 0.1;
     static constexpr double tol = 1e-9;
 
     // Run approximation
@@ -94,7 +94,6 @@ TEST_F(CentralityGTest, testApproxEffectiveResistance) {
     INFO(apx.timeToSample);
     INFO(apx.timeDFS);
     INFO(apx.timeToAggregate);
-    INFO(apx.getDiagonal());
 }
 
 

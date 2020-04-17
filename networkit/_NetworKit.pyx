@@ -23,6 +23,7 @@ from cython.operator import dereference, preincrement
 
 # type imports
 from libc.stdint cimport uint64_t
+from libc.stdint cimport uint32_t
 from libc.stdint cimport int64_t
 from libc.stdint cimport uint8_t
 
@@ -42,6 +43,7 @@ from libcpp.algorithm cimport sort as stdsort
 ctypedef uint64_t count
 ctypedef uint64_t index
 ctypedef uint64_t edgeid
+ctypedef uint32_t small_node
 ctypedef index node
 ctypedef index cluster
 ctypedef double edgeweight
@@ -12027,10 +12029,11 @@ def sort2(sample):
 cdef extern from "<networkit/centrality/ApproxEffectiveResistance.hpp>":
 	cdef cppclass _ApproxEffectiveResistance "NetworKit::ApproxEffectiveResistance"(_Algorithm):
 		_ApproxEffectiveResistance(_Graph G, double eps) except +
-		node getRoot() except +
-		node getRootEcc() except +
+		void init() except +
+		small_node getRoot() except +
+		small_node getRootEcc() except +
 		vector[double] getApproxEffectiveResistances() except +
-		vector[double] getDiagonal() except +
+		vector[edgeweight] getDiagonal() except +
 		unordered_map[string, double] profilingResults() except +
 
 cdef class ApproxEffectiveResistance(Algorithm):
@@ -12042,6 +12045,9 @@ cdef class ApproxEffectiveResistance(Algorithm):
 
 	def profilingResults(self):
 		return (<_ApproxEffectiveResistance*>(self._this)).profilingResults()
+
+	def init(self):
+		return (<_ApproxEffectiveResistance*>(self._this)).init()
 
 	def getRootEcc(self):
 		return (<_ApproxEffectiveResistance*>(self._this)).getRootEcc()
