@@ -135,7 +135,7 @@ public:
         const count n = G.numberOfNodes(), m = G.numberOfEdges();
         auto R = getApproxEffectiveResistances();
         Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower | Eigen::Upper> cg;
-        cg.setTolerance(epsilon / (10.0 * std::sqrt((double)(n * m) * std::log(n))));
+        cg.setTolerance(1e-9);
         auto L = getLaplacian();
         cg.compute(L);
         Eigen::VectorXd rhs(n);

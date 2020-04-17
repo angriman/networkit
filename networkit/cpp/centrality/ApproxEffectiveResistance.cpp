@@ -482,6 +482,8 @@ void ApproxEffectiveResistance::aggregateUST() {
 }
 
 void ApproxEffectiveResistance::run() {
+    if (!didInit)
+        init();
     Aux::Timer totalTimer;
     totalTimer.start();
     numberOfUSTs = computeNumberOfUSTs();
@@ -505,12 +507,17 @@ void ApproxEffectiveResistance::run() {
 
     totalTimer.stop();
     time["total"] = totalTimer.elapsedMicroseconds() / 1e6;
+
     timeToSample = 0, timeDFS = 0, timeToAggregate = 0;
     for (index i = 0; i < omp_get_max_threads(); ++i) {
-        timeToSample += ((double)samplingTime[i]) / 1e9;
-        timeDFS += ((double)dfsTime[i]) / 1e9;
-        timeToAggregate += ((double)aggregationTime[i]) / 1e9;
+        timeToSample += ((double)samplingTime[i]);
+        timeDFS += ((double)dfsTime[i]);
+        timeToAggregate += ((double)aggregationTime[i]);
     }
+
+    time["UST sampling"] = static_cast<double>(timeToSample) / 1e9;
+    time["UST aggregation"] = static_cast<double>(timeToAggregate) / 1e9;
+    time["DFS time"] = static_cast<double>(timeDFS) / 1e9;
     hasRun = true;
 }
 
