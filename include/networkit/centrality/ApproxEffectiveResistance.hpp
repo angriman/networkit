@@ -138,10 +138,10 @@ public:
         cg.setTolerance(1e-9);
         auto L = getLaplacian();
         cg.compute(L);
-        Eigen::VectorXd rhs(n);
+        Eigen::VectorXd rhs(n), sol(n);
         G.parallelForNodes([&](const node u) { rhs[u] = -1.0 / static_cast<double>(n); });
         rhs[root] += 1.;
-        const auto sol = cg.solve(rhs);
+        sol = cg.solve(rhs);
         G.parallelForNodes([&](const node v) { R[v] = R[v] - sol[root] + 2. * sol[v]; });
         return R;
     }
