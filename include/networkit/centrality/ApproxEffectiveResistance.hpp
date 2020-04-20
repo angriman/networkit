@@ -132,7 +132,7 @@ public:
     }
 
     std::vector<double> getDiagonal() const {
-        const count n = G.numberOfNodes(), m = G.numberOfEdges();
+        const count n = G.numberOfNodes();
         auto R = getApproxEffectiveResistances();
         Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower | Eigen::Upper> cg;
         cg.setTolerance(1e-9);
