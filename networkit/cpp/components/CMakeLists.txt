@@ -1,6 +1,7 @@
 networkit_add_module(components
     BiconnectedComponents.cpp
     ConnectedComponents.cpp
+    ConnectedComponentsImpl.cpp
     DynConnectedComponents.cpp
     DynWeaklyConnectedComponents.cpp
     ParallelConnectedComponents.cpp

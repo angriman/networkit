@@ -10,7 +10,6 @@
 #include <networkit/components/ParallelConnectedComponents.hpp>
 #include <networkit/components/StronglyConnectedComponents.hpp>
 #include <networkit/components/DynConnectedComponents.hpp>
-#include <networkit/components/WeaklyConnectedComponents.hpp>
 #include <networkit/components/DynWeaklyConnectedComponents.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
 #include <networkit/graph/GraphTools.hpp>
