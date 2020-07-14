@@ -21,13 +21,12 @@ public:
     std::vector<std::vector<node>> getComponents() const;
     Graph extractLargestConnectedComponent(bool compactGraph) const;
 
-private:
+protected:
     const Graph *G;
     const bool weaklyCC;
     bool hasRun;
     Partition component;
     count numComponents;
-
     void assureFinished() const;
 };
 

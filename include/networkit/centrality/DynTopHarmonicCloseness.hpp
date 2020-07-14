@@ -11,7 +11,6 @@
 #include <networkit/base/Algorithm.hpp>
 #include <networkit/base/DynAlgorithm.hpp>
 #include <networkit/components/DynConnectedComponents.hpp>
-#include <networkit/components/DynWeaklyConnectedComponents.hpp>
 #include <networkit/graph/Graph.hpp>
 #include <networkit/structures/Partition.hpp>
 
