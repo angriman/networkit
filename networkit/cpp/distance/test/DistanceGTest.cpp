@@ -5,8 +5,11 @@
  *      Author: Maximilian Vogel
  */
 
+#include <unordered_set>
+
 #include <gtest/gtest.h>
 
+#include <networkit/distance/APSP.hpp>
 #include <networkit/distance/AStar.hpp>
 #include <networkit/distance/BFS.hpp>
 #include <networkit/distance/BidirectionalBFS.hpp>
@@ -17,6 +20,8 @@
 #include <networkit/distance/EffectiveDiameterApproximation.hpp>
 #include <networkit/distance/HopPlotApproximation.hpp>
 #include <networkit/distance/IncompleteDijkstra.hpp>
+#include <networkit/distance/MultiSourceBFS.hpp>
+#include <networkit/distance/MultiSourceDijkstra.hpp>
 #include <networkit/distance/NeighborhoodFunction.hpp>
 #include <networkit/distance/NeighborhoodFunctionApproximation.hpp>
 #include <networkit/distance/NeighborhoodFunctionHeuristic.hpp>
@@ -464,6 +469,121 @@ TEST_F(DistanceGTest, testNeighborhoodFunctionHeuristic) {
     anf.run();
     auto heuristic = anf.getNeighborhoodFunction();
     EXPECT_EQ(exact.size(), heuristic.size());
+}
+
+TEST_F(DistanceGTest, testMultiSourceBFS) {
+    Aux::Random::setSeed(42, true);
+    for (bool directed : {false, true}) {
+        const auto G = ErdosRenyiGenerator(1000, 0.15, directed).generate();
+
+        APSP apsp(G);
+        apsp.run();
+        const auto dist = apsp.getDistances();
+
+        std::unordered_set<node> sources, targets;
+        MultiSourceBFS msBFS(G);
+
+        for (size_t nSources : {1, 10, 20, 100}) {
+            sources.clear();
+            do {
+                sources.insert(GraphTools::randomNode(G));
+            } while (sources.size() < nSources);
+
+            if (nSources == 1)
+                msBFS.setSource(*(sources.begin()));
+            else
+                msBFS.setSources(sources.begin(), sources.end());
+            msBFS.clearTargets();
+            msBFS.run();
+            const auto &resultDist = msBFS.getDistances();
+            auto testDistance = [&](node u) -> void {
+                if (sources.find(u) != sources.end()) {
+                    EXPECT_DOUBLE_EQ(resultDist[u], 0);
+                } else {
+                    edgeweight minDist = std::numeric_limits<edgeweight>::max();
+                    for (node source : sources)
+                        minDist = std::min(minDist, dist[source][u]);
+                    EXPECT_DOUBLE_EQ(resultDist[u], minDist);
+                }
+            };
+
+            G.forNodes(testDistance);
+
+            for (size_t nTargets : {1, 10, 20, 50, 100}) {
+                targets.clear();
+                do {
+                    targets.insert(GraphTools::randomNode(G));
+                } while (targets.size() < nTargets);
+
+                if (nTargets == 1)
+                    msBFS.setTarget(*(targets.begin()));
+                else
+                    msBFS.setTargets(targets.begin(), targets.end());
+                msBFS.run();
+                for (node target : targets)
+                    testDistance(target);
+            }
+        }
+    }
+}
+
+TEST_F(DistanceGTest, testMultiSourceDijkstra) {
+    Aux::Random::setSeed(42, true);
+    for (bool directed : {false, true}) {
+        auto G = ErdosRenyiGenerator(1000, 0.15, directed).generate();
+        G = GraphTools::toWeighted(G);
+        G.forEdges([&](node u, node v) { G.setWeight(u, v, Aux::Random::probability()); });
+
+        APSP apsp(G);
+        apsp.run();
+        const auto dist = apsp.getDistances();
+
+        std::unordered_set<node> sources, targets;
+        MultiSourceDijkstra msd(G);
+
+        for (size_t nSources : {1, 10, 20, 100}) {
+            sources.clear();
+            do {
+                sources.insert(GraphTools::randomNode(G));
+            } while (sources.size() < nSources);
+
+            if (nSources == 1)
+                msd.setSource(*(sources.begin()));
+            else
+                msd.setSources(sources.begin(), sources.end());
+            msd.clearTargets();
+            msd.run();
+            const auto &resultDist = msd.getDistances();
+            auto testDistance = [&](node u) -> void {
+                if (sources.find(u) != sources.end()) {
+                    EXPECT_DOUBLE_EQ(resultDist[u], 0);
+                } else {
+                    edgeweight minDist = std::numeric_limits<edgeweight>::max();
+                    for (node source : sources)
+                        minDist = std::min(minDist, dist[source][u]);
+                    EXPECT_DOUBLE_EQ(resultDist[u], minDist);
+                }
+            };
+
+            G.forNodes(testDistance);
+            continue;
+
+            for (size_t nTargets : {1, 10, 20, 50, 100}) {
+                targets.clear();
+                do {
+                    targets.insert(GraphTools::randomNode(G));
+                } while (targets.size() < nTargets);
+
+                if (nTargets == 1)
+                    msd.setTarget(*(targets.begin()));
+                else
+                    msd.setTargets(targets.begin(), targets.end());
+                msd.run();
+                for (node target : targets)
+                    testDistance(target);
+            }
+        }
+    }
 }
 
 } /* namespace NetworKit */

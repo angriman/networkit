@@ -17,6 +17,9 @@ networkit_add_module(distance
     HopPlotApproximation.cpp
     IncompleteDijkstra.cpp
     JaccardDistance.cpp
+    MultiSourceBFS.cpp
+    MultiSourceDijkstra.cpp
+    MSSP.cpp
     NeighborhoodFunction.cpp
     NeighborhoodFunctionApproximation.cpp
     NeighborhoodFunctionHeuristic.cpp

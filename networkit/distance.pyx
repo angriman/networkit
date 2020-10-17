@@ -4,6 +4,7 @@ from cython.operator import dereference, preincrement
 
 from libc.stdint cimport uint64_t
 from libcpp.vector cimport vector
+from libcpp.unordered_map cimport unordered_map
 from libcpp.utility cimport pair
 from libcpp.map cimport map
 from libcpp cimport bool as bool_t
@@ -305,6 +306,286 @@ cdef class DynSSSP(SSSP):
 
 	def setTargetNode(self, t):
 		(<_DynSSSP*>(self._this)).setTargetNode(t)
+
+
+cdef extern from "<networkit/distance/MSSP.hpp>":
+
+	cdef cppclass _MSSP "NetworKit::MSSP"(_Algorithm):
+		vector[edgeweight] getDistances() except +
+		edgeweight distance(node t) except +
+		vector[node] getNodesSortedByDistance() except +
+		vector[node] getTargetNodesSortedByDistance() except +
+		unordered_map[node, edgeweight] getDistancesToTargets() except +
+		count getReachableNodes() except +
+		void setSources[SourcesInputIt](SourcesInputIt sourcesFirst, SourcesInputIt sourcesLast) except +
+		void setSource(node source) except +
+		void setTargets[TargetsInputIt](TargetsInputIt targetsFirst, TargetsInputIt targetsLast) except +
+		void setTarget(node target) except +
+		void clearTargets() except +
+
+cdef class MSSP(Algorithm):
+	""" Base class for multi-source shortest path algorithms. """
+	cdef Graph _G
+
+	def __init__(self, *args, **kwargs):
+		if type(self) == MSSP:
+			raise RuntimeError("Error, you may not use MSSP directly, use a sub-class instead")
+
+	def getDistances(self):
+		"""
+		Returns the minimum distances from the source nodes to all the other nodes. If one or more
+		targets have been specified, only the distances to the targets are guaranteed to be correct.
+
+		Returns
+		-------
+		vector[double]
+			Distances from the source nodes to all the other nodes.
+		"""
+		return (<_MSSP*>self._this).getDistances()
+
+	def distance(self, node t):
+		"""
+		Returns the distance from the source nodes to the node @a t. If one or more targets have been
+		specified and @a t is not among them, the output distance is not guaranteed to be correct.
+
+		Parameters
+		----------
+		t : node
+
+		Returns
+		-------
+		double
+			The minimum distance from the source nodes to the node @a t.
+		"""
+		return (<_MSSP*>self._this).distance(t)
+
+	def getNodesSortedByDistance(self):
+		"""
+		Returns a vector with all the nodes of the graph sorted by increasing distance from the
+		source nodes
+
+		Returns
+		-------
+		vector[node]
+			Nodes sorted by increasing distance from the source nodes.
+		"""
+		return (<_MSSP*>self._this).getNodesSortedByDistance()
+
+	def getTargetNodesSortedByDistance(self):
+		"""
+		Returns a vector with the target nodes sorted by increasing distance from the source nodes.
+
+		Returns
+		-------
+		vector[node]
+			Vector of target nodes sorted by increasing distance from the source nodes.
+		"""
+		return (<_MSSP*>self._this).getTargetNodesSortedByDistance()
+
+	def getDistancesToTargets(self):
+		"""
+		Returns a [node, edgeweight] map with the minimum distances from the source nodes to the
+		target nodes.
+
+		Returns
+		-------
+		map[node, edgeweight]
+			Map with keys the target nodes and values their minimum distance from
+			the source nodes.
+		"""
+		return (<_MSSP*>self._this).getDistancesToTargets()
+
+	def getReachableNodes(self):
+		"""
+		Returns the number of nodes reached from the source nodes during the exploration of the graph.
+
+		Returns
+		-------
+		count
+			The number of nodes reached from the source nodes during the exploration of the graph.
+		"""
+		return (<_MSSP*>self._this).getReachableNodes()
+
+	def setSources(self, sources):
+		"""
+		Change the source nodes.
+
+		Parameters
+		----------
+		sources : list
+			List of the new source nodes.
+		"""
+		cdef vector[node] nodeVec
+
+		try:
+			nodeVec = <vector[node]?>sources
+		except TypeError:
+			raise RuntimeError("Error, the input parameter must be a list of sources.")
+		(<_MSSP*>self._this).setSources[vector[node].iterator](nodeVec.begin(), nodeVec.end())
+
+	def setSource(self, source):
+		"""
+		Change the source nodes.
+
+		Parameters
+		----------
+		source : node
+			The new source node.
+		"""
+		(<_MSSP*>self._this).setSource(source)
+
+	def setTargets(self, targets):
+		"""
+		Change the target nodes.
+
+		Parameters
+		----------
+		targets : list
+			List of the new target nodes.
+		"""
+		cdef vector[node] nodeVec
+
+		try:
+			nodeVec = <vector[node]?>targets
+		except TypeError:
+			raise RuntimeError("Error, the input parameter must be a list of sources.")
+		(<_MSSP*>self._this).setTargets[vector[node].iterator](nodeVec.begin(), nodeVec.end())
+
+	def setTarget(self, target):
+		"""
+		Change the target nodes.
+
+		Parameters
+		----------
+		targets : node
+			The new target node.
+		"""
+		(<_MSSP*>self._this).setTarget(target)
+
+	def clearTargets(self):
+		"""
+		Clears the target nodes.
+		"""
+		(<_MSSP*>self._this).clearTargets()
+
+
+cdef extern from "<networkit/distance/MultiSourceBFS.hpp>":
+
+	cdef cppclass _MultiSourceBFS "NetworKit::MultiSourceBFS"(_MSSP):
+		_MultiSourceBFS(_Graph G) except +
+		_MultiSourceBFS(_Graph G, vector[node].iterator sourcesFirst, vector[node].iterator sourcesLast) except +
+		_MultiSourceBFS(_Graph G, vector[node].iterator sourcesFirst,
+						vector[node].iterator sourcesLast, vector[node].iterator
+						targetsFirst, vector[node].iterator targetsLast) except +
+		_MultiSourceBFS(_Graph G, vector[node].iterator sourcesFirst, vector[node].iterator sourcesLast, node target) except +
+
+cdef class MultiSourceBFS(MSSP):
+	"""
+		Multi-source BFS search on a graph from a given set of source nodes to all
+		the other nodes. If one or more target nodes are specified, the BFS
+		terminates after the shortest-path distance has been computed for all the
+		target nodes.
+	"""
+	def __cinit__(self, Graph G, sources=None, targets=None):
+		"""
+		Creates an instance of MultiSourceBFS with the input graph G, an (optional)
+		set of source and an (optional) set of targets.
+
+		Parameters
+		----------
+		G : networkit.Graph
+			The input graph.
+		sources : list
+			List of source nodes.
+		targets : list or node
+			List of target nodes or the target node.
+		"""
+		self._G = G
+		cdef vector[node] sourcesVec
+		cdef vector[node] targetsVec
+		cdef node target
+
+		if sources is None:
+			self._this = new _MultiSourceBFS(G._this)
+			return
+		try:
+			sourcesVec = <vector[node]?>sources
+		except TypeError:
+			raise RuntimeError("Error, sources must be a list of nodes.")
+
+		if targets is None:
+			self._this = new _MultiSourceBFS(G._this, sourcesVec.begin(), sourcesVec.end())
+			return
+
+		try:
+			targetsVec = <vector[node]?>targets
+			self._this = new _MultiSourceBFS(G._this, sourcesVec.begin(), sourcesVec.end(), targetsVec.begin(), targetsVec.end())
+		except TypeError:
+			try:
+				target = <node?>targets
+				self._this = new _MultiSourceBFS(G._this, sourcesVec.begin(), sourcesVec.end(), target)
+			except TypeError:
+				raise RuntimeError("Error, targets must be either a node or a list of nodes.")
+
+cdef extern from "<networkit/distance/MultiSourceDijkstra.hpp>":
+
+	cdef cppclass _MultiSourceDijkstra "NetworKit::MultiSourceDijkstra"(_MSSP):
+		_MultiSourceDijkstra(_Graph G) except +
+		_MultiSourceDijkstra(_Graph G, vector[node].iterator sourcesFirst, vector[node].iterator sourcesLast) except +
+		_MultiSourceDijkstra(_Graph G, vector[node].iterator sourcesFirst,
+						vector[node].iterator sourcesLast, vector[node].iterator
+						targetsFirst, vector[node].iterator targetsLast) except +
+		_MultiSourceDijkstra(_Graph G, vector[node].iterator sourcesFirst, vector[node].iterator sourcesLast, node target) except +
+
+cdef class MultiSourceDijkstra(MSSP):
+	"""
+		Multi-source Dijkstra search on a graph from a given set of source nodes to
+		all the other nodes. If one or more target nodes are specified, the BFS
+		terminates after the shortest-path distance has been computed for all the
+		target nodes.
+	"""
+
+	def __cinit__(self, Graph G, sources=None, targets=None):
+		"""
+		Creates an instance of MultiSourceDijkstra with the input graph G, an
+		(optional) set of source and an (optional) set of targets.
+
+		Parameters
+		----------
+		G : networkit.Graph
+			The input graph.
+		sources : list
+			List of source nodes.
+		targets : list or node
+			List of target nodes or the target node.
+		"""
+		self._G = G
+		cdef vector[node] sourcesVec
+		cdef vector[node] targetsVec
+		cdef node target
+
+		if sources is None:
+			self._this = new _MultiSourceDijkstra(G._this)
+			return
+		try:
+			sourcesVec = <vector[node]?>sources
+		except TypeError:
+			raise RuntimeError("Error, sources must be a list of nodes.")
+
+		if targets is None:
+			self._this = new _MultiSourceDijkstra(G._this, sourcesVec.begin(), sourcesVec.end())
+			return
+
+		try:
+			targetsVec = <vector[node]?>targets
+			self._this = new _MultiSourceDijkstra(G._this, sourcesVec.begin(), sourcesVec.end(), targetsVec.begin(), targetsVec.end())
+		except TypeError:
+			try:
+				target = <node?>targets
+				self._this = new _MultiSourceDijkstra(G._this, sourcesVec.begin(), sourcesVec.end(), target)
+			except TypeError:
+				raise RuntimeError("Error, targets must be either a node or a list of nodes.")
+
 
 cdef extern from "<networkit/distance/AdamicAdarDistance.hpp>":
 
