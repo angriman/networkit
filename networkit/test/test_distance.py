@@ -129,6 +129,63 @@ class TestDistance(unittest.TestCase):
 		testMesh(9, 18)
 		testMesh(7, 1)
 
+	def testMultiSourceBFS(self):
+		def testMSSP(mssp):
+			n = self.G.upperNodeIdBound()
+			mssp.run()
+			dist = mssp.getDistances()
+			self.assertEqual(len(dist), n)
+			sortedNodes = mssp.getNodesSortedByDistance()
+			self.assertEqual(len(mssp.getNodesSortedByDistance()), n)
+
+			for i in range(1, n):
+				self.assertLessEqual(dist[sortedNodes[i - 1]], dist[sortedNodes[i]])
+
+			mssp.distance(nk.graphtools.randomNode(self.G))
+			mssp.getDistancesToTargets()
+			mssp.getReachableNodes()
+
+			sortedTargets = mssp.getTargetNodesSortedByDistance()
+			if len(sortedTargets) > 0:
+				for i in range(1, len(sortedTargets)):
+					self.assertLessEqual(dist[sortedTargets[i - 1]], dist[sortedTargets[i]])
+
+		source = nk.graphtools.randomNode(self.G)
+		sources = set()
+		while len(sources) < 5:
+			sources.add(nk.graphtools.randomNode(self.G))
+
+		target = nk.graphtools.randomNode(self.G)
+		targets = set()
+		while len(targets) < 5:
+			targets.add(nk.graphtools.randomNode(self.G))
+
+		for mssp in [nk.distance.MultiSourceBFS(self.G), nk.distance.MultiSourceDijkstra(self.G)]:
+			testMSSP(mssp)
+
+			mssp.setSource(source)
+			testMSSP(mssp)
+
+			mssp.setTarget(target)
+			testMSSP(mssp)
+
+			mssp.setSources(sources)
+			mssp.clearTargets()
+			testMSSP(mssp)
+
+			mssp.setTargets(targets)
+			testMSSP(mssp)
+
+		testMSSP(nk.distance.MultiSourceBFS(self.G, sources))
+		testMSSP(nk.distance.MultiSourceBFS(self.G, sources, target))
+		testMSSP(nk.distance.MultiSourceBFS(self.G, sources, targets))
+
+		testMSSP(nk.distance.MultiSourceDijkstra(self.G, sources))
+		testMSSP(nk.distance.MultiSourceDijkstra(self.G, sources, target))
+		testMSSP(nk.distance.MultiSourceDijkstra(self.G, sources, targets))
+
+
+
 
 if __name__ == "__main__":
 	unittest.main()
