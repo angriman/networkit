@@ -270,6 +270,7 @@ class Profile:
 
 		# internal unique name | category name | display name |
 		# compute correlation within same category | value function for measures | display name (axis) | class name of measure | parameter of constructor
+		katz_alpha = 1 / (graphtools.maxDegree(G) + 1)
 		for parameter in [
 			("Centrality.Degree",					"Node Centrality",	"Degree",
 				True,	funcScores,	"Score",				centrality.DegreeCentrality, 			(G, )),
@@ -282,9 +283,9 @@ class Profile:
 			("Centrality.KPath", 					"Node Centrality",	"k-Path Centrality",
 				True,	funcScores,	"Score",				centrality.KPathCentrality,				(G, )),
 			("Centrality.Katz",						"Node Centrality",	"Katz Centrality",
-				True,	funcScores,	"Score",				centrality.KatzCentrality,				(G, )),
+				True,	funcScores,	"Score",				centrality.KatzCentrality,				(G, katz_alpha)),
 			("Centrality.Betweenness", 				"Node Centrality",	"Betweenness",
-				True,	funcScores,	"Score",				centrality.ApproxBetweenness2,			(G, 10, True)),
+				True,	funcScores,	"Score",				centrality.EstimateBetweenness,			(G, 10, True)),
 			("Centrality.Closeness",				"Node Centrality",	"Closeness",
 				True,	funcScores,	"Score",				centrality.ApproxCloseness,				(G, min(10, G.numberOfNodes()), True)),
 			("Partition.Communities", 				"Partition",		"Communities",
@@ -637,10 +638,10 @@ class Profile:
 									value = self.__correlations[category][keyA][keyB]
 								except:
 									value = self.__correlations[category][keyB][keyA]
-								if outputType == "HTML":
-									result += "<div class=\"Thumbnail_ScatterPlot\" data-title=\"" + keyB + "\" data-title-second=\"" + keyA + "\"><img src=\"data:image/svg+xml;utf8," + value["image"] + "\" /></div>"
-								elif outputType == "LaTeX":
-									result += "\n\\includegraphics[width=0.5\\textwidth]{{\"" + value["image"] + "\"}.pdf}"
+#								if outputType == "HTML":
+#									result += "<div class=\"Thumbnail_ScatterPlot\" data-title=\"" + keyB + "\" data-title-second=\"" + keyA + "\"><img src=\"data:image/svg+xml;utf8," + value["image"] + "\" /></div>"
+#								elif outputType == "LaTeX":
+#									result += "\n\\includegraphics[width=0.5\\textwidth]{{\"" + value["image"] + "\"}.pdf}"
 				return result
 			results[category]["Correlations"]["ScatterPlots"] += funcScatterPlot(category)
 
