@@ -1460,7 +1460,7 @@ cdef class KatzCentrality(Centrality):
 			The tolerance for convergence.
 	"""
 
-	def __cinit__(self, Graph G, alpha=0.2, beta=0.1, tol=1e-8):
+	def __cinit__(self, Graph G, alpha=5e-4, beta=0.1, tol=1e-8):
 		self._G = G
 		self._this = new _KatzCentrality(G._this, alpha, beta, tol)
 
