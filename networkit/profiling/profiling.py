@@ -238,12 +238,15 @@ class Profile:
 	def create(cls, G, preset="default", config=None):
 		""" creates a profile object
 
-		Args:
+		Parameters:
+		-----------
 			G: networkit.Graph
 				Graph to profile
 			preset: name of preset configuration: "complete", "minimal", "default"
 			config: object to control some aspects of the generation behaviour (Config)
+		
 		Returns:
+		--------
 			profile object
 		"""
 
@@ -316,7 +319,8 @@ class Profile:
 	def setVerbose(cls, verbose=False, level=0, filename=""):
 		""" set verbose behaviour of all public methods
 
-		Args:
+		Parameters:
+		-----------
 			verbose: enable/disable display verbose
 			level: set level of verbose (0, 1)
 			filename: enable/disable additional logfile support to given file
@@ -361,10 +365,11 @@ class Profile:
 		return self.__measures[measure]["time"]
 
 
-	def output(self, outputType, directory, style="light", color=colors["green"], parallel=False):
+	def output(self, outputType, directory, filename='graph', style="light", color=colors["green"], parallel=False):
 		""" outputs a computed profile to disk
 
-		Args:
+		Parameters:
+		-----------
 			outputType: profile output format ("HTML", "LaTeX")
 			directory: directory to write
 			style: style of generated output ("light")
@@ -379,8 +384,6 @@ class Profile:
 				raise ValueError("unknown output type: options are " + str(options_type[0:len(options_type)-1]))
 			if o == outputType:
 				break
-
-		filename  = "{0}.".format(self.__G.getName())
 
 		result = self.__format(
 			outputType = outputType,
@@ -435,7 +438,8 @@ class Profile:
 	def show(self, style="light", color=colors["green"], parallel=False):
 		""" display computed profile
 
-		Args:
+		Parameters:
+		-----------
 			style: style of generated output ("light")
 			color: mainly used color of given style (RGB values in [0,1])
 			parallel: run some additional parts of the generation in parallel (experimental)
@@ -740,7 +744,6 @@ class Profile:
 
 	def __loadProperties(self):
 		""" calculate the network properties """
-		self.__properties["Name"] = self.__G.getName()
 		self.__properties["Nodes"] = self.__G.numberOfNodes()
 		self.__properties["Edges"] = self.__G.numberOfEdges()
 		self.__properties["Density"] = kit.graphtools.density(self.__G)
@@ -954,7 +957,8 @@ class Profile:
 def walk(inputDir, outputDir, graphFormat, filePattern="*",  preset="default", config=None, outputType="HTML", style="light", color=colors["green"], recursive=False, parallel=False):
 	""" tests all files of a directory for the given conditions and generates a profile when matching
 
-	Args:
+	Parameters:
+	-----------
 		inputDir: the directory to search
 		filePattern: specify accepted file names, e.g.: *.METIS.graph
 		outputDir: directory to write the generated profiles

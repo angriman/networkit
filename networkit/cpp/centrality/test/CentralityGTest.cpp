@@ -14,6 +14,7 @@
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/centrality/ApproxBetweenness.hpp>
 #include <networkit/centrality/ApproxCloseness.hpp>
+#include <networkit/centrality/ApproxElectricalCloseness.hpp>
 #include <networkit/centrality/ApproxSpanningEdge.hpp>
 #include <networkit/centrality/ApproxGroupBetweenness.hpp>
 #include <networkit/centrality/Betweenness.hpp>
@@ -41,6 +42,7 @@
 #include <networkit/distance/Dijkstra.hpp>
 #include <networkit/generators/DorogovtsevMendesGenerator.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
+#include <networkit/generators/HyperbolicGenerator.hpp>
 #include <networkit/graph/GraphTools.hpp>
 #include <networkit/io/METISGraphReader.hpp>
 #include <networkit/io/SNAPGraphReader.hpp>
@@ -1800,6 +1802,22 @@ TEST_P(CentralityGTest, testGedWalk) {
 
             EXPECT_GE(apxScore, (1. - 1. / std::exp(1)) * maxScore - epsilon);
         }
+    }
+}
+
+TEST_F(CentralityGTest, testApproxElectricalCloseness) {
+    const double eps = 0.1;
+    for (int seed : {1, 2, 3}) {
+        Aux::Random::setSeed(seed, true);
+        auto G = HyperbolicGenerator(75, 10, 3).generate();
+        G = ConnectedComponents::extractLargestConnectedComponent(G, true);
+
+        ApproxElectricalCloseness apx(G);
+        apx.run();
+        const auto diag = apx.getDiagonal();
+        const auto gt = apx.computeExactDiagonal(1e-12);
+        G.forNodes([&](node u) { EXPECT_NEAR(diag[u], gt[u], eps); });
+        EXPECT_EQ(apx.scores().size(), G.numberOfNodes());
     }
 }
 

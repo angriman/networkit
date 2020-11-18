@@ -1,5 +1,5 @@
 /*
- * Centrality.h
+ * Centrality.hpp
  *
  *  Created on: 19.02.2014
  *      Author: Christian Staudt
@@ -10,8 +10,6 @@
 
 #include <networkit/graph/Graph.hpp>
 #include <networkit/base/Algorithm.hpp>
-
-#include <tlx/define/deprecated.hpp>
 
 namespace NetworKit {
 
@@ -44,7 +42,6 @@ public:
      *
      * @return The centrality scores calculated by @link run().
      */
-    virtual std::vector<double> TLX_DEPRECATED(scores(bool moveOut));
     virtual const std::vector<double> &scores() const;
 
     /**
