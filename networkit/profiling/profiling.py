@@ -114,11 +114,13 @@ class Config:
 			"Centrality.Degree": False,
 			"Centrality.CoreDecomposition": False,
 			"Centrality.ClusteringCoefficient": False,
+			"Centrality.GedWalk": False,
 			"Centrality.PageRank": False,
 			"Centrality.KPath": False,
 			"Centrality.Katz": False,
 			"Centrality.Betweenness": False,
 			"Centrality.Closeness": False,
+			"Centrality.HarmonicCloseness": False,
 			"Partition.Communities": False,
 			"Partition.ConnectedComponents": False,
 			"Partition.CoreDecomposition": False
@@ -140,10 +142,10 @@ class Config:
 			result.setMeasure("Centrality.Degree"),
 			result.setMeasure("Centrality.CoreDecomposition")
 			result.setMeasure("Centrality.ClusteringCoefficient")
-			result.setMeasure("Centrality.PageRank")
 			result.setMeasure("Centrality.Katz")
 			result.setMeasure("Centrality.Betweenness")
 			result.setMeasure("Centrality.Closeness")
+			result.setMeasure("Centrality.HarmonicCloseness")
 			result.setMeasure("Partition.Communities")
 			result.setMeasure("Partition.ConnectedComponents")
 			result.setMeasure("Partition.CoreDecomposition")
@@ -156,11 +158,11 @@ class Config:
 		elif preset == "default":
 			result.setProperty("Diameter")
 			result.setMeasure("Centrality.Degree")
-			result.setMeasure("Centrality.ClusteringCoefficient")
-			result.setMeasure("Centrality.PageRank")
+			result.setMeasure("Centrality.GedWalk")
 			result.setMeasure("Centrality.Betweenness")
 			result.setMeasure("Centrality.Katz")
-			result.setMeasure("Centrality.CoreDecomposition")
+			result.setMeasure("Centrality.HarmonicCloseness")
+			result.setMeasure("Centrality.PageRank")
 			result.setMeasure("Partition.ConnectedComponents")
 			result.setMeasure("Partition.Communities")
 			result.setMeasure("Partition.CoreDecomposition")
@@ -276,8 +278,8 @@ class Profile:
 				True,	funcScores,	"Score",				centrality.DegreeCentrality, 			(G, )),
 			("Centrality.CoreDecomposition",		"Node Centrality",	"k-Core Decomposition",
 				True,	funcScores,	"Score",				centrality.CoreDecomposition, 			(G, )),
-			("Centrality.ClusteringCoefficient",	"Node Centrality",	"Local Clustering Coefficient",
-				True,	funcScores,	"Score",				centrality.LocalClusteringCoefficient,	(G, )),
+			("Centrality.GedWalk",	"Node Centrality",	"Ed Walk",
+				True,	funcScores,	"Score",				centrality.GedWalk,	(G, )),
 			("Centrality.PageRank", 				"Node Centrality",	"PageRank",
 				True,	funcScores,	"Score",				centrality.PageRank, 					(G, )),
 			("Centrality.KPath", 					"Node Centrality",	"k-Path Centrality",
@@ -285,9 +287,11 @@ class Profile:
 			("Centrality.Katz",						"Node Centrality",	"Katz Centrality",
 				True,	funcScores,	"Score",				centrality.KatzCentrality,				(G, katz_alpha)),
 			("Centrality.Betweenness", 				"Node Centrality",	"Betweenness",
-				True,	funcScores,	"Score",				centrality.EstimateBetweenness,			(G, 10, True)),
+				True,	funcScores,	"Score",				centrality.KadabraBetweenness,			(G, 0.1)),
 			("Centrality.Closeness",				"Node Centrality",	"Closeness",
 				True,	funcScores,	"Score",				centrality.ApproxCloseness,				(G, min(10, G.numberOfNodes()), True)),
+			("Centrality.HarmonicCloseness",				"Node Centrality",	"Harmonic Closeness",
+				True,	funcScores,	"Score",				centrality.HarmonicCloseness,				(G, )),
 			("Partition.Communities", 				"Partition",		"Communities",
 				False,	funcSizes,	"Nodes per Community",	community.PLM,			 				(G, )),
 			("Partition.ConnectedComponents", 		"Partition",		"Connected Components",
@@ -803,9 +807,11 @@ class Profile:
 
 		for name, measure in self.__measures.items():
 			self.verbosePrint(name + ": ", end="")
+			print("Calculating ", name)
 			try:
 				instance = measure["class"](*measure["parameters"])
 			except Exception as e:
+				print("Exception!", e)
 				self.verbosePrint("(removed)\n>> " + str(e))
 				failed_measures.append(name)
 				continue

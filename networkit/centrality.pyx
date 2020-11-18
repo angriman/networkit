@@ -1202,6 +1202,7 @@ cdef extern from "<networkit/centrality/GedWalk.hpp>":
 		vector[node] groupMaxGedWalk() except +
 		double getApproximateScore() except +
 		double scoreOfGroup[InputIt](InputIt first, InputIt last, double epsilon) except +
+		vector[double] scores() except +
 
 cdef class GedWalk(Algorithm):
 	cdef Graph _G
@@ -1239,6 +1240,12 @@ cdef class GedWalk(Algorithm):
 		if self._this is not NULL:
 			del self._this
 			self._this = NULL
+
+	def scores(self):
+		scores = []
+		for u in self._G.iterNodes():
+			scores.append(self.scoreOfGroup([u]))
+		return scores
 
 	def groupMaxGedWalk(self):
 		"""
