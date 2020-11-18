@@ -121,6 +121,7 @@ class Config:
 			"Centrality.Betweenness": False,
 			"Centrality.Closeness": False,
 			"Centrality.HarmonicCloseness": False,
+			"Centrality.ApproxElectricalCloseness": False,
 			"Partition.Communities": False,
 			"Partition.ConnectedComponents": False,
 			"Partition.CoreDecomposition": False
@@ -157,7 +158,7 @@ class Config:
 
 		elif preset == "default":
 			result.setProperty("Diameter")
-			result.setMeasure("Centrality.Degree")
+			result.setMeasure("Centrality.ApproxElectricalCloseness")
 			result.setMeasure("Centrality.GedWalk")
 			result.setMeasure("Centrality.Betweenness")
 			result.setMeasure("Centrality.Katz")
@@ -295,6 +296,8 @@ class Profile:
 				True,	funcScores,	"Score",				centrality.ApproxCloseness,				(G, min(10, G.numberOfNodes()), True)),
 			("Centrality.HarmonicCloseness",				"Node Centrality",	"Harmonic Closeness",
 				True,	funcScores,	"Score",				centrality.HarmonicCloseness,				(G, )),
+			("Centrality.ApproxElectricalCloseness",				"Node Centrality",	"Electrical Closeness",
+				True,	funcScores,	"Score",				centrality.ApproxElectricalCloseness,				(G, )),
 			("Partition.Communities", 				"Partition",		"Communities",
 				False,	funcSizes,	"Nodes per Community",	community.PLM,			 				(G, )),
 			("Partition.ConnectedComponents", 		"Partition",		"Connected Components",
