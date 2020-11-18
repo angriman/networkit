@@ -1817,7 +1817,7 @@ cdef extern from "<networkit/centrality/ApproxElectricalCloseness.hpp>":
 		vector[double] getDiagonal() except +
 		vector[double] computeExactDiagonal(double tol) except +
 
-cdef class ApproxElectricalCloseness(Algorithm):
+cdef class ApproxElectricalCloseness(Centrality):
 	"""
 	Estimates the electrical closeness of all the vertices of the graph by approximating the
 	diagonal of the laplacian's pseudoinverse of @a G. Every element of the diagonal is
@@ -1838,8 +1838,6 @@ cdef class ApproxElectricalCloseness(Algorithm):
 		Balances the tolerance of the solver for the linear system and the
 		number of USTs to be sampled.
 	"""
-
-	cdef Graph _G
 
 	def __cinit__(self, Graph G, double eps = 0.1, double kappa = 0.3):
 		self._G = G
