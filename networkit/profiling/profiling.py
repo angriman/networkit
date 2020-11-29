@@ -276,7 +276,6 @@ class Profile:
 
 		# internal unique name | category name | display name |
 		# compute correlation within same category | value function for measures | display name (axis) | class name of measure | parameter of constructor
-		katz_alpha = 1 / (graphtools.maxDegree(G) + 1)
 		for parameter in [
 			("Centrality.Degree",					"Node Centrality",	"Degree",
 				True,	funcScores,	"Score",				centrality.DegreeCentrality, 			(G, )),
@@ -289,7 +288,7 @@ class Profile:
 			("Centrality.KPath", 					"Node Centrality",	"k-Path Centrality",
 				True,	funcScores,	"Score",				centrality.KPathCentrality,				(G, )),
 			("Centrality.Katz",						"Node Centrality",	"Katz Centrality",
-				True,	funcScores,	"Score",				centrality.KatzCentrality,				(G, katz_alpha)),
+				True,	funcScores,	"Score",				centrality.KatzCentrality,				(G, )),
 			("Centrality.Betweenness", 				"Node Centrality",	"Betweenness",
 				True,	funcScores,	"Score",				centrality.KadabraBetweenness,			(G, 0.1)),
 			("Centrality.Closeness",				"Node Centrality",	"Closeness",
