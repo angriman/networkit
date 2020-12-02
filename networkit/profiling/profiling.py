@@ -276,19 +276,20 @@ class Profile:
 
 		# internal unique name | category name | display name |
 		# compute correlation within same category | value function for measures | display name (axis) | class name of measure | parameter of constructor
+		katz_alpha = 1. / (1. + graphtools.maxDegree(G))
 		for parameter in [
 			("Centrality.Degree",					"Node Centrality",	"Degree",
 				True,	funcScores,	"Score",				centrality.DegreeCentrality, 			(G, )),
 			("Centrality.CoreDecomposition",		"Node Centrality",	"k-Core Decomposition",
 				True,	funcScores,	"Score",				centrality.CoreDecomposition, 			(G, )),
-			("Centrality.GedWalk",	"Node Centrality",	"Ed Walk",
+			("Centrality.GedWalk",	"Node Centrality",	"ED Walk",
 				True,	funcScores,	"Score",				centrality.GedWalk,	(G, )),
 			("Centrality.PageRank", 				"Node Centrality",	"PageRank",
 				True,	funcScores,	"Score",				centrality.PageRank, 					(G, )),
 			("Centrality.KPath", 					"Node Centrality",	"k-Path Centrality",
 				True,	funcScores,	"Score",				centrality.KPathCentrality,				(G, )),
 			("Centrality.Katz",						"Node Centrality",	"Katz Centrality",
-				True,	funcScores,	"Score",				centrality.KatzCentrality,				(G, )),
+				True,	funcScores,	"Score",				centrality.KatzCentrality,				(G, katz_alpha)),
 			("Centrality.Betweenness", 				"Node Centrality",	"Betweenness",
 				True,	funcScores,	"Score",				centrality.KadabraBetweenness,			(G, 0.1)),
 			("Centrality.Closeness",				"Node Centrality",	"Closeness",
