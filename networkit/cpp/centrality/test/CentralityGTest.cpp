@@ -28,6 +28,7 @@
 #include <networkit/centrality/GedWalk.hpp>
 #include <networkit/centrality/GroupCloseness.hpp>
 #include <networkit/centrality/GroupDegree.hpp>
+#include <networkit/centrality/GroupHarmonicClosenessLocalSearch.hpp>
 #include <networkit/centrality/HarmonicCloseness.hpp>
 #include <networkit/centrality/KPathCentrality.hpp>
 #include <networkit/centrality/KadabraBetweenness.hpp>
@@ -1804,6 +1805,24 @@ TEST_F(CentralityGTest, testApproxElectricalCloseness) {
         const auto gt = apx.computeExactDiagonal(1e-12);
         G.forNodes([&](node u) { EXPECT_NEAR(diag[u], gt[u], eps); });
         EXPECT_EQ(apx.scores().size(), G.numberOfNodes());
+    }
+}
+
+TEST_P(CentralityGTest, testGroupHarmonicClosenessLocalSearch) {
+    const count n = 100;
+    const double p = 0.15;
+    for (int seed : {1, 2, 3}) {
+        Aux::Random::setSeed(seed, true);
+        for (count k : {5, 10, 20}) {
+            auto G = ErdosRenyiGenerator(n, p, isDirected()).generate();
+            if (isWeighted()) {
+                G = GraphTools::toWeighted(G);
+                G.parallelForEdges([&G](node u, node v) { G.setWeight(u, v, Aux::Random::real(0.01, 10)); });
+                GroupHarmonicClosenessLocalSearch ghc(G, k);
+                ghc.run();
+//                auto &result = ghc.groupMaxHarmonicCloseness();
+            }
+        }
     }
 }
 

@@ -19,6 +19,8 @@ networkit_add_module(centrality
     GedWalk.cpp
     GroupCloseness.cpp
     GroupDegree.cpp
+    GroupHarmonicClosenessLocalSearch.cpp
+    GroupHarmonicClosenessLocalSearchImpl.cpp
     HarmonicCloseness.cpp
     KadabraBetweenness.cpp
     KatzCentrality.cpp
