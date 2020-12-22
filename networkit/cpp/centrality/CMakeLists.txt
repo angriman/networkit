@@ -18,6 +18,7 @@ networkit_add_module(centrality
     EstimateBetweenness.cpp
     GedWalk.cpp
     GroupCloseness.cpp
+    GroupClosenessImpl.cpp
     GroupDegree.cpp
     HarmonicCloseness.cpp
     KadabraBetweenness.cpp
