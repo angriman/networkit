@@ -46,31 +46,27 @@ GroupClosenessImpl<Weight>::GroupClosenessImpl(const Graph &G, count k, Weight m
         predGlobal.resize(threads, std::vector<node>(n));
 }
 
-template <>
-void GroupClosenessImpl<count>::computeFarnessLowerBound() {
-    G->parallelForNodes([&farness = farness, &G = G](node u) {
-        farness[u] = G->degree(u) + (G->numberOfNodes() - G->degree(u)) * 2;
-    });
-}
+template <class Weight>
+void GroupClosenessImpl<Weight>::run() {
+    group.push_back(topClosenessNode());
+#ifdef NETWORKIT_SANITY_CHECKS
+    checkDistFromGroup();
+#endif // NETWORKIT_SANITY_CHECKS
 
-template <>
-void GroupClosenessImpl<edgeweight>::computeFarnessLowerBound() {
-    G->parallelForNodes([&farness = farness, &G = G, &minEdgeWeight = minEdgeWeight](node u) {
-        edgeweight cheapestOutEdge = infDist;
-        G->forNeighborsOf(u, [&cheapestOutEdge](node, edgeweight ew) {
-            cheapestOutEdge = std::min(cheapestOutEdge, ew);
-        });
-
-        farness[u] =
-            cheapestOutEdge
-            + (minEdgeWeight + cheapestOutEdge) * static_cast<edgeweight>(G->numberOfNodes() - 1);
-    });
+    while (group.size() < k) {
+        group.push_back(findNodeWithHighestMarginalGain());
+#ifdef NETWORKIT_SANITY_CHECKS
+        checkDistFromGroup();
+#endif // NETWORKIT_SANITY_CHECKS
+        marginalGain[group.back()] = 0;
+    }
 }
 
 template <class Weight>
 node GroupClosenessImpl<Weight>::topClosenessNode() {
     computeFarnessLowerBound();
-    candidateNodesPQ.build_heap(G->nodeRange().begin(), G->nodeRange().end());
+    tlx::DAryAddressableIntHeap<node, 2, Less> nodesWithLowestFarness{Less(farness)};
+    nodesWithLowestFarness.build_heap(G->nodeRange().begin(), G->nodeRange().end());
     node highestClosenessNode = none;
     double lowestFarness = std::numeric_limits<double>::max();
 
@@ -82,8 +78,8 @@ node GroupClosenessImpl<Weight>::topClosenessNode() {
             node u = none;
 #pragma omp critical
             {
-                if (!candidateNodesPQ.empty()) {
-                    u = candidateNodesPQ.extract_top();
+                if (!nodesWithLowestFarness.empty()) {
+                    u = nodesWithLowestFarness.extract_top();
                     if (farness[u] >= lowestFarness) {
                         stop.store(true, std::memory_order_relaxed);
                         u = none;
@@ -95,13 +91,10 @@ node GroupClosenessImpl<Weight>::topClosenessNode() {
             if (u == none)
                 break;
 
-            const auto ssspResult = prunedSSSP(u, lowestFarness);
+            const auto ssspResult = prunedSSSPEmptyGroup(u, lowestFarness);
             if (!ssspResult.pruned) {
 #ifdef NETWORKIT_SANITY_CHECKS
-                assert(group.empty());
-                group.push_back(u);
-                checkDistFromGroup();
-                group.pop_back(u);
+                checkTopNode(u, distGlobal[omp_get_thread_num()], ssspResult.farness);
 #endif // NETWORKIT_SANITY_CHECKS
 
 #pragma omp critical
@@ -120,7 +113,7 @@ node GroupClosenessImpl<Weight>::topClosenessNode() {
 
 template <>
 GroupClosenessImpl<count>::PrunedSSSPResult
-GroupClosenessImpl<count>::prunedSSSP(node source, double lowestFarness) {
+GroupClosenessImpl<count>::prunedSSSPEmptyGroup(node source, double lowestFarness) {
     auto &visited = visitedGlobal[omp_get_thread_num()];
     std::fill(visited.begin(), visited.end(), false);
     visited[source] = true;
@@ -129,7 +122,6 @@ GroupClosenessImpl<count>::prunedSSSP(node source, double lowestFarness) {
     dist[source] = 0;
 
     auto &pred = predGlobal[omp_get_thread_num()];
-
     std::queue<node> q1, q2;
     q1.push(source);
 
@@ -182,11 +174,109 @@ GroupClosenessImpl<count>::prunedSSSP(node source, double lowestFarness) {
 
 template <>
 GroupClosenessImpl<edgeweight>::PrunedSSSPResult
-GroupClosenessImpl<edgeweight>::prunedSSSP(node source, double lowestFarness) {
-    return {0, false};
+GroupClosenessImpl<edgeweight>::prunedSSSPEmptyGroup(node source, double lowestFarness) {
+    auto &visited = visitedGlobal[omp_get_thread_num()];
+    std::fill(visited.begin(), visited.end(), false);
+    visited[source] = true;
+
+    auto &dist = distGlobal[omp_get_thread_num()];
+    std::fill(dist.begin(), dist.end(), infDist);
+    dist[source] = 0;
+
+    auto &prioQ = dijkstraHeaps[omp_get_thread_num()];
+    prioQ.clear();
+    prioQ.push(source);
+
+    const auto exploreNeighbors = [&](node u) -> void {
+        node w;
+        edgeweight ew;
+        for (const auto neighborWeight : G->weightNeighborRange(u)) {
+            std::tie(w, ew) = neighborWeight;
+            const edgeweight newDist = dist[u] + ew;
+            if (!visited[w]) {
+                visited[w] = true;
+                dist[w] = newDist;
+                prioQ.push(w);
+            } else if (newDist < dist[w]) {
+                dist[w] = newDist;
+                prioQ.update(w);
+            }
+        }
+    };
+
+    edgeweight curFarness = 0, farnessLowerBound = farness[source];
+    count visitedNodes = 1;
+
+    do {
+        const node u = prioQ.extract_top();
+        curFarness += dist[u];
+        farnessLowerBound =
+            curFarness + static_cast<edgeweight>(G->numberOfNodes() - visitedNodes) * dist[u];
+
+        if (farnessLowerBound >= lowestFarness)
+            return {false, farnessLowerBound};
+
+        ++visitedNodes;
+        exploreNeighbors(u);
+    } while (!prioQ.empty());
+
+    return {true, curFarness};
+}
+
+template <>
+node GroupClosenessImpl<count>::findNodeWithHighestMarginalGain() {
+    return none;
+}
+
+template <>
+node GroupClosenessImpl<edgeweight>::findNodeWithHighestMarginalGain() {
+    return none;
+}
+
+template <>
+void GroupClosenessImpl<count>::computeFarnessLowerBound() {
+    G->parallelForNodes([&farness = farness, &G = G](node u) {
+        farness[u] = G->degree(u) + (G->numberOfNodes() - G->degree(u)) * 2;
+    });
+}
+
+template <>
+void GroupClosenessImpl<edgeweight>::computeFarnessLowerBound() {
+    G->parallelForNodes([&farness = farness, &G = G, &minEdgeWeight = minEdgeWeight](node u) {
+        edgeweight cheapestOutEdge = infDist;
+        G->forNeighborsOf(u, [&cheapestOutEdge](node, edgeweight ew) {
+            cheapestOutEdge = std::min(cheapestOutEdge, ew);
+        });
+
+        farness[u] =
+            cheapestOutEdge
+            + (minEdgeWeight + cheapestOutEdge) * static_cast<edgeweight>(G->numberOfNodes() - 1);
+    });
 }
 
 #ifdef NETWORKIT_SANITY_CHECKS
+template <>
+void GroupClosenessImpl<count>::checkTopNode(node u, const std::vector<count> &dist,
+                                             count computedFarness) const {
+    count farnessU = 0;
+    Traversal::BFSfrom(*G, u, [&dist = dist](node v, count distV) {
+        assert(dist[v] == distV);
+        farnessU += distV;
+    });
+    assert(farnessU == computedFarness);
+}
+
+template <>
+void GroupClosenessImpl<edgweight>::checkTopNode(node u, const std::vector<edgweight> &dist,
+                                                 edgeweight computedFarness) const {
+    edgeweight farnessU = 0;
+    Traversal::DijkstraFrom(*G, u, [&dist = dist](node v, edgweight distV) {
+        assert(dist[v] == distV);
+        farnessU += distV;
+    });
+    assert(farnessU == computedFarness);
+}
+
 template <>
 void GroupClosenessImpl<count>::checkDistFromGroup() const {
     Traversal::BFSfrom(

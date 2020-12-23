@@ -37,9 +37,17 @@ private:
     std::vector<node> group, nearerNodes;
     std::vector<std::vector<node>> predGlobal;
     std::vector<std::vector<node>> nearerNodesGlobal;
-    std::vector<Weight> distFromGroup, farness, lowestDist;
+    std::vector<Weight> distFromGroup, farness, marginalGain, lowestDist;
     std::vector<std::vector<Weight>> distGlobal;
     std::vector<std::vector<bool>> visitedGlobal;
+
+    struct Greater {
+        Greater(const std::vector<Weight> &vec) : vec(vec) {}
+        bool operator()(node x, node y) const noexcept { return vec[x] > vec[y]; }
+
+    private:
+        const std::vector<Weight> &vec;
+    };
 
     struct Less {
         Less(const std::vector<Weight> &vec) : vec(vec) {}
@@ -49,7 +57,7 @@ private:
         const std::vector<Weight> &vec;
     };
 
-    tlx::d_ary_addressable_int_heap<node, 2, Less> candidateNodesPQ{Less(farness)};
+    tlx::d_ary_addressable_int_heap<node, 2, Greater> candidateNodesPQ{Greater(farness)};
     std::vector<tlx::d_ary_addressable_int_heap<node, 2, Less>> dijkstraHeaps;
 
     struct PrunedSSSPResult {
@@ -58,15 +66,17 @@ private:
         PrunedSSSPResult(bool pruned, Weight farness) : farness(farness), pruned(pruned) {}
     };
 
-    PrunedSSSPResult prunedSSSP(node source, double highestClosenessScore);
+    PrunedSSSPResult prunedSSSPEmptyGroup(node source, double highestClosenessScore);
     node topClosenessNode();
+
     void computeFarnessLowerBound();
 
-    node findNodeWithHighestMargGain();
+    node findNodeWithHighestMarginalGain();
     Weight computeMargGain(node source);
 
 #ifdef NETWORKIT_SANITY_CHECKS
-    void checkDistances() const;
+    void checkTopNode(node u, const std::vector<Weight> &dist, Weight computedFarness) const;
+    void checkDistFromGroup() const;
 #endif // NETWORKIT_SANITY_CHECKS
 };
 
