@@ -23,7 +23,7 @@ GroupClosenessImpl<Weight>::GroupClosenessImpl(const Graph &G, count k, Weight m
     group.reserve(k);
     distFromGroup.resize(n, infDist);
     distGlobal.resize(threads, std::vector<Weight>(n));
-    lowestDist.resize(n, infDist);
+    lowestDist.resize(n);
     visitedGlobal.resize(threads, std::vector<bool>(n));
     farness.resize(n, 0);
     marginalGain.resize(n);
@@ -98,7 +98,7 @@ node GroupClosenessImpl<Weight>::topClosenessNode() {
                 break;
 
             const auto ssspResult = prunedSSSPEmptyGroup(u, lowestFarness);
-            marginalGain[u] = ssspResult.farness > 0 ? 1. / static_cast<double>(ssspResult.farness) : 0;
+            marginalGain[u] = ssspResult.farness;
             if (!ssspResult.pruned) {
 #ifdef NETWORKIT_SANITY_CHECKS
                 checkTopNode(u, distGlobal[omp_get_thread_num()], ssspResult.farness);
@@ -120,7 +120,7 @@ node GroupClosenessImpl<Weight>::topClosenessNode() {
 
 template <>
 GroupClosenessImpl<count>::PrunedSSSPResult
-GroupClosenessImpl<count>::prunedSSSPEmptyGroup(node source, double lowestFarness) {
+GroupClosenessImpl<count>::prunedSSSPEmptyGroup(node source, count lowestFarness) {
     auto &visited = visitedGlobal[omp_get_thread_num()];
     std::fill(visited.begin(), visited.end(), false);
     visited[source] = true;
@@ -181,7 +181,7 @@ GroupClosenessImpl<count>::prunedSSSPEmptyGroup(node source, double lowestFarnes
 
 template <>
 GroupClosenessImpl<edgeweight>::PrunedSSSPResult
-GroupClosenessImpl<edgeweight>::prunedSSSPEmptyGroup(node source, double lowestFarness) {
+GroupClosenessImpl<edgeweight>::prunedSSSPEmptyGroup(node source, edgeweight lowestFarness) {
     auto &visited = visitedGlobal[omp_get_thread_num()];
     std::fill(visited.begin(), visited.end(), false);
     visited[source] = true;
@@ -232,7 +232,51 @@ GroupClosenessImpl<edgeweight>::prunedSSSPEmptyGroup(node source, double lowestF
 
 template <>
 node GroupClosenessImpl<count>::findNodeWithHighestMarginalGain() {
-    return none;
+    node bestNode = candidateNodesPQ.top();
+    count highestFarnessDecrement = 0;
+
+    std::atomic<bool> stop{false};
+
+#pragma omp parallel
+    {
+        while (!stop.load(std::memory_order_relaxed)) {
+            node u = none;
+#pragma omp critical
+            {
+                if (!candidateNodesPQ.empty()) {
+                    u = candidateNodesPQ.extract_top();
+                    if (marginalGain[u] <= highestFarnessDecrement) {
+                        stop.store(true, std::memory_order_relaxed);
+                        u = none;
+                    }
+                } else
+                    stop.store(true, std::memory_order_relaxed);
+            }
+
+            if (u == none)
+                break;
+
+            const auto ssspResult = prunedSSSP(u, highestFarnessDecrement);
+            marginalGain[u] = ssspResult.farness;
+
+            if (!ssspResult.pruned) {
+#pragma omp critical
+                {
+                    if (ssspResult.farness > highestFarnessDecrement) {
+                        bestNode = u;
+                        highestFarnessDecrement = ssspResult.farness;
+                        std::swap(lowestDist, distGlobal[omp_get_thread_num()]);
+                        std::swap(nearerNodes, nearerNodesGlobal[omp_get_thread_num()]);
+                    }
+                }
+            }
+        }
+    }
+
+    for (const node u : nearerNodes) {
+        assert(lowestDist[u] < distFromGroup[u]);
+    }
+    return bestNode;
 }
 
 template <>

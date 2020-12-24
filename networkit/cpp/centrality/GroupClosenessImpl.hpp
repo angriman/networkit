@@ -66,7 +66,8 @@ private:
         PrunedSSSPResult(bool pruned, Weight farness) : farness(farness), pruned(pruned) {}
     };
 
-    PrunedSSSPResult prunedSSSPEmptyGroup(node source, double highestClosenessScore);
+    PrunedSSSPResult prunedSSSPEmptyGroup(node source, Weight lowestFarness);
+    PrunedSSSPResult prunedSSSP(node source, Weight highestFarnessDecrement);
     node topClosenessNode();
 
     void computeFarnessLowerBound();
