@@ -57,7 +57,7 @@ private:
         const std::vector<Weight> &vec;
     };
 
-    tlx::d_ary_addressable_int_heap<node, 2, Greater> candidateNodesPQ{Greater(farness)};
+    tlx::d_ary_addressable_int_heap<node, 2, Greater> candidateNodesPQ{Greater(marginalGain)};
     std::vector<tlx::d_ary_addressable_int_heap<node, 2, Less>> dijkstraHeaps;
 
     struct PrunedSSSPResult {

@@ -26,6 +26,7 @@ GroupClosenessImpl<Weight>::GroupClosenessImpl(const Graph &G, count k, Weight m
     lowestDist.resize(n, infDist);
     visitedGlobal.resize(threads, std::vector<bool>(n));
     farness.resize(n, 0);
+    marginalGain.resize(n);
 
     nearerNodesGlobal.resize(threads);
     for (count i = 0; i < threads; ++i)
@@ -54,6 +55,11 @@ void GroupClosenessImpl<Weight>::run() {
 #endif // NETWORKIT_SANITY_CHECKS
 
     while (group.size() < k) {
+
+        candidateNodesPQ.build_heap(G->nodeRange().begin(), G->nodeRange().end());
+        for (node u : group)
+            candidateNodesPQ.remove(u);
+
         group.push_back(findNodeWithHighestMarginalGain());
 #ifdef NETWORKIT_SANITY_CHECKS
         checkDistFromGroup();
@@ -92,6 +98,7 @@ node GroupClosenessImpl<Weight>::topClosenessNode() {
                 break;
 
             const auto ssspResult = prunedSSSPEmptyGroup(u, lowestFarness);
+            marginalGain[u] = ssspResult.farness > 0 ? 1. / static_cast<double>(ssspResult.farness) : 0;
             if (!ssspResult.pruned) {
 #ifdef NETWORKIT_SANITY_CHECKS
                 checkTopNode(u, distGlobal[omp_get_thread_num()], ssspResult.farness);
