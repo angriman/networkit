@@ -98,3 +98,5 @@ CheckOptions:
     value: camelBack
   - key:   readability-identifier-naming.TemplateParameterCase
     value: CamelCase
+  - key:   readability-identifier-naming.TypeAliasCase
+    value: CamelCase
