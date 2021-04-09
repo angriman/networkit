@@ -6,6 +6,8 @@
  *             Alexander van der Grinten <avdgrinten@hu-berlin.de>
  */
 
+// networkit-format
+
 #include <cmath>
 #include <deque>
 #include <limits>
@@ -19,17 +21,13 @@
 
 namespace NetworKit {
 
-Status::Status(const count k)
-    : k(k), top(k), approxTop(k), finished(k), bet(k), errL(k), errU(k) {}
+Status::Status(const count k) : k(k), top(k), approxTop(k), finished(k), bet(k), errL(k), errU(k) {}
 
-KadabraBetweenness::KadabraBetweenness(const Graph &G, const double err,
-                                       const double delta,
-                                       const bool deterministic, const count k,
-                                       count unionSample,
+KadabraBetweenness::KadabraBetweenness(const Graph &G, const double err, const double delta,
+                                       const bool deterministic, const count k, count unionSample,
                                        const count startFactor)
-    : G(G), delta(delta), err(err), deterministic(deterministic), k(k),
-      startFactor(startFactor), unionSample(unionSample), absolute(k == 0),
-      stop(false) {
+    : G(G), delta(delta), err(err), deterministic(deterministic), k(k), startFactor(startFactor),
+      unionSample(unionSample), absolute(k == 0), stop(false) {
     const count n = G.upperNodeIdBound();
     if (k > n)
         throw std::runtime_error(
@@ -37,12 +35,10 @@ KadabraBetweenness::KadabraBetweenness(const Graph &G, const double err,
             "value between 0 (absolute) and n-1.");
 
     if (delta >= 1 || delta <= 0)
-        throw std::runtime_error(
-            "Delta should be greater than 0 and smaller than 1.");
+        throw std::runtime_error("Delta should be greater than 0 and smaller than 1.");
 
     if (err >= 1 || err <= 0)
-        throw std::runtime_error(
-            "The error should be greater than 0 and smaller than 1.");
+        throw std::runtime_error("The error should be greater than 0 and smaller than 1.");
 
     seed0 = Aux::Random::integer();
     seed1 = Aux::Random::integer();
@@ -73,18 +69,14 @@ bool KadabraBetweenness::computeFinished(Status *status) const {
     } else {
         for (count i = 0; i < status->k; ++i) {
             if (i == 0) {
-                status->finished[i] =
-                    (bet[i] - errL[i] > bet[i + 1] + errU[i + 1]);
+                status->finished[i] = (bet[i] - errL[i] > bet[i + 1] + errU[i + 1]);
             } else if (i < k) {
-                status->finished[i] =
-                    (bet[i - 1] - errL[i - 1] > bet[i] + errU[i]) &&
-                    (bet[i] - errL[i] > bet[i + 1] + errU[i + 1]);
+                status->finished[i] = (bet[i - 1] - errL[i - 1] > bet[i] + errU[i])
+                                      && (bet[i] - errL[i] > bet[i + 1] + errU[i + 1]);
             } else {
-                status->finished[i] =
-                    bet[k - 1] - errU[k - 1] > bet[i] + errU[i];
+                status->finished[i] = bet[k - 1] - errU[k - 1] > bet[i] + errU[i];
             }
-            status->finished[i] =
-                status->finished[i] || (errL[i] < err && errU[i] < err);
+            status->finished[i] = status->finished[i] || (errL[i] < err && errU[i] < err);
             allFinished = allFinished && status->finished[i];
         }
     }
@@ -98,9 +90,8 @@ double KadabraBetweenness::computeF(const double btilde, const count iterNum,
                                     const double deltaL) const {
     double tmp = (((double)omega) / iterNum - 1. / 3);
     double errChern =
-        (std::log(1. / deltaL)) * 1. / iterNum *
-        (-tmp +
-         std::sqrt(tmp * tmp + 2 * btilde * omega / (std::log(1. / deltaL))));
+        (std::log(1. / deltaL)) * 1. / iterNum
+        * (-tmp + std::sqrt(tmp * tmp + 2 * btilde * omega / (std::log(1. / deltaL))));
     return std::min(errChern, btilde);
 }
 
@@ -109,10 +100,8 @@ double KadabraBetweenness::computeF(const double btilde, const count iterNum,
 double KadabraBetweenness::computeG(const double btilde, const count iterNum,
                                     const double deltaU) const {
     double tmp = (((double)omega) / iterNum + 1. / 3);
-    double errChern =
-        (std::log(1. / deltaU)) * 1. / iterNum *
-        (tmp +
-         std::sqrt(tmp * tmp + 2 * btilde * omega / (std::log(1. / deltaU))));
+    double errChern = (std::log(1. / deltaU)) * 1. / iterNum
+                      * (tmp + std::sqrt(tmp * tmp + 2 * btilde * omega / (std::log(1. / deltaU))));
     return std::min(errChern, 1 - btilde);
 }
 
@@ -129,8 +118,7 @@ void KadabraBetweenness::getStatus(Status *status, const bool parallel) const {
         };
         if (parallel) {
 #pragma omp parallel for
-            for (omp_index i = 0; i < static_cast<omp_index>(unionSample);
-                 ++i) {
+            for (omp_index i = 0; i < static_cast<omp_index>(unionSample); ++i) {
                 loop(static_cast<count>(i));
             }
         } else {
@@ -142,8 +130,7 @@ void KadabraBetweenness::getStatus(Status *status, const bool parallel) const {
 }
 
 void KadabraBetweenness::computeBetErr(Status *status, std::vector<double> &bet,
-                                       std::vector<double> &errL,
-                                       std::vector<double> &errU) const {
+                                       std::vector<double> &errL, std::vector<double> &errU) const {
     count i;
     double maxErr = std::sqrt(startFactor) * err / 4.;
 
@@ -164,8 +151,7 @@ void KadabraBetweenness::computeBetErr(Status *status, std::vector<double> &bet,
         }
         for (i = k; i < status->k; ++i) {
             errL[i] = 10;
-            errU[i] =
-                std::max(err, bet[k - 1] + (bet[k - 1] - bet[k]) / 2. - bet[i]);
+            errU[i] = std::max(err, bet[k - 1] + (bet[k - 1] - bet[k]) / 2. - bet[i]);
         }
         for (i = 0; i < k - 1; ++i) {
             if (bet[i] - bet[i + 1] < maxErr) {
@@ -189,9 +175,7 @@ void KadabraBetweenness::computeBetErr(Status *status, std::vector<double> &bet,
 void KadabraBetweenness::computeDeltaGuess() {
     const double n = G.upperNodeIdBound();
     const double balancingFactor = 0.001;
-    double a = 0,
-           b = 1. / err / err * std::log(n * 4 * (1 - balancingFactor) / delta),
-           c;
+    double a = 0, b = 1. / err / err * std::log(n * 4 * (1 - balancingFactor) / delta), c;
     double sum;
 
     Status status(unionSample);
@@ -217,12 +201,10 @@ void KadabraBetweenness::computeDeltaGuess() {
             sum += std::exp(-c * errU[i] * errU[i] / bet[i]);
         }
 
-        sum += std::exp(-c * errL[unionSample - 1] * errL[unionSample - 1] /
-                        bet[unionSample - 1]) *
-               (n - unionSample);
-        sum += std::exp(-c * errU[unionSample - 1] * errU[unionSample - 1] /
-                        bet[unionSample - 1]) *
-               (n - unionSample);
+        sum += std::exp(-c * errL[unionSample - 1] * errL[unionSample - 1] / bet[unionSample - 1])
+               * (n - unionSample);
+        sum += std::exp(-c * errU[unionSample - 1] * errU[unionSample - 1] / bet[unionSample - 1])
+               * (n - unionSample);
 
         if (sum >= delta / 2. * (1 - balancingFactor))
             a = c;
@@ -230,29 +212,27 @@ void KadabraBetweenness::computeDeltaGuess() {
             b = c;
     }
 
-    deltaLMinGuess = std::exp(-b * errL[unionSample - 1] *
-                              errL[unionSample - 1] / bet[unionSample - 1]) +
-                     delta * balancingFactor / 4. / n;
-    deltaUMinGuess = std::exp(-b * errU[unionSample - 1] *
-                              errU[unionSample - 1] / bet[unionSample - 1]) +
-                     delta * balancingFactor / 4. / n;
+    deltaLMinGuess =
+        std::exp(-b * errL[unionSample - 1] * errL[unionSample - 1] / bet[unionSample - 1])
+        + delta * balancingFactor / 4. / n;
+    deltaUMinGuess =
+        std::exp(-b * errU[unionSample - 1] * errU[unionSample - 1] / bet[unionSample - 1])
+        + delta * balancingFactor / 4. / n;
 
 #pragma omp parallel for
     for (omp_index i = 0; i < static_cast<omp_index>(unionSample); ++i) {
         node v = status.top[i];
-        deltaLGuess[v] = std::exp(-b * errL[i] * errL[i] / bet[i]) +
-                         delta * balancingFactor / 4. / n;
-        deltaUGuess[v] = std::exp(-b * errU[i] * errU[i] / bet[i]) +
-                         delta * balancingFactor / 4. / n;
+        deltaLGuess[v] =
+            std::exp(-b * errL[i] * errL[i] / bet[i]) + delta * balancingFactor / 4. / n;
+        deltaUGuess[v] =
+            std::exp(-b * errU[i] * errU[i] / bet[i]) + delta * balancingFactor / 4. / n;
     }
 }
 
-void KadabraBetweenness::computeApproxParallel(
-    const std::vector<StateFrame> &firstFrames) {
+void KadabraBetweenness::computeApproxParallel(const std::vector<StateFrame> &firstFrames) {
     const count omp_max_threads = omp_get_max_threads();
 #pragma omp parallel for
-    for (omp_index i = 0; i < static_cast<omp_index>(G.upperNodeIdBound());
-         ++i) {
+    for (omp_index i = 0; i < static_cast<omp_index>(G.upperNodeIdBound()); ++i) {
         for (count j = 0; j < omp_max_threads; ++j) {
             approxSum[i] += firstFrames[j].apx[i];
         }
@@ -289,11 +269,10 @@ void KadabraBetweenness::fillResult() {
         for (omp_index i = 0; i < static_cast<omp_index>(n); ++i) {
             rankingVector[i] = std::make_pair(i, approxSum[i]);
         }
-        Aux::Parallel::sort(
-            rankingVector.begin(), rankingVector.end(),
-            [&](std::pair<node, double> p1, std::pair<node, double> p2) {
-                return p1.second > p2.second;
-            });
+        Aux::Parallel::sort(rankingVector.begin(), rankingVector.end(),
+                            [&](std::pair<node, double> p1, std::pair<node, double> p2) {
+                                return p1.second > p2.second;
+                            });
 #pragma omp parallel for
         for (omp_index i = 0; i < static_cast<omp_index>(n); ++i) {
             topkNodes[i] = rankingVector[i].first;
@@ -318,9 +297,9 @@ void KadabraBetweenness::run() {
     const auto omp_max_threads = omp_get_max_threads();
 
     // Compute the number of samples per SF as in our EUROPAR'19 paper.
-    const auto itersPerStep = std::max(1U,
-            static_cast<unsigned int>(baseItersPerStep
-                                      / std::pow(omp_max_threads, itersPerStepExp)));
+    const auto itersPerStep =
+        std::max(1U, static_cast<unsigned int>(baseItersPerStep
+                                               / std::pow(omp_max_threads, itersPerStepExp)));
 
     // TODO: setting the maximum relateve error to 0 gives the exact diameter
     // but may be inefficient for large graphs. What is the maximum relative
@@ -329,8 +308,7 @@ void KadabraBetweenness::run() {
     diam.run();
     // Getting diameter upper bound
     int32_t diameter = diam.getDiameter().second;
-    omega =
-        0.5 / err / err * (std::log2(diameter - 1) + 1 + std::log(0.5 / delta));
+    omega = 0.5 / err / err * (std::log2(diameter - 1) + 1 + std::log(0.5 / delta));
 
     const count tau = omega / startFactor;
 
@@ -341,10 +319,8 @@ void KadabraBetweenness::run() {
         if (absolute) {
             unionSample = n;
         } else {
-            unionSample =
-                std::min(n, (count)std::max((2 * std::sqrt(G.numberOfEdges()) /
-                                             omp_max_threads),
-                                            k + 20.));
+            unionSample = std::min(
+                n, (count)std::max((2 * std::sqrt(G.numberOfEdges()) / omp_max_threads), k + 20.));
         }
     }
 
@@ -400,13 +376,11 @@ void KadabraBetweenness::run() {
                 unused.pop_front();
             }
             curFrame->reset(epochToWrite);
-            sampler.rng.seed(seed1 ^
-                             (epochToWrite * omp_get_max_threads() + t));
+            sampler.rng.seed(seed1 ^ (epochToWrite * omp_get_max_threads() + t));
         };
 
         auto recycleFrame = [&]() {
-            auto finishedFrame =
-                epochFinished[t].load(std::memory_order_relaxed);
+            auto finishedFrame = epochFinished[t].load(std::memory_order_relaxed);
             if (finishedFrame) {
                 unused.push_back(finishedFrame);
             }
@@ -432,8 +406,7 @@ void KadabraBetweenness::run() {
             } else if (!finishedQueue.empty()) {
                 if (etr == static_cast<int32_t>(finishedQueue.front()->epoch)) {
                     recycleFrame();
-                    epochFinished[t].store(finishedQueue.front(),
-                                           std::memory_order_release);
+                    epochFinished[t].store(finishedQueue.front(), std::memory_order_release);
                     finishedQueue.pop_front();
                 }
             }
@@ -456,7 +429,7 @@ void KadabraBetweenness::run() {
 
 #pragma omp parallel for
     for (omp_index i = 0; i < static_cast<omp_index>(n); ++i) {
-        approxSum[i] /= (double)nPairs;
+        approxSum[i] /= static_cast<double>(nPairs);
         if (!G.isDirected())
             approxSum[i] *= 2.;
     }
@@ -478,8 +451,8 @@ void KadabraBetweenness::checkConvergence(Status &status) {
     const count omp_max_threads = omp_get_max_threads();
     for (count i = 0; i < omp_max_threads; ++i) {
         auto frame = epochFinished[i].load(std::memory_order_acquire);
-        if (!frame ||
-            static_cast<int32_t>(frame->epoch) != epochToRead.load(std::memory_order_relaxed)) {
+        if (!frame
+            || static_cast<int32_t>(frame->epoch) != epochToRead.load(std::memory_order_relaxed)) {
             allEpochsFinished = false;
             break;
         }
@@ -501,14 +474,13 @@ void KadabraBetweenness::checkConvergence(Status &status) {
         }
 
         getStatus(&status);
-        if(computeFinished(&status) || nPairs >= omega)
+        if (computeFinished(&status) || nPairs >= omega)
             stop.store(true, std::memory_order_relaxed);
         epochRead = epochToRead.load(std::memory_order_relaxed);
     }
 }
 
-SpSampler::SpSampler(const Graph &G, const ConnectedComponents &cc)
-    : G(G), cc(cc), rng(0) {
+SpSampler::SpSampler(const Graph &G, const ConnectedComponents &cc) : G(G), cc(cc), rng(0) {
     const auto n = G.upperNodeIdBound();
     distr = std::uniform_int_distribution<node>(0, n - 1);
     q.resize(n);
@@ -545,8 +517,7 @@ void SpSampler::randomPath(StateFrame *curFrame) {
 
     node x, randomEdge;
     bool hasToStop = false, useDegreeIn;
-    count startU = 0, startV = 1, endU = 1, endV = 2, startCur, endCur,
-          *newEndCur;
+    count startU = 0, startV = 1, endU = 1, endV = 2, startCur, endCur, *newEndCur;
     count sumDegsU = 0, sumDegsV = 0, *sumDegsCur;
     count totWeight = 0, curEdge = 0;
 
@@ -592,8 +563,7 @@ void SpSampler::randomPath(StateFrame *curFrame) {
             x = q[startCur++];
 
             if (useDegreeIn)
-                G.forInNeighborsOf(x,
-                                   [&](const node y) { procNeighbor(x, y); });
+                G.forInNeighborsOf(x, [&](const node y) { procNeighbor(x, y); });
             else
                 G.forNeighborsOf(x, [&](const node y) { procNeighbor(x, y); });
         }
@@ -636,8 +606,7 @@ void SpSampler::randomPath(StateFrame *curFrame) {
     resetSampler(endQ);
 }
 
-void SpSampler::backtrackPath(const node source, const node target,
-                              const node start) {
+void SpSampler::backtrackPath(const node source, const node target, const node start) {
     if (start == target || start == source)
         return;
 
@@ -647,21 +616,27 @@ void SpSampler::backtrackPath(const node source, const node target,
     const node randomPred = wDistr(rng);
 
     node curPred = 0, w = 0;
-    bool stop = false;
-    // TODO: update this in the case of directed graphs (use inNeighbors if
-    // ballind is 0x80)
-    G.forNeighborsOf(start, [&](const node t) {
-        if (!stop) {
-            if (dist[t] == dist[start] - 1 &&
-                ((timestamp[start] & ballMask) == (timestamp[t] & ballMask))) {
-                w = t;
-                curPred += nPaths[target];
-                if (curPred > randomPred) {
-                    stop = true;
-                }
-            }
+
+    const auto visitNeighbor = [&](node t) -> bool {
+        if (dist[t] == dist[start] - 1
+            && ((timestamp[start] & ballMask) == (timestamp[t] & ballMask))) {
+            w = t;
+            curPred += nPaths[target];
+            if (curPred > randomPred)
+                return true;
         }
-    });
+        return false;
+    };
+
+    if (G.isDirected() && ((timestamp[start] & ballMask) == ballMask)) {
+        for (node t : G.inNeighborRange(start))
+            if (visitNeighbor(t))
+                break;
+    } else {
+        for (node t : G.neighborRange(start))
+            if (visitNeighbor(t))
+                break;
+    }
 
     if (w != source && w != target)
         backtrackPath(source, target, w);

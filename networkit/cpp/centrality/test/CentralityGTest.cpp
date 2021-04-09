@@ -1613,10 +1613,10 @@ TEST_F(CentralityGTest, testGroupCloseness) {
  * probability. Thus, it is possible that, for a different random seed, this
  * test fails.
  */
-TEST_F(CentralityGTest, testKadabraAbsolute) {
+TEST_P(CentralityGTest, testKadabraAbsolute) {
     Aux::Random::setSeed(42, true);
     const count n = 10;
-    Graph g = ErdosRenyiGenerator(n, 0.1).generate();
+    Graph g = ErdosRenyiGenerator(n, 0.1, isDirected()).generate();
 
     const double delta = 0.1;
     const double epsilon = 0.01;
@@ -1627,14 +1627,12 @@ TEST_F(CentralityGTest, testKadabraAbsolute) {
 
     Betweenness betweenness(g, true);
     betweenness.run();
-    count maxErrors = (count)std::ceil(delta * (double)n);
+    const auto maxErrors = static_cast<count>(std::ceil(delta * (double)n));
 
     count errors = 0;
-    for (count i = 0; i < n; ++i) {
-        if (std::abs(scores[i] - betweenness.score(nodes[i])) > delta) {
+    for (count i = 0; i < n; ++i)
+        if (std::abs(scores[i] - betweenness.score(nodes[i])) > delta)
             ++errors;
-        }
-    }
 
     EXPECT_TRUE(errors <= maxErrors);
 }
