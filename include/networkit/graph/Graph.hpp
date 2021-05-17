@@ -41,6 +41,15 @@ struct Edge {
     }
 };
 
+struct EdgeWithId : public Edge {
+    edgeid eid;
+
+    EdgeWithId() : Edge(), eid(std::numeric_limits<edgeid>::max()) {}
+
+    EdgeWithId(node _u, node _v, edgeid _eid, bool sorted = false)
+        : Edge(_u, _v, sorted), eid(_eid) {}
+};
+
 /**
  * A weighted edge used for the graph constructor with
  * initializer list syntax.
@@ -1221,6 +1230,18 @@ public:
      */
     edgeweight weightedDegreeIn(node u, bool countSelfLoopsTwice = false) const;
 
+    std::pair<node, edgeid> randomNeighborWithId(node u) const {
+        if (outEdges[u].empty()) {
+            return std::make_pair(none, none);
+        }
+        node v;
+        index i;
+        do {
+            i = Aux::Random::integer(outEdges[u].size() - 1);
+            v = outEdges[u][i];
+        } while (v == none);
+        return std::make_pair(v, outEdgeIds[u][i]);
+    }
     /* EDGE MODIFIERS */
 
     /**

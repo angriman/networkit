@@ -5,6 +5,7 @@
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
 #include <networkit/graph/BFS.hpp>
 #include <networkit/graph/GraphTools.hpp>
+#include <networkit/reachability/LinkCut.hpp>
 #include <networkit/reachability/ReachableNodes.hpp>
 
 namespace NetworKit {
@@ -69,6 +70,15 @@ TEST_P(ReachabilityGTest, testReachableNodesApprox) {
             EXPECT_GE(rb.numberOfReachableNodesUB(u), r);
         });
     }
+}
+
+TEST_F(ReachabilityGTest, testLinkCut) {
+    Aux::Random::setSeed(42, false);
+    auto G = ErdosRenyiGenerator(30, 0.2, false).generate();
+    G.indexEdges();
+
+    LinkCut lc(G);
+    lc.doCuts(10);
 }
 
 } // namespace NetworKit
