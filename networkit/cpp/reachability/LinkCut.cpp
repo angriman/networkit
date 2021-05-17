@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <iostream>
 #include <queue>
 #include <set>
 #include <stdexcept>
@@ -113,9 +115,9 @@ void LinkCut::sampleUST() {
     G->forEdges([&](node u, node v, edgeweight, edgeid eid) {
         if (stEdges.find(eid) == stEdges.end()) {
             nonSTEdges[nonSTEdgeCount++] = {u, v, eid};
-            edgeInST[eid] = 0;
+            edgeInST[eid] = false;
         } else {
-            edgeInST[eid] = 1;
+            edgeInST[eid] = true;
             ++stEdgeCount;
         }
     });
@@ -187,12 +189,12 @@ void LinkCut::doLinkCut() {
 
     // Add edge to tree
     assert(!edgeInST[randNonSTEdge.eid]);
-    edgeInST[randNonSTEdge.eid] = 1;
+    edgeInST[randNonSTEdge.eid] = true;
     // Update set of non-tree edges
     nonSTEdges[randInt] = {pred, u, G->edgeId(pred, u)}; // TODO get rid of edgeId
     // Remove edge from the tree
     assert(edgeInST[randNonSTEdge.eid]);
-    edgeInST[randNonSTEdge.eid] = 0;
+    edgeInST[randNonSTEdge.eid] = false;
 
     for (auto seenNode : seenNodes) {
         pathLength[seenNode] = 0;
@@ -200,9 +202,24 @@ void LinkCut::doLinkCut() {
     seenNodes.clear();
 }
 
-void LinkCut::doCuts(count n) {
-    for (count i = 0; i < n; ++i)
-        doLinkCut();
+std::vector<double> LinkCut::simulation(count reps, count cutsPerRep) {
+    std::vector<double> result(G->numberOfEdges());
+    for (count i = 0; i < reps; ++i) {
+        for (count j = 0; j < cutsPerRep; ++j)
+            doLinkCut();
+        assert(std::count_if(edgeInST.begin(), edgeInST.end(), [](bool elem) { return elem; })
+               == G->numberOfNodes() - 1);
+        G->parallelForEdges([&](node, node, edgeweight, edgeid eid) {
+            if (edgeInST[eid])
+                ++result[eid];
+        });
+    }
+
+    G->parallelForEdges([&](node, node, edgeweight, edgeid eid) {
+        result[eid] /= static_cast<double>(reps * cutsPerRep);
+    });
+
+    return result;
 }
 
 } // namespace NetworKit

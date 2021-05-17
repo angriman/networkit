@@ -10,8 +10,7 @@ class LinkCut final {
 public:
     LinkCut(const Graph &G);
 
-    void doCuts(count n);
-
+    std::vector<double> simulation(count reps, count cutsPerRep);
 private:
     const Graph *G;
     node root;
@@ -20,7 +19,8 @@ private:
     std::vector<count> edgeScores, pathLength;
     std::vector<EdgeWithId> nonSTEdges;
 
-    std::vector<short> status, edgeInST;
+    std::vector<short> status;
+    std::vector<bool> edgeInST;
 
     void sampleUST();
     void doLinkCut();

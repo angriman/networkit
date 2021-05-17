@@ -78,7 +78,9 @@ TEST_F(ReachabilityGTest, testLinkCut) {
     G.indexEdges();
 
     LinkCut lc(G);
-    lc.doCuts(10);
+    auto result = lc.simulation(1000, 1000);
+    INFO(result);
+    INFO("Sum: ", std::accumulate(result.begin(), result.end(), 0.));
 }
 
 } // namespace NetworKit

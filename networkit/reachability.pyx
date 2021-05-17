@@ -199,3 +199,20 @@ cdef class AllSimplePaths(Algorithm):
 			(<_AllSimplePaths*>(self._this)).forAllSimplePaths[PathCallbackWrapper](dereference(wrapper))
 		finally:
 			del wrapper
+
+cdef extern from "<networkit/reachability/LinkCut.hpp>":
+
+	cdef cppclass _LinkCut "NetworKit::LinkCut":
+		_LinkCut(_Graph G) except +
+		vector[double] simulation(count reps, count cutsPerRep) except +
+
+cdef class LinkCut:
+	cdef _LinkCut *_this
+	cdef Graph _G
+
+	def __cinit__(self, Graph G):
+		self._G = G
+		self._this = new _LinkCut(G._this)
+
+	def simulation(self, count reps, count cutsPerRep):
+		(<_LinkCut*>(self._this)).simulation(reps, cutsPerRep)
