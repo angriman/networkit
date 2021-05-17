@@ -1,6 +1,7 @@
 networkit_add_module(reachability
     AllSimplePaths.cpp
     LinkCut.cpp
+    LinkCut2.cpp
     ReachableNodes.cpp
     )
 

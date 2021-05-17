@@ -215,4 +215,4 @@ cdef class LinkCut:
 		self._this = new _LinkCut(G._this)
 
 	def simulation(self, count reps, count cutsPerRep):
-		(<_LinkCut*>(self._this)).simulation(reps, cutsPerRep)
+		return (<_LinkCut*>(self._this)).simulation(reps, cutsPerRep)

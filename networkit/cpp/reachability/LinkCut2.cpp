@@ -6,11 +6,11 @@
 #include <unordered_set>
 
 #include <networkit/auxiliary/Random.hpp>
-#include <networkit/reachability/LinkCut.hpp>
+#include <networkit/reachability/LinkCut2.hpp>
 
 namespace NetworKit {
 
-LinkCut::LinkCut(const Graph &G) : G(&G) {
+LinkCut2::LinkCut2(const Graph &G) : G(&G) {
     if (!G.hasEdgeIds())
         throw std::runtime_error("Edges are not indexed.");
 
@@ -34,7 +34,7 @@ LinkCut::LinkCut(const Graph &G) : G(&G) {
     sampleUST();
 }
 
-void LinkCut::buildNodeSequence() {
+void LinkCut2::buildNodeSequence() {
     status.resize(G->upperNodeIdBound());
     sequence.clear();
     sequence.reserve(G->numberOfNodes());
@@ -58,7 +58,7 @@ void LinkCut::buildNodeSequence() {
     assert(sequence.size() == G->numberOfNodes());
 }
 
-void LinkCut::sampleUST() {
+void LinkCut2::sampleUST() {
     std::unordered_set<edgeid> stEdges;
     std::vector<std::pair<node, edgeid>> stack;
     G->parallelForNodes([&](const node u) { status[u] = 0; });
@@ -124,84 +124,56 @@ void LinkCut::sampleUST() {
     assert(stEdgeCount == G->numberOfNodes() - 1);
 }
 
-void LinkCut::doLinkCut() {
-    // Index of random edge outside spanning tree to be added
-    const auto randInt = Aux::Random::integer(nonSTEdges.size() - 1);
-    // Actual edge to be added
-    const auto &randNonSTEdge = nonSTEdges[randInt];
-    assert(!edgeInST[randNonSTEdge.eid]);
-    node u = randNonSTEdge.u, u_ = randNonSTEdge.u;
-    node v = randNonSTEdge.v, v_ = randNonSTEdge.v;
-    seenNodes.push_back(u);
-    seenNodes.push_back(v);
-
-    auto processNode = [&](node &x, const char *s) {
-        const auto xParent = parent[x];
-        if (x == root) {
-            return 1;
+void LinkCut2::doLinkCut() {
+    // Remove a random edge
+    auto edgeToRemove = Aux::Random::integer(G->numberOfNodes() - 2);
+    index removedEdge = 0;
+    for (index i = 0; i < G->numberOfEdges(); ++i) {
+        if (edgeInST[i]) {
+            if (edgeToRemove == 0) {
+                removedEdge = i;
+                break;
+            } else
+                --edgeToRemove;
         }
-        if (pathLength[xParent]) {
-            return 2;
-        }
-        pathLength[xParent] = pathLength[x] + 1;
-        seenNodes.push_back(xParent);
-        x = xParent;
-        return 0;
-    };
-
-    pathLength[u] = pathLength[v] = 1;
-
-    // Finding lca
-    while (processNode(u, "u") + processNode(v, "v") < 2) {
     }
 
-    if (u == root || !pathLength[parent[u]]) {
-        std::swap(u, v);
-        std::swap(u_, v_);
-    }
+    assert(edgeInST[removedEdge]);
+    edgeInST[removedEdge] = false;
 
-    const auto lca = parent[u];
-    assert(u != root);
-    assert(pathLength[parent[u]]);
+    // BFS from root
+    std::vector<bool> reachableFromRoot(G->numberOfNodes());
+    reachableFromRoot[root] = true;
+    std::queue<node> queue;
+    queue.push(root);
 
-    node pred = v_;
-
-    // Here we omit the additional edge, the actual loop is 1 hop longer
-    const auto loopLength = pathLength[u] + pathLength[lca] - 1;
-    auto randomEdgeInLoop = Aux::Random::integer(loopLength - 1);
-    if (randomEdgeInLoop >= pathLength[lca] - 1) {
-        randomEdgeInLoop -= pathLength[lca] - 1;
-        u = u_;
-    } else {
-        u = v_;
-        pred = u_;
-    }
-
-    node tmp = u;
     do {
-        assert(u != root);
-        u = parent[u];
-        parent[tmp] = pred;
-        pred = tmp;
-        tmp = u;
-    } while (randomEdgeInLoop--);
+        const auto u = queue.front();
+        queue.pop();
 
-    // Add edge to tree
-    assert(!edgeInST[randNonSTEdge.eid]);
-    edgeInST[randNonSTEdge.eid] = true;
-    // Update set of non-tree edges
-    nonSTEdges[randInt] = {pred, u, G->edgeId(pred, u)}; // TODO get rid of edgeId
-    // Remove edge from the tree
-    assert(edgeInST[randNonSTEdge.eid]);
-    edgeInST[randNonSTEdge.eid] = false;
+        G->forEdgesOf(u, [&](node, node v, edgeweight, edgeid eid) {
+            if (!reachableFromRoot[v] && edgeInST[eid]) {
+                reachableFromRoot[v] = true;
+                queue.push(v);
+            }
+        });
+    } while (!queue.empty());
 
-    for (auto seenNode : seenNodes) {
-        pathLength[seenNode] = 0;
-    }
-    seenNodes.clear();
+    std::vector<edgeid> cutEdges;
+    G->forEdges([&](node u, node v, edgeweight, edgeid eid) {
+        if (reachableFromRoot[u] != reachableFromRoot[v])
+            cutEdges.push_back(eid);
+    });
+
+    assert(!cutEdges.empty());
+#ifndef NDEBUG
+    for (edgeid eid : cutEdges)
+        assert(!edgeInST[eid]);
+#endif
+    edgeInST[cutEdges[Aux::Random::integer(cutEdges.size() - 1)]] = true;
 }
 
-std::vector<double> LinkCut::simulation(count reps, count cutsPerRep) {
+std::vector<double> LinkCut2::simulation(count reps, count cutsPerRep) {
     std::vector<double> result(G->numberOfEdges());
     for (count i = 0; i < reps; ++i) {
         for (count j = 0; j < cutsPerRep; ++j)
@@ -214,9 +186,8 @@ std::vector<double> LinkCut::simulation(count reps, count cutsPerRep) {
         });
     }
 
-    G->parallelForEdges([&](node, node, edgeweight, edgeid eid) {
-        result[eid] /= static_cast<double>(reps);
-    });
+    G->parallelForEdges(
+        [&](node, node, edgeweight, edgeid eid) { result[eid] /= static_cast<double>(reps); });
 
     return result;
 }

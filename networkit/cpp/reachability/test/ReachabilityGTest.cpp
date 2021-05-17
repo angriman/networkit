@@ -6,6 +6,7 @@
 #include <networkit/graph/BFS.hpp>
 #include <networkit/graph/GraphTools.hpp>
 #include <networkit/reachability/LinkCut.hpp>
+#include <networkit/reachability/LinkCut2.hpp>
 #include <networkit/reachability/ReachableNodes.hpp>
 
 namespace NetworKit {
@@ -80,7 +81,15 @@ TEST_F(ReachabilityGTest, testLinkCut) {
     LinkCut lc(G);
     auto result = lc.simulation(1000, 1000);
     INFO(result);
-    INFO("Sum: ", std::accumulate(result.begin(), result.end(), 0.));
 }
 
+TEST_F(ReachabilityGTest, testLinkCut2) {
+    Aux::Random::setSeed(42, false);
+    auto G = ErdosRenyiGenerator(30, 0.2, false).generate();
+    G.indexEdges();
+
+    LinkCut2 lc(G);
+    auto result = lc.simulation(100, 100);
+    INFO(result);
+}
 } // namespace NetworKit
