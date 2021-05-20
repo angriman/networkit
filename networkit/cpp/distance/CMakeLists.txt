@@ -9,6 +9,7 @@ networkit_add_module(distance
     CommuteTimeDistance.cpp
     Diameter.cpp
     Dijkstra.cpp
+    DynPrunedLandmarkLabeling.cpp
     Eccentricity.cpp
     EffectiveDiameter.cpp
     EffectiveDiameterApproximation.cpp

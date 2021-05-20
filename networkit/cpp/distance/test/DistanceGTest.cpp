@@ -21,6 +21,7 @@
 #include <networkit/distance/NeighborhoodFunction.hpp>
 #include <networkit/distance/NeighborhoodFunctionApproximation.hpp>
 #include <networkit/distance/NeighborhoodFunctionHeuristic.hpp>
+#include <networkit/distance/DynPrunedLandmarkLabeling.hpp>
 #include <networkit/distance/SPSP.hpp>
 
 #include <networkit/generators/DorogovtsevMendesGenerator.hpp>
@@ -504,6 +505,58 @@ TEST_F(DistanceGTest, testSPSP) {
                         });
                     }
                 }
+            }
+        }
+    }
+}
+
+TEST_F(DistanceGTest, testPrunedLandmarkLabeling) {
+    const auto checkCorrectDistances = [](const Graph &G,
+                                          const DynPrunedLandmarkLabeling &dll) -> void {
+        APSP apsp(G);
+        apsp.run();
+        const auto dists = apsp.getDistances();
+
+        G.forNodePairs([&](node u, node v) {
+            EXPECT_EQ(static_cast<count>(dists[u][v]), dll.query(u, v));
+        });
+    };
+
+    const auto runTest = [&checkCorrectDistances](Graph &G) -> void {
+        DynPrunedLandmarkLabeling dll(G);
+        dll.run();
+
+        checkCorrectDistances(G, dll);
+        return;
+
+        for (int i = 0; i < 10; ++i) {
+            node u = none, v = none;
+            do {
+                u = GraphTools::randomNode(G);
+                v = GraphTools::randomNode(G);
+            } while (u == v);
+
+            G.addEdge(u, v);
+            dll.addEdge(u, v);
+
+            checkCorrectDistances(G, dll);
+            INFO("All ok");
+        }
+    };
+
+    for (int seed : {1, 2, 3}) {
+        Aux::Random::setSeed(seed, true);
+        for (bool directed : {false, true}) {
+            for (bool weighted : {false, true}) {
+                auto G = ErdosRenyiGenerator(50, 0.15, directed).generate();
+                if (weighted) {
+                    G = GraphTools::toWeighted(G);
+                    G.forEdges([&](node u, node v) {
+                        G.setWeight(u, v, Aux::Random::probability());
+                    });
+                }
+
+                runTest(G);
             }
         }
     }
