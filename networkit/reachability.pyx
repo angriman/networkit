@@ -216,3 +216,20 @@ cdef class LinkCut:
 
 	def simulation(self, count reps, count cutsPerRep):
 		return (<_LinkCut*>(self._this)).simulation(reps, cutsPerRep)
+
+cdef extern from "<networkit/reachability/LinkCut2.hpp>":
+
+	cdef cppclass _LinkCut2 "NetworKit::LinkCut2":
+		_LinkCut2(_Graph G) except +
+		vector[double] simulation(count reps, count cutsPerRep) except +
+
+cdef class LinkCut2:
+	cdef _LinkCut2 *_this
+	cdef Graph _G
+
+	def __cinit__(self, Graph G):
+		self._G = G
+		self._this = new _LinkCut2(G._this)
+
+	def simulation(self, count reps, count cutsPerRep):
+		return (<_LinkCut2*>(self._this)).simulation(reps, cutsPerRep)

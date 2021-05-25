@@ -5,6 +5,7 @@
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
 #include <networkit/graph/BFS.hpp>
 #include <networkit/graph/GraphTools.hpp>
+#include <networkit/io/NetworkitBinaryReader.hpp>
 #include <networkit/reachability/LinkCut.hpp>
 #include <networkit/reachability/LinkCut2.hpp>
 #include <networkit/reachability/ReachableNodes.hpp>
@@ -84,12 +85,14 @@ TEST_F(ReachabilityGTest, testLinkCut) {
 }
 
 TEST_F(ReachabilityGTest, testLinkCut2) {
-    Aux::Random::setSeed(42, false);
-    auto G = ErdosRenyiGenerator(30, 0.2, false).generate();
+//    Aux::Random::setSeed(42, false);
+//    auto G = ErdosRenyiGenerator(30, 0.2, false).generate();
+    auto G = NetworkitBinaryReader{}.read("/home/angriman/projects/link-cut/graphs/ER-30");
+    INFO("Nedges = ", G.numberOfEdges());
     G.indexEdges();
 
-    LinkCut2 lc(G);
-    auto result = lc.simulation(100, 100);
-    INFO(result);
+    LinkCut lc(G);
+    auto result = lc.simulation(100, 150);
+    INFO(result.size());
 }
 } // namespace NetworKit
