@@ -109,6 +109,12 @@ def getCXXFiles(includeSources = True, includeHeaders = True):
 
 	return files
 
+def getNewCXXFiles():
+	""" Returns a list of all new C++ files added to the repository."""
+	out = subprocess.Popen(("git", "diff", "--name-status", "master"), stdout=subprocess.PIPE)
+	out = subprocess.Popen(("grep", "^A.*\.[ch]pp$"), stdin=out.stdout, stdout=subprocess.PIPE)
+	return subprocess.check_output(("awk", "{ print $2 }"), stdin=out.stdout).decode("utf8").split("\n")[:-1]
+
 def computeAndReportDiff(originalFilename, formatedFilename):
 	"""Compute a colorful diff between the original file and the formatted one"""
 	p = subprocess.Popen(["diff", "-a", "--color=always", originalFilename, formatedFilename],

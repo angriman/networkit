@@ -437,4 +437,9 @@ jobs:
       - name: Prepare environment and run checks
         run:  |
           set -e
+          git remote add networkit "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git fetch networkit
+          export CUR_BRANCH=$(git branch --show-current)
+          git checkout --track networkit/master
+          git checkout $CUR_BRANCH
           ./check_code.sh -v

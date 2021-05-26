@@ -54,10 +54,18 @@ def subscribedToFormat(filename, pattern = "networkit-format"):
 	with open(filename, 'r') as file:
 		return any( ((pattern in line) for line in file) )
 
-def runClangFormat(inputFilename, outputFilename, clangFormatBinary = 'clang-format-8'):
+def runClangFormat(inputFilename, outputFilename, subscribed, clangFormatBinary = 'clang-format-8'):
 	"""Execute clang-format onto inputFilename and stores the result in outputFilename"""
 	with open(outputFilename, "w") as outfile:
 		subprocess.call([clangFormatBinary, '-style=file', inputFilename], stdout=outfile)
+
+	# Subscribe file to networkit-format if not already subscribed
+	if not subscribed:
+		with open(outputFilename, "r+") as outfile:
+			content = outfile.read()
+			outfile.seek(0, 0)
+			outfile.write(f"// {NWK_FORMAT_PATTERN}\n" + content)
+
 
 
 nkt.setup()
@@ -69,18 +77,20 @@ numberNonCompliant = 0
 numberFileSkipped = 0
 
 clangFormatCommand = findClangFormat()
+
 with tempfile.TemporaryDirectory(dir=nkt.getNetworKitRoot()) as tempDir:
 	files = nkt.getCXXFiles()
-	for file in files:
-		if not subscribedToFormat(file):
-			numberFileSkipped += 1
-			continue
+	newFiles = set(nkt.getNewCXXFiles())
 
+	def checkFormatted(file, subscribed):
+		"""
+		Returns True if the given file is formatted, False otherwise.
+		If called with '-w', formats unformatted files.
+		"""
 		tempFile = os.path.join(tempDir, 'cfOutput')
-		runClangFormat(file, tempFile, clangFormatCommand)
+		runClangFormat(file, tempFile, subscribed, clangFormatCommand)
 
 		if not filecmp.cmp(file, tempFile, shallow=False):
-			numberNonCompliant += 1
 			nkt.reportChange(file + " is non-compliant")
 
 			if nkt.doReportDiff():
@@ -88,6 +98,24 @@ with tempfile.TemporaryDirectory(dir=nkt.getNetworKitRoot()) as tempDir:
 
 			if not nkt.isReadonly():
 				os.replace(tempFile, file)
+			return False
+		return True
+
+	for file in files:
+		if file in newFiles:
+			continue # Newly added files are handled later
+		subscribed = subscribedToFormat(file)
+		if not subscribed:
+			numberFileSkipped += 1
+			continue
+		if not checkFormatted(file, subscribed):
+			numberNonCompliant += 1
+
+	for file in newFiles:
+		# Check that all newly added files comply with coding style
+		if not checkFormatted(file, subscribedToFormat(file)):
+			numberNonCompliant += 1
+
 
 print("Scanned %d files (skipped %d files without subscription). Non-compliant files: %d." %
 	  (len(files), numberFileSkipped, numberNonCompliant))
