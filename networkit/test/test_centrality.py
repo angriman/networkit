@@ -2,6 +2,8 @@
 import unittest
 import os
 import networkit as nk
+import numpy as np
+import scipy
 
 
 class Test_Centrality(unittest.TestCase):
@@ -27,6 +29,23 @@ class Test_Centrality(unittest.TestCase):
 		dc = nk.centrality.DegreeCentrality(g).run().scores()
 
 		self.assertListEqual(expected_result, dc)
+
+	def test_ForestCentralty(self):
+		nk.engineering.setSeed(42, False)
+		eps = 0.05
+		g = nk.generators.HyperbolicGenerator(200).generate()
+		root = nk.graphtools.augmentGraph(g)
+
+		fc = nk.centrality.ForestCentrality(g, root, eps)
+		fc.run()
+		apxDiag = fc.getDiagonal()
+
+		A = nk.algebraic.adjacencyMatrix(g, "dense")
+		Fmat = scipy.sparse.csgraph.laplacian(A)
+		diag = np.linalg.pinv(Fmat).diagonal()
+
+		for apx, exact in zip(apxDiag, diag):
+			self.assertLessEqual(abs(apx - exact), eps)
 
 if __name__ == "__main__":
 	unittest.main()
