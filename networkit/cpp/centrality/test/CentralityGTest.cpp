@@ -26,6 +26,7 @@
 #include <networkit/centrality/DynTopHarmonicCloseness.hpp>
 #include <networkit/centrality/EigenvectorCentrality.hpp>
 #include <networkit/centrality/EstimateBetweenness.hpp>
+#include <networkit/centrality/ForestCentrality.hpp>
 #include <networkit/centrality/GedWalk.hpp>
 #include <networkit/centrality/GroupCloseness.hpp>
 #include <networkit/centrality/GroupClosenessGrowShrink.hpp>
@@ -2037,6 +2038,53 @@ TEST_P(CentralityGTest, testDegreeCentralityIgnoreSelfLoops) {
         std::array<int ,8> expectedResults{{2, 1, 4, 2, 2, 5, 1, 1}};
         for(long unsigned int i = 0; i < expectedResults.size(); i++) EXPECT_EQ(expectedResults[i], dc.score(i));
     }
+}
+
+TEST_F(CentralityGTest, testForestCentralityRun) {
+    Aux::Random::setSeed(42, true);
+    auto G = HyperbolicGenerator(200).generate();
+    G = ConnectedComponents::extractLargestConnectedComponent(G, true);
+
+    const node root = G.addNode();
+    const count n = G.numberOfNodes();
+    Vector rhs(n), sol(n);
+
+    G.forNodes([&](const node u) {
+        rhs[u] = -1.0 / static_cast<double>(n);
+        if (u != root)
+            G.addEdge(u, root);
+    });
+    rhs[root] += 1.0;
+
+    ForestCentrality fc(G, root, 0.05);
+    fc.numberOfUSTs = fc.computeNumberOfUSTs();
+    fc.run();
+    return;
+#if 0
+    const auto nonNorm = fc.getNonNormalizedData();
+    const std::vector<double> R(nonNorm.begin(), nonNorm.end());
+    std::vector<double> apxDiag(n);
+    G.forNodes([&](const node u) {
+        apxDiag[u] = R[u] / static_cast<double>(fc.numberOfUSTs) - sol[u] + 2 * sol[u];
+    });
+    for (int i = 0; i < 10; ++i)
+        INFO(apxDiag[i]);
+    INFO("Back: ", apxDiag[n - 2]);
+    INFO("Diag size, ", diag.size(), " n = ", n);
+    INFO("Exact back: ", diag[n - 2]);
+    std::vector<double> absErrs(n - 1);
+    G.forNodes([&](const node u) {
+        if (u == n - 1)
+            return;
+        absErrs[u] = std::abs(diag[u] - apxDiag[u]);
+    });
+    INFO("Max abs: ", *std::max_element(absErrs.begin(), absErrs.end()));
+    INFO("Min abs: ", *std::min_element(absErrs.begin(), absErrs.end()));
+    INFO("Avg: ",
+         std::accumulate(absErrs.begin(), absErrs.end(), 0) / static_cast<double>(absErrs.size()));
+    std::sort(absErrs.begin(), absErrs.end());
+    INFO("Median: ", absErrs[absErrs.size() / 2]);
+#endif
 }
 
 } /* namespace NetworKit */

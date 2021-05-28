@@ -1536,6 +1536,17 @@ public:
     }
 
     /**
+     * Return the i-th (outgoing) neighbor of @a u including the edge weight.
+     *
+     * @param u Node.
+     * @param i index; should be in [0, degreeOut(u))
+     * @return @a i-th (outgoing) neighbor of @a u including the edge weight.
+     */
+    std::pair<node, edgeweight> getIthNeighborWithWeight(node u, index i) const {
+        const auto ithNeighbor = getIthNeighbor(u, i);
+        return {ithNeighbor, ithNeighbor == none ? nullWeight : outEdgeWeights[u][i]};
+    }
+    /**
      * Get i-th (outgoing) neighbor of @a u and the corresponding edge id.
      *
      * @param u Node.
