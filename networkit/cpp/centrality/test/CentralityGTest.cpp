@@ -33,6 +33,7 @@
 #include <networkit/centrality/GroupClosenessLocalSearch.hpp>
 #include <networkit/centrality/GroupDegree.hpp>
 #include <networkit/centrality/GroupHarmonicCloseness.hpp>
+#include <networkit/centrality/GroupHarmonicClosenessLocalSearch.hpp>
 #include <networkit/centrality/HarmonicCloseness.hpp>
 #include <networkit/centrality/KPathCentrality.hpp>
 #include <networkit/centrality/KadabraBetweenness.hpp>
@@ -2180,6 +2181,12 @@ TEST_P(CentralityGTest, testGroupHarmonicCloseness) {
             EXPECT_GE(score / opt, approxRatio);
         }
     }
+}
+
+TEST_P(CentralityGTest, testGroupHarmonicClosenessLocalSearch) {
+    const auto G = ErdosRenyiGenerator(100, 0.15, false).generate();
+    GroupHarmonicClosenessLocalSearch ghc(G, 5);
+    ghc.run();
 }
 
 TEST_P(CentralityGTest, testGroupClosenessLocalSearch) {
