@@ -5,6 +5,7 @@
 *      Author: Maximilian Vogel
 */
 
+#include <algorithm>
 #include <cmath>
 #include <map>
 #include <omp.h>
@@ -55,7 +56,7 @@ void NeighborhoodFunctionHeuristic::run() {
     if (strategy == SPLIT) {
         start_nodes = split(*G, nSamples);
     } else if (strategy == RANDOM) {
-        start_nodes = random(*G, nSamples);
+        std::sample(G->nodeRange().begin(), G->nodeRange().end(), start_nodes.begin(), nSamples, Aux::Random::getURNG());
     }
 
     // run nSamples BFS and count the distances.
@@ -107,27 +108,9 @@ std::vector<count> NeighborhoodFunctionHeuristic::getNeighborhoodFunction() cons
     return result;
 }
 
-std::vector<node> NeighborhoodFunctionHeuristic::random(const Graph& G, count nSamples) {
-    std::vector<node> start_nodes(nSamples, 0);
-    // the vector of start nodes is chosen completely at random with the graphs "randomNode()" function.
-    for (index i = 0; i < nSamples; ++i) {
-        start_nodes[i] = GraphTools::randomNode(G);
-    }
-    return start_nodes;
-}
-
 std::vector<node> NeighborhoodFunctionHeuristic::split(const Graph& G, count nSamples) {
-    // sort the nodes by node degree or sum of degrees of its neighbors
-    std::vector<count> nodeDeg(G.upperNodeIdBound(), none);
-    G.parallelForNodes([&](node u) {
-            nodeDeg[u] = G.degree(u);
-    });
-    std::vector<node> nodes;
-    nodes.reserve(G.numberOfNodes());
-    G.forNodes([&](node u) { nodes.push_back(u); });
-    nodes.erase(std::remove_if(nodes.begin(), nodes.end(), [](node u){return u == none;}), nodes.end());
-    //std::random_shuffle(nodes.begin(), nodes.end());
-    Aux::Parallel::sort(nodes.begin(), nodes.end(), [&nodeDeg](const node& a, const node& b) {return nodeDeg[a] < nodeDeg[b];});
+    std::vector<node> nodes(G.nodeRange().begin(), G.nodeRange().end());
+    Aux::Parallel::sort(nodes.begin(), nodes.end(), [&G](const node& a, const node& b) {return G.degree(a) < G.degree(b);});
     std::vector<node> start_nodes(nSamples, 0);
     // every (n/nSamples)-th node is selected as start node
     auto stepwidth = G.numberOfNodes()/nSamples;
