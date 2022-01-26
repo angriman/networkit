@@ -107,12 +107,9 @@ Vector& Vector::operator+=(const Vector &other) {
     return *this;
 }
 
-Vector& Vector::operator+=(const double value) {
-#pragma omp parallel for
-    for (omp_index i = 0; i < static_cast<omp_index>(getDimension()); ++i) {
-        values[i] += value;
-    }
-
+Vector& Vector::operator+=(double scalar) {
+    std::transform(std::execution::par, values.begin(), values.end(), values.begin(),
+                   [scalar](double value) { return value + scalar; });
     return *this;
 }
 
