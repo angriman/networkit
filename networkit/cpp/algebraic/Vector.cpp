@@ -77,11 +77,8 @@ Vector Vector::operator*(double scalar) const {
 }
 
 Vector& Vector::operator*=(double scalar) {
-#pragma omp parallel for
-    for (omp_index i = 0; i < static_cast<omp_index>(getDimension()); i++) {
-        values[i] *= scalar;
-    }
-
+    std::transform(std::execution::par, values.begin(), values.end(), values.begin(),
+                   [scalar](double value) -> double { return value * scalar; });
     return *this;
 }
 
