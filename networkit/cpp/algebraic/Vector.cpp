@@ -102,11 +102,8 @@ Vector& Vector::operator+=(const Vector &other) {
     assert(isTransposed() == other.isTransposed()); // vectors must be transposed correctly
     assert(getDimension() == other.getDimension()); // dimensions of vectors must match
 
-#pragma omp parallel for
-    for (omp_index i = 0; i < static_cast<omp_index>(getDimension()); i++) {
-        values[i] += other[i];
-    }
-
+    std::transform(std::execution::par, values.begin(), values.end(), other.values.begin(),
+                   values.begin(), std::plus<>());
     return *this;
 }
 
