@@ -39,17 +39,8 @@ double Vector::length() const {
 }
 
 double Vector::mean() const {
-    double sum = 0.;
-    const auto n = getDimension();
-#ifndef NETWORKIT_OMP2
-#pragma omp parallel for reduction(+ : sum)
-    for (omp_index i = 0; i < static_cast<omp_index>(n); ++i)
-        sum += values[i];
-#else
-    sum = std::accumulate(values.begin(), values.end(), 0.);
-#endif
-
-    return sum / (double)n;
+    return std::reduce(std::execution::par, values.begin(), values.end())
+           / static_cast<double>(getDimension());
 }
 
 bool Vector::operator==(const Vector &other) const {
