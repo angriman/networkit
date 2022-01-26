@@ -134,7 +134,6 @@ if (NETWORKIT_SANITY_CHECKS)
     set(NETWORKIT_CXX_FLAGS "${NETWORKIT_CXX_FLAGS} -DNETWORKIT_SANITY_CHECKS")
 endif()
 
-
 # finding or creating OpenMP target. This is likely to fail for CMake Version < 3.12.
 find_package(OpenMP)
 
@@ -279,6 +278,11 @@ if(NETWORKIT_BUILD_CORE AND NETWORKIT_MONOLITH)
 	target_include_directories(networkit PUBLIC "${PROJECT_SOURCE_DIR}/extlibs/ttmath/")
 
 endif()
+
+# Find tbb
+find_package(TBB)
+target_link_libraries(networkit PRIVATE TBB::tbb)
+
 
 ################################################################################
 # ENABLE CLANG-TIDY
