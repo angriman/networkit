@@ -6,8 +6,10 @@
  *      Author: Michael Wegner (michael.wegner@student.kit.edu)
  */
 
-#include <networkit/algebraic/Vector.hpp>
+#include <execution>
+#include <functional>
 
+#include <networkit/algebraic/Vector.hpp>
 #include <networkit/algebraic/DynamicMatrix.hpp>
 
 namespace NetworKit {
@@ -59,16 +61,8 @@ bool Vector::operator!=(const Vector &other) const {
 }
 
 double Vector::innerProduct(const Vector &v1, const Vector &v2) {
-    assert(v1.getDimension() == v2.getDimension());
-    double inner_prod = 0.;
-#ifndef NETWORKIT_OMP2
-#pragma omp parallel for reduction(+ : inner_prod)
-    for (omp_index i = 0; i < static_cast<omp_index>(v1.getDimension()); ++i)
-        inner_prod += v1[i] * v2[i];
-#else
-    inner_prod = std::inner_product(v1.values.begin(), v1.values.end(), v2.values.begin(), 0.0);
-#endif
-    return inner_prod;
+    return std::transform_reduce(std::execution::par, v1.values.begin(), v1.values.end(),
+                                 v2.values.begin(), 0., std::plus<>(), std::multiplies<>());
 }
 
 double Vector::operator*(const Vector &other) const {
@@ -159,4 +153,3 @@ Vector& Vector::operator-=(const double value) {
 
 
 } /* namespace NetworKit */
-
