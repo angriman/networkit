@@ -6,6 +6,7 @@
  *              Alexander van der Grinten <avdgrinten@hu-berlin.de>
  */
 
+#include <execution>
 #include <numeric>
 #include <omp.h>
 #include <queue>
@@ -532,7 +533,7 @@ void ApproxElectricalCloseness::run() {
 
     G.parallelForNodes([&](node u) { diagonal[u] = diagonal[u] - sol[root] + 2. * sol[u]; });
     diagonal[root] = sol[root];
-    const double trace = std::accumulate(diagonal.begin(), diagonal.end(), 0.);
+    const double trace = std::reduce(std::execution::par, diagonal.begin(), diagonal.end());
     const auto n = static_cast<double>(G.numberOfNodes());
 
     G.parallelForNodes([&](node u) { scoreData[u] = (n - 1.) / (n * diagonal[u] + trace); });

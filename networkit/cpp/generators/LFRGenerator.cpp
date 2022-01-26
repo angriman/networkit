@@ -1,4 +1,5 @@
 // no-networkit-format
+#include <execution>
 #include <algorithm>
 #include <numeric>
 #include <random>
@@ -131,7 +132,7 @@ void NetworKit::LFRGenerator::setPartition(NetworKit::Partition zeta) {
 
 NetworKit::Graph NetworKit::LFRGenerator::generateIntraClusterGraph(std::vector< NetworKit::count > intraDegreeSequence, const std::vector<NetworKit::node> &localToGlobalNode) {
     // check if sum of degrees is even and fix if necessary
-    count intraDegSum = std::accumulate(intraDegreeSequence.begin(), intraDegreeSequence.end(), count{0});
+    count intraDegSum = std::reduce(std::execution::par, intraDegreeSequence.begin(), intraDegreeSequence.end());
 
     DEBUG("Possibly correcting the degree sequence");
 

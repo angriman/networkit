@@ -7,6 +7,7 @@
  *      Contributors: Hoske/Weisbarth
  */
 
+#include <execution>
 #include <numeric>
 
 #include <networkit/auxiliary/Parallel.hpp>
@@ -18,7 +19,7 @@ namespace NetworKit {
 
 ChungLuGenerator::ChungLuGenerator(const std::vector<count> &degreeSequence) :
         StaticDegreeSequenceGenerator(degreeSequence) {
-    sum_deg = std::accumulate(seq.begin(), seq.end(), count{0});
+    sum_deg = std::reduce(std::execution::par, seq.begin(), seq.end());
     n = (count) seq.size();
 }
 
