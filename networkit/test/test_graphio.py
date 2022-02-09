@@ -2,6 +2,7 @@
 import unittest
 import os
 import networkit as nk
+import tempfile
 
 class TestGEXFIO(unittest.TestCase):
 	def setUp(self):
@@ -43,30 +44,23 @@ class TestGEXFIO(unittest.TestCase):
 		#write and read files again to check
 		from networkit.GEXFIO import GEXFWriter
 		writer = GEXFWriter()
-		writer.write(self.g, "output/staticTestResult.gexf", self.events)
-		self.assertTrue(os.path.isfile("output/staticTestResult.gexf"))
-		writer.write(self.g2, "output/dynamicTestResult.gexf", self.events2)
-		self.assertTrue(os.path.isfile("output/dynamicTestResult.gexf"))
-		writer.write(self.g3, "output/dynamicTest2Result.gexf", self.events3)
-		self.assertTrue(os.path.isfile("output/dynamicTest2Result.gexf"))
-		writer.write(self.g4, "output/dynamicTest3Result.gexf", self.events4)
-		self.assertTrue(os.path.isfile("output/dynamicTest3Result.gexf"))
 
-		gTest, testEvents = self.reader.read("output/staticTestResult.gexf")
-		g2Test, testEvents2 = self.reader.read("output/dynamicTestResult.gexf")
-		g3Test, testEvents3 = self.reader.read("output/dynamicTest2Result.gexf")
-		g4Test, testEvents4 = self.reader.read("output/dynamicTest3Result.gexf")
+		with tempfile.TemporaryDirectory() as tmpdir:
+			graphs = [self.g, self.g2, self.g3, self.g4]
+			events = [self.events, self.events2, self.events3, self.events4]
 
-		#1. check properties and static elements
-		self.checkStatic(self.g, gTest)
-		self.checkStatic(self.g2, g2Test)
-		self.checkStatic(self.g3, g3Test)
-		self.checkStatic(self.g4, g4Test)
-		#2.check events
-		self.checkDynamic(self.events, testEvents)
-		self.checkDynamic(self.events2, testEvents2)
-		self.checkDynamic(self.events3, testEvents3)
-		self.checkDynamic(self.events4, testEvents4)
+			for g, events in zip(graphs, events):
+				resultsPath = os.path.join(tmpdir, "results.gexf")
+				writer.write(g, resultsPath, events)
+				self.assertTrue(os.path.isfile(resultsPath))
+
+				gTest, testEvents = self.reader.read(resultsPath)
+
+				#1. check properties and static elements
+				self.checkStatic(g, gTest)
+
+				#2.check events
+				self.checkDynamic(events, testEvents)
 
 	def testWriteGraphReadGraph(self):
 		G = nk.generators.ErdosRenyiGenerator(100, 0.1).generate()
@@ -79,20 +73,19 @@ class TestGEXFIO(unittest.TestCase):
 				# format do not support both reading and writing
 				continue
 
-			filename = "output/testWriteGraphReadGraph." + str(format)
-			if format == nk.Format.MAT:
-				filename += ".mat" # suffix required
+			with tempfile.TemporaryDirectory() as tmpdir:
+				filename = "testWriteGraphReadGraph." + str(format)
+				if format == nk.Format.MAT:
+					filename += ".mat" # suffix required
+				path = os.path.join(tmpdir, filename)
 
-			if os.path.exists(filename):
-				os.remove(filename)
-
-			kargs = [' ', 0] if format == nk.Format.EdgeList else []
-			nk.graphio.writeGraph(G, filename, format, *kargs)
-			if format == nk.Format.GEXF:
-				G1, _ = nk.graphio.readGraph(filename, format, *kargs)
-			else:
-				G1 = nk.graphio.readGraph(filename, format, *kargs)
-			self.checkStatic(G, G1)
+				kargs = [' ', 0] if format == nk.Format.EdgeList else []
+				nk.graphio.writeGraph(G, path, format, *kargs)
+				if format == nk.Format.GEXF:
+					G1, _ = nk.graphio.readGraph(path, format, *kargs)
+				else:
+					G1 = nk.graphio.readGraph(path, format, *kargs)
+				self.checkStatic(G, G1)
 
 
 if __name__ == "__main__":

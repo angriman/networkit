@@ -278,6 +278,10 @@ if(NETWORKIT_BUILD_CORE AND NETWORKIT_MONOLITH)
 	target_include_directories(networkit BEFORE PUBLIC "${PROJECT_SOURCE_DIR}/include")
 	target_include_directories(networkit PUBLIC "${PROJECT_SOURCE_DIR}/extlibs/ttmath/")
 
+
+	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8)
+		target_link_libraries(networkit PRIVATE c++fs)
+	endif()
 endif()
 
 ################################################################################

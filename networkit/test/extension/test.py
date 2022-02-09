@@ -1,8 +1,6 @@
 import unittest
 import os
-#from .. import networkit
-#from .. import *
-#import ..
+import tempfile
 
 
 class TestExtMETISGraphReader(unittest.TestCase):
@@ -15,14 +13,14 @@ class TestExtMETISGraphReader(unittest.TestCase):
 		self.g.addEdge(0,4)
 
 	def test_readAndWrite(self):
-#		from networkit.graphio import METISGraphReader
 		from networkit.graphio import METISGraphReader
 		from networkit.graphio import METISGraphWriter
 		w = METISGraphWriter()
-		w.write(self.g, "output/metis_test.graph")
-		self.assertTrue(os.path.isfile("output/metis_test.graph"))
-		r = METISGraphReader()
-		testg = r.read("output/metis_test.graph")
-		self.assertEqual(self.g.numberOfNodes(), testg.numberOfNodes())
-		self.assertEqual(self.g.numberOfEdges(), testg.numberOfEdges())
+		with tempfile.NamedTemporaryFile(mode='w') as tmpfile:
+			w.write(self.g, tmpfile.name)
+			self.assertTrue(os.path.isfile(tmpfile.name))
+			r = METISGraphReader()
+			testg = r.read(tmpfile.name)
+			self.assertEqual(self.g.numberOfNodes(), testg.numberOfNodes())
+			self.assertEqual(self.g.numberOfEdges(), testg.numberOfEdges())
 

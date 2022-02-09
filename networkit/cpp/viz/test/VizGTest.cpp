@@ -7,8 +7,22 @@
  */
 
 #include <gtest/gtest.h>
-
 #include <vector>
+
+// Check if using GCC; !defined(__clang__) is necessary because Clang defines __GNUG__
+#if defined(__GNUG__) && !defined(__clang__)
+    // GCC versions < 8.1: filesystem is an experimental feature
+    #if __GNUG__ < 8
+        #include <experimental/filesystem>
+        namespace fs = std::experimental::filesystem;
+    #else
+        #include <filesystem>
+        namespace fs = std::filesystem;
+    #endif // __GNUG__ < 8
+#else
+    #include <filesystem>
+    namespace fs = std::filesystem;
+#endif // __GNUG__
 
 #include <networkit/viz/PostscriptWriter.hpp>
 #include <networkit/graph/Graph.hpp>
@@ -41,16 +55,17 @@ TEST_F(VizGTest, testPostscriptWriterOnRandomGraph) {
 
 
     // write graph to file
-    std::string path = "output/testGraph.eps";
+    const auto path = fs::temp_directory_path() / "testGraph.eps";
     PostscriptWriter psWriter;
-    psWriter.write(G, coordinates, path);
+    psWriter.write(G, coordinates, path.string());
 
     bool exists = false;
-    std::ifstream file(path);
+    std::ifstream file(path.string());
     if (file) {
         exists = true;
     }
-    EXPECT_TRUE(exists) << "A file should have been created : " << path;
+    EXPECT_TRUE(exists) << "A file should have been created : " << path.string();
+    fs::remove(path);
 }
 
 #ifndef NETWORKIT_WINDOWS
@@ -62,16 +77,17 @@ TEST_F(VizGTest, testPostscriptWriterOnRealGraph) {
 
 
     // write graph to file
-    std::string path = "output/airfoil1.eps";
+    const auto path = fs::temp_directory_path() / "airfoil1.eps";
     PostscriptWriter psWriter;
-    psWriter.write(G, Point<>::pointVectorToPoint2D(coordinates), path);
+    psWriter.write(G, Point<>::pointVectorToPoint2D(coordinates), path.string());
 
     bool exists = false;
-    std::ifstream file(path);
+    std::ifstream file(path.string());
     if (file) {
         exists = true;
     }
-    EXPECT_TRUE(exists) << "A file should have been created : " << path;
+    EXPECT_TRUE(exists) << "A file should have been created : " << path.string();
+    fs::remove(path);
 }
 #endif
 
