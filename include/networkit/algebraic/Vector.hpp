@@ -64,6 +64,17 @@ public:
     inline count getDimension() const { return values.size(); }
 
     /**
+     * Changes the dimension of the vector.
+     *
+     * @parameter newDimension The new dimension of the vector.
+     * @parameter defaultValue If the new dimension is greater than the current dimension, value of
+     * the new elements.
+     */
+    void setDimension(count newDimension, double defaultValue = 0) {
+        values.resize(newDimension, defaultValue);
+    }
+
+    /**
      * A transposed vector is a row vector.
      * @return True, if this vector is transposed, otherwise false.
      */

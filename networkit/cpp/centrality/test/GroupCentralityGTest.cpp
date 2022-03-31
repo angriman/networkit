@@ -8,10 +8,12 @@
 #include <networkit/centrality/GroupClosenessLocalSearch.hpp>
 #include <networkit/centrality/GroupClosenessLocalSwaps.hpp>
 #include <networkit/centrality/GroupDegree.hpp>
+#include <networkit/centrality/GroupForestCloseness.hpp>
 #include <networkit/centrality/GroupHarmonicCloseness.hpp>
 #include <networkit/components/ConnectedComponents.hpp>
 #include <networkit/distance/BFS.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
+#include <networkit/generators/HyperbolicGenerator.hpp>
 #include <networkit/graph/BFS.hpp>
 #include <networkit/graph/Dijkstra.hpp>
 #include <networkit/graph/GraphTools.hpp>
@@ -516,6 +518,16 @@ TEST_P(GroupCentralityGTest, testGedWalk) {
             EXPECT_GE(apxScore, (1. - 1. / std::exp(1)) * maxScore - epsilon);
         }
     }
+}
+
+TEST_F(GroupCentralityGTest, testGroupForestCloseness) {
+    Aux::Random::setSeed(42, true);
+    auto G = HyperbolicGenerator(200, 5).generate();
+
+    const auto root = GraphTools::augmentGraph(G);
+    const count k = 5;
+    GroupForestCloseness gfc(G, root, k);
+    gfc.run();
 }
 
 } // namespace NetworKit

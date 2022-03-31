@@ -40,6 +40,8 @@ public:
     LinearSolver(const double tolerance) : tolerance(tolerance) {}
     virtual ~LinearSolver() = default;
 
+    void setTolerance(double newTolerance) { this->tolerance = newTolerance; }
+
     /**
      * Sets the solver up for the specified @a matrix.
      * @param matrix
