@@ -368,7 +368,7 @@ TEST_F(DynSSSPGTest, testDynamicDijkstraGeneratedGraph) {
         DEBUG("Running from scratch with dijkstra");
         dij.run();
         G.forNodes([&] (node i) {
-            EXPECT_EQ(dyn_dij.distance(i), dij.distance(i));
+            EXPECT_DOUBLE_EQ(dyn_dij.distance(i), dij.distance(i));
             EXPECT_EQ(dyn_dij.numberOfPaths(i), dij.numberOfPaths(i));
         });
     }
