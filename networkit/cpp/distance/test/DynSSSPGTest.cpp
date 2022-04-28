@@ -349,34 +349,28 @@ TEST_F(DynSSSPGTest, testDynamicDijkstraGeneratedGraph) {
     auto G = DorogovtsevMendesGenerator{1000}.generate();
     G = GraphTools::toWeighted(G);
     DEBUG("Generated graph of dimension ", G.upperNodeIdBound());
+
     DynDijkstra dyn_dij(G, 0);
-    Dijkstra dij(G, 0);
     dyn_dij.run();
-    dij.run();
-    DEBUG("Before the edge insertion: ");
-    count nInsertions = 10, i = 0;
-    while (i < nInsertions) {
+
+    Dijkstra dij(G, 0); // Baseline
+
+    for (int i = 0; i < 10; ++i) {
         DEBUG("Sampling a new edge");
-        node v1 = GraphTools::randomNode(G);
-        node v2 = GraphTools::randomNode(G);
-        if (v1 != v2 && !G.hasEdge(v1, v2)) {
-            i++;
-            DEBUG("Adding edge number ", i);
-            G.addEdge(v1, v2);
-            std::vector<GraphEvent> batch;
-            batch.push_back(GraphEvent(GraphEvent::EDGE_ADDITION, v1, v2, 1.0));
-            DEBUG("Running update with dynamic dijkstra");
-            dyn_dij.updateBatch(batch);
-            DEBUG("Running from scratch with dijkstra");
-            dij.run();
-            G.forNodes([&] (node i) {
-            //	std::cout<<"Node "<<i<<":"<<std::endl;
-            //	std::cout<<"Actual distance: "<<dij.distance(i)<<", computed distance: "<<ddij.distance(i)<<std::endl;
-            //	std::cout<<"Actual number of paths: "<<dij.numberOfPaths(i)<<", computed one: "<<ddij.numberOfPaths(i)<<std::endl;
-                EXPECT_EQ(dyn_dij.distance(i), dij.distance(i));
-                EXPECT_EQ(dyn_dij.numberOfPaths(i), dij.numberOfPaths(i));
-            });
-        }
+        node v1 = GraphTools::randomNode(G), v2 = GraphTools::randomNode(G);
+        while (v1 == v2 || G.hasEdge(v1, v2))
+             v1 = GraphTools::randomNode(G), v2 = GraphTools::randomNode(G);
+
+        DEBUG("Adding edge number ", i);
+        G.addEdge(v1, v2);
+        DEBUG("Running update with dynamic dijkstra");
+        dyn_dij.update(GraphEvent(GraphEvent::EDGE_ADDITION, v1, v2, defaultEdgeWeight));
+        DEBUG("Running from scratch with dijkstra");
+        dij.run();
+        G.forNodes([&] (node i) {
+            EXPECT_EQ(dyn_dij.distance(i), dij.distance(i));
+            EXPECT_EQ(dyn_dij.numberOfPaths(i), dij.numberOfPaths(i));
+        });
     }
 }
 
