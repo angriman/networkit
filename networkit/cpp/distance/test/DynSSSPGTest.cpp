@@ -346,6 +346,7 @@ TEST_F(DynSSSPGTest, testDynamicBFSGeneratedGraphEdgeDeletion) {
 }
 
 TEST_F(DynSSSPGTest, testDynamicDijkstraGeneratedGraph) {
+    Aux::Random::setSeed(1, true);
     auto G = DorogovtsevMendesGenerator{1000}.generate();
     G = GraphTools::toWeighted(G);
     DEBUG("Generated graph of dimension ", G.upperNodeIdBound());
