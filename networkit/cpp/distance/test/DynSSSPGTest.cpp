@@ -12,7 +12,6 @@
 #include <networkit/distance/BFS.hpp>
 #include <networkit/distance/DynDijkstra.hpp>
 #include <networkit/distance/Dijkstra.hpp>
-#include <networkit/io/METISGraphReader.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/generators/DorogovtsevMendesGenerator.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
@@ -286,7 +285,6 @@ TEST_F(DynSSSPGTest, testDynamicDijkstraDeletion) {
 }
 
 TEST_F(DynSSSPGTest, testDynamicBFSGeneratedGraph) {
-    METISGraphReader reader;
     DorogovtsevMendesGenerator generator(500);
     Graph G = generator.generate();
     DEBUG("Generated graph of dimension ", G.upperNodeIdBound());
@@ -348,10 +346,8 @@ TEST_F(DynSSSPGTest, testDynamicBFSGeneratedGraphEdgeDeletion) {
 }
 
 TEST_F(DynSSSPGTest, testDynamicDijkstraGeneratedGraph) {
-    METISGraphReader reader;
-    DorogovtsevMendesGenerator generator(1000);
-    Graph G1 = generator.generate();
-    Graph G(G1, true, false);
+    auto G = DorogovtsevMendesGenerator{1000}.generate();
+    G = GraphTools::toWeighted(G);
     DEBUG("Generated graph of dimension ", G.upperNodeIdBound());
     DynDijkstra dyn_dij(G, 0);
     Dijkstra dij(G, 0);
@@ -412,7 +408,6 @@ TEST_F(DynSSSPGTest, testDynamicDijkstraGeneratedGraphEdgeDeletion) {
 }
 
 TEST_F(DynSSSPGTest, testDynamicDijkstraBatches) {
-    METISGraphReader reader;
     std::default_random_engine random_generator;
     std::normal_distribution<double> distribution(100,10);
     DorogovtsevMendesGenerator generator(100);
