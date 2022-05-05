@@ -84,6 +84,14 @@ node randomNeighbor(const Graph &G, node u);
 std::pair<node, node> randomEdge(const Graph &G, bool uniformDistribution = false);
 
 /**
+ * Returns a random pair of non-adjacent nodes.
+ *
+ * @param Graph G The input graph.
+ * @return std::pair<node, node> A random pair of non-adjacent nodes.
+ */
+std::pair<node, node> randomEdge(const Graph &G);
+
+/**
  * Returns a vector with @a nr random edges. The edges are chosen uniformly
  * random.
  *

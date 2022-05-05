@@ -178,6 +178,9 @@ std::pair<node, node> randomEdge(const Graph &G, bool uniformDistribution) {
     return {u, v};
 }
 
+std::pair<node, node> randomNonAdjacentNodes(const Graph &G) {
+}
+
 std::vector<std::pair<node, node>> randomEdges(const Graph &G, count nr) {
     if (!nr)
         return {};
