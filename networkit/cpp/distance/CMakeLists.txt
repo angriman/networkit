@@ -4,6 +4,7 @@ networkit_add_module(distance
     AdamicAdarDistance.cpp
     AlgebraicDistance.cpp
     BFS.cpp
+    BFSImpl.cpp
     BidirectionalBFS.cpp
     BidirectionalDijkstra.cpp
     CommuteTimeDistance.cpp
