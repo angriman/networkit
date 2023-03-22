@@ -32,6 +32,7 @@
 #include <networkit/auxiliary/FunctionTraits.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Random.hpp>
+#include <networkit/graph/GeneralGraph.hpp>
 
 #include <tlx/define/deprecated.hpp>
 
@@ -100,7 +101,7 @@ class CurveballMaterialization;
  * @ingroup graph
  * A graph (with optional weights) and parallel iterator methods.
  */
-class Graph final {
+class Graph final : public GeneralGraph<node, edgeweight> {
 
     // graph attributes
     //!< current number of nodes
@@ -907,87 +908,13 @@ public:
     /**
      * Class to iterate over the nodes of a graph.
      */
-    class NodeIterator {
-
-        const Graph *G;
-        node u;
-
-    public:
-        // The value type of the nodes (i.e. nodes). Returned by
-        // operator*().
-        using value_type = node;
-
-        // Reference to the value_type, required by STL.
-        using reference = value_type &;
-
-        // Pointer to the value_type, required by STL.
-        using pointer = value_type *;
-
-        // STL iterator category.
-        using iterator_category = std::forward_iterator_tag;
-
-        // Signed integer type of the result of subtracting two pointers,
-        // required by STL.
-        using difference_type = ptrdiff_t;
-
-        // Own type.
-        using self = NodeIterator;
-
-        NodeIterator(const Graph *G, node u) : G(G), u(u) {
-            if (!G->hasNode(u) && u < G->upperNodeIdBound()) {
-                ++(*this);
-            }
-        }
-
-        /**
-         * @brief WARNING: This constructor is required for Python and should not be used as the
-         * iterator is not initialized.
-         */
-        NodeIterator() : G(nullptr) {}
-
-        ~NodeIterator() = default;
-
-        NodeIterator &operator++() {
-            assert(u < G->upperNodeIdBound());
-            do {
-                ++u;
-            } while (!(G->hasNode(u) || u >= G->upperNodeIdBound()));
-            return *this;
-        }
-
-        NodeIterator operator++(int) {
-            const auto tmp = *this;
-            ++(*this);
-            return tmp;
-        }
-
-        NodeIterator operator--() {
-            assert(u);
-            do {
-                --u;
-            } while (!G->hasNode(u));
-            return *this;
-        }
-
-        NodeIterator operator--(int) {
-            const auto tmp = *this;
-            --(*this);
-            return tmp;
-        }
-
-        bool operator==(const NodeIterator &rhs) const noexcept { return u == rhs.u; }
-
-        bool operator!=(const NodeIterator &rhs) const noexcept { return !(*this == rhs); }
-
-        node operator*() const noexcept {
-            assert(u < G->upperNodeIdBound());
-            return u;
-        }
-    };
+    using NodeIterator = NodeIteratorBase<Graph, node>;
 
     /**
      * Wrapper class to iterate over a range of the nodes of a graph.
      */
+    using NodeRange = NodeRangeBase<Graph, node>;
+#if 0
     class NodeRange {
 
         const Graph *G;
@@ -1009,6 +936,7 @@ public:
             return NodeIterator(G, G->upperNodeIdBound());
         }
     };
+#endif
 
     // Necessary for friendship with EdgeIteratorBase.
     class EdgeIterator;
@@ -1263,66 +1191,16 @@ public:
     /**
      * Class to iterate over the in/out neighbors of a node.
      */
-    class NeighborIterator {
-
-        std::vector<node>::const_iterator nIter;
+    class NeighborIterator : public NeighborIteratorBase<node, node> {
 
     public:
-        // The value type of the neighbors (i.e. nodes). Returned by
-        // operator*().
-        using value_type = node;
-
-        // Reference to the value_type, required by STL.
-        using reference = value_type &;
-
-        // Pointer to the value_type, required by STL.
-        using pointer = value_type *;
-
-        // STL iterator category.
-        using iterator_category = std::forward_iterator_tag;
-
-        // Signed integer type of the result of subtracting two pointers,
-        // required by STL.
-        using difference_type = ptrdiff_t;
-
         // Own type.
         using self = NeighborIterator;
 
-        NeighborIterator(std::vector<node>::const_iterator nodesIter) : nIter(nodesIter) {}
+        // Using the same constructor as `NeighborIteratorBase`.
+        using NeighborIteratorBase<node, node>::NeighborIteratorBase;
 
-        /**
-         * @brief WARNING: This contructor is required for Python and should not be used as the
-         * iterator is not initialized.
-         */
-        NeighborIterator() {}
-
-        NeighborIterator &operator++() {
-            ++nIter;
-            return *this;
-        }
-
-        NeighborIterator operator++(int) {
-            const auto tmp = *this;
-            ++nIter;
-            return tmp;
-        }
-
-        NeighborIterator operator--() {
-            const auto tmp = *this;
-            --nIter;
-            return tmp;
-        }
-
-        NeighborIterator operator--(int) {
-            --nIter;
-            return *this;
-        }
-
-        bool operator==(const NeighborIterator &rhs) const { return nIter == rhs.nIter; }
-
-        bool operator!=(const NeighborIterator &rhs) const { return !(nIter == rhs.nIter); }
-
-        node operator*() const { return *nIter; }
+        node operator*() const noexcept { return *neighIter; }
     };
 
     /**
@@ -1403,25 +1281,22 @@ public:
      * a for loop.
      */
     template <bool InEdges = false>
-    class NeighborRange {
-        const Graph *G;
-        node u;
+    class NeighborRange : NeighborRangeBase<Graph, node, InEdges> {
 
     public:
-        NeighborRange(const Graph &G, node u) : G(&G), u(u) { assert(G.hasNode(u)); };
+        // Using the same constructor as the base class.
+        using NeighborRangeBase<Graph, node, InEdges>::NeighborRangeBase;
 
-        NeighborRange() : G(nullptr){};
-
-        NeighborIterator begin() const {
-            assert(G);
-            return InEdges ? NeighborIterator(G->inEdges[u].begin())
-                           : NeighborIterator(G->outEdges[u].begin());
+        NeighborIterator begin() const override {
+            assert(this->G != nullptr);
+            return InEdges ? NeighborIterator(this->G->inEdges[this->source].begin())
+                           : NeighborIterator(this->G->outEdges[this->source].begin());
         }
 
-        NeighborIterator end() const {
-            assert(G);
-            return InEdges ? NeighborIterator(G->inEdges[u].end())
-                           : NeighborIterator(G->outEdges[u].end());
+        NeighborIterator end() const override {
+            assert(this->G != nullptr);
+            return InEdges ? NeighborIterator(this->G->inEdges[this->source].end())
+                           : NeighborIterator(this->G->outEdges[this->source].end());
         }
     };
 
@@ -1742,7 +1617,7 @@ public:
      * Get an upper bound for the edge ids in the graph.
      * @return An upper bound for the edge ids.
      */
-    index upperEdgeIdBound() const noexcept { return omega; }
+    index upperEdgeIdBound() const override { return omega; }
 
     /** GRAPH INFORMATION **/
 
@@ -1860,7 +1735,7 @@ public:
      * @return @c true if @a v exists, @c false otherwise.
      */
 
-    bool hasNode(node v) const noexcept { return (v < z) && this->exists[v]; }
+    bool hasNode(node v) const override { return (v < z) && this->exists[v]; }
 
     /**
      * Restores a previously deleted node @a v with its previous id in the
@@ -2131,13 +2006,13 @@ public:
      * Return the number of nodes in the graph.
      * @return The number of nodes.
      */
-    count numberOfNodes() const noexcept { return n; }
+    count numberOfNodes() const override { return n; }
 
     /**
      * Return the number of edges in the graph.
      * @return The number of edges.
      */
-    count numberOfEdges() const noexcept { return m; }
+    count numberOfEdges() const override { return m; }
 
     /**
      * Return the number of loops {v,v} in the graph.
@@ -2151,7 +2026,7 @@ public:
      * Get an upper bound for the node ids in the graph.
      * @return An upper bound for the node ids.
      */
-    index upperNodeIdBound() const noexcept { return z; }
+    index upperNodeIdBound() const override { return z; }
 
     /**
      * Check for invalid graph states, such as multi-edges.
