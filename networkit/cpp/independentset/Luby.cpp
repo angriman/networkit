@@ -5,6 +5,8 @@
  *      Author: Christian Staudt
  */
 
+#include <algorithm>
+
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/independentset/Luby.hpp>
@@ -16,15 +18,6 @@ std::vector<bool> Luby::run(const Graph &G) {
     std::vector<bool> I(G.numberOfNodes(), false); // independent set $I = \emptyset$
     // instead of pruning the graph, store here whether a node in G is still in G'
     std::vector<bool> V(G.numberOfNodes(), true);
-
-    // test if there are no active nodes left (G' is empty)
-    auto empty = [&]() {
-        for (bool a : V) {
-            if (a)
-                return false;
-        }
-        return true;
-    };
 
     // weighted degree filtered for active nodes
     auto weightedDegree = [&](node u) {
@@ -39,7 +32,7 @@ std::vector<bool> Luby::run(const Graph &G) {
 
     auto nodeProbability = [&](node v) { return 1.0 / (2.0 * weightedDegree(v)); };
 
-    while (!empty()) {
+    while (std::any_of(V.begin(), V.end(), [](bool elem) { return elem; })) {
         // choose set S - weighted choice of active nodes with probability $1 / 2 \omega(v)$
         std::vector<bool> S(G.numberOfNodes(), false);
         G.parallelForNodes([&](node u) {
@@ -51,8 +44,8 @@ std::vector<bool> Luby::run(const Graph &G) {
         });
         // remove non-independent nodes from S to get S'
         G.parallelForEdges([&](node u, node v) {
-            if (u != v) {          // exclude self-loops
-                if (S[u] & S[v]) { // u and v are not independent (note: S is subset of V')
+            if (u != v) {           // exclude self-loops
+                if (S[u] && S[v]) { // u and v are not independent (note: S is subset of V')
                     // remove node with smaller degree
                     edgeweight wu = weightedDegree(u);
                     edgeweight wv = weightedDegree(v);

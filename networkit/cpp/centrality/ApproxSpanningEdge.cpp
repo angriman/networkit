@@ -10,6 +10,8 @@
 #include <omp.h>
 #include <queue>
 
+#include <tlx/unused.hpp>
+
 #include <networkit/centrality/ApproxSpanningEdge.hpp>
 #include <networkit/components/BiconnectedComponents.hpp>
 
@@ -179,6 +181,7 @@ void ApproxSpanningEdge::run() {
             sequences.push_back(std::move(sequence));
             sequence.clear();
             assert(nVisited == curComponent.size());
+            tlx::unused(nVisited);
         }
     }
 
