@@ -6,10 +6,17 @@
  *               Fabian Brandt-Tumescheit <brandtfa@hu-berlin.de>
  */
 
-#include <networkit/auxiliary/NumericTools.hpp>
+#include <atomic>
+#include <cmath>
+#include <cstdlib>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
+#include <networkit/centrality/Centrality.hpp>
 #include <networkit/centrality/PageRank.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

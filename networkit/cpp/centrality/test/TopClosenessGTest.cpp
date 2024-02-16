@@ -5,11 +5,16 @@
  *      Author: cls, Fabian Brandt-Tumescheit
  */
 
-#include <iomanip>
-#include <iostream>
+#include <algorithm>
+#include <functional>
+#include <utility>
+#include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/centrality/Closeness.hpp>
 #include <networkit/centrality/HarmonicCloseness.hpp>

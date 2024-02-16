@@ -4,12 +4,17 @@
  * @author Charmaine Ndolo <charmaine.ndolo@hu-berlin.de>
  */
 
+#include <cassert>
+#include <cstdint>
 #include <cstring>
 #include <fstream>
+#include <ios>
+#include <sstream>
 #include <string>
 #include <unordered_map>
-
-#include <tlx/math/clz.hpp>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Enforce.hpp>
 #include <networkit/auxiliary/Log.hpp>

@@ -4,11 +4,17 @@
  *  Created on: 01.06.2019
  *    Author: Manuel Penschuck <networkit@manuel.jetzt>
  */
+#include <cassert>
+#include <cstddef>
+#include <limits>
 #include <omp.h>
 
 #include <algorithm>
 #include <numeric>
+#include <random>
+#include <tuple>
 #include <vector>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Parallel.hpp>

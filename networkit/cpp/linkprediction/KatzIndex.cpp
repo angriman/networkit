@@ -5,7 +5,14 @@
  *      Author: Kolja Esders
  */
 
+#include <cmath>
 #include <list>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/linkprediction/LinkPredictor.hpp>
 
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/linkprediction/KatzIndex.hpp>

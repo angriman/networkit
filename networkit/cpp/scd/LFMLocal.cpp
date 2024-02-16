@@ -1,5 +1,10 @@
+#include <cassert>
 #include <cmath>
-#include <unordered_map>
+#include <set>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/scd/SelectiveCommunityDetector.hpp>
 
 #include <networkit/auxiliary/IncrementalUniformRandomSelector.hpp>
 #include <networkit/scd/LFMLocal.hpp>

@@ -5,7 +5,19 @@
  *      Author: Henning
  */
 
+#include <algorithm>
+#include <cassert>
+#include <cmath>
 #include <map>
+#include <queue>
+#include <tuple>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/generators/PubWebGenerator.hpp>
+#include <networkit/viz/Point.hpp>
 
 #include <networkit/generators/DynamicPubWebGenerator.hpp>
 

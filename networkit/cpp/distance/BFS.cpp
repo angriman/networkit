@@ -5,7 +5,14 @@
  *      Author: Henning
  */
 
+#include <algorithm>
+#include <limits>
 #include <queue>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/distance/SSSP.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/distance/BFS.hpp>
 

@@ -5,14 +5,21 @@
  *      Author: cls
  */
 
+#include <cassert>
+#include <map>
 #include <omp.h>
-#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/community/CommunityDetectionAlgorithm.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
 #include <networkit/auxiliary/Timer.hpp>
-#include <networkit/coarsening/ClusteringProjector.hpp>
 #include <networkit/coarsening/ParallelPartitionCoarsening.hpp>
 #include <networkit/community/PLM.hpp>
 

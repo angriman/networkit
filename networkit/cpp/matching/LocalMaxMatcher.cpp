@@ -5,6 +5,11 @@
  */
 
 #include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/matching/Matcher.hpp>
 
 #include <networkit/matching/LocalMaxMatcher.hpp>
 

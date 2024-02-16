@@ -5,7 +5,9 @@
  *      Author:  Hung Tran <htran@ae.cs.uni-frankfurt.de>
  */
 
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
 #include "../CurveballImpl.hpp"
 

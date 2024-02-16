@@ -5,8 +5,13 @@
  *      Author: Henning
  */
 
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
+#include <networkit/distance/BFS.hpp>
+#include <networkit/distance/Dijkstra.hpp>
 #include <networkit/distance/GraphDistance.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

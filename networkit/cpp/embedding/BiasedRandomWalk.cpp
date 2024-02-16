@@ -13,6 +13,7 @@
  */
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 
 #include <networkit/auxiliary/Random.hpp>
@@ -20,6 +21,8 @@
 
 #include "AliasSampler.hpp"
 #include "BiasedRandomWalk.hpp"
+#include <vector>
+#include <networkit/Globals.hpp>
 
 namespace NetworKit {
 namespace Embedding {

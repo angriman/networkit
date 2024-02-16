@@ -5,7 +5,17 @@
  *      Author: Henning
  */
 
+#include <cassert>
+#include <cstdint>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/BucketPQ.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/matching/Matcher.hpp>
+#include <networkit/matching/Matching.hpp>
 #include <networkit/matching/PathGrowingMatcher.hpp>
 
 namespace NetworKit {

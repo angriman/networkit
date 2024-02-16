@@ -5,7 +5,11 @@
  *      Author: Kolja Esders
  */
 
+#include <algorithm>
+#include <iterator>
 #include <set>
+#include <vector>
+#include <networkit/Globals.hpp>
 
 #include <networkit/linkprediction/AdjustedRandIndex.hpp>
 

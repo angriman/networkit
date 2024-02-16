@@ -1,4 +1,10 @@
+#include <iostream>
+#include <ostream>
+#include <string>
+#include <unordered_set>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Timer.hpp>

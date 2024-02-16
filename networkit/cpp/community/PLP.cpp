@@ -5,11 +5,17 @@
  *      Author: Christian Staudt
  */
 
-#include <omp.h>
+#include <algorithm>
+#include <map>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/community/CommunityDetectionAlgorithm.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/Random.hpp>
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/community/PLP.hpp>
 

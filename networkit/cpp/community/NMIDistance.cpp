@@ -5,12 +5,17 @@
  *      Author: cls
  */
 
+#include <cassert>
+#include <cmath>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/MissingMath.hpp>
-#include <networkit/auxiliary/NumericTools.hpp>
 #include <networkit/community/DynamicNMIDistance.hpp>
 #include <networkit/community/NMIDistance.hpp>
 #include <networkit/community/PartitionIntersection.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

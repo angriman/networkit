@@ -7,14 +7,20 @@
  *              Marvin Ritter <marvin.ritter@gmail.com>
  */
 
-#include <cmath>
-#include <map>
-#include <random>
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <initializer_list>
 #include <sstream>
+#include <stdexcept>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/graph/Graph.hpp>
-#include <networkit/graph/GraphTools.hpp>
 
 namespace NetworKit {
 

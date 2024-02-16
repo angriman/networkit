@@ -4,7 +4,18 @@
  *  Created on: Sep 16, 2013
  *      Author: Maximilian Vogel
  */
+#include <algorithm>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/components/ConnectedComponents.hpp>
 #include <networkit/components/DynConnectedComponents.hpp>
@@ -15,12 +26,8 @@
 #include <networkit/components/WeaklyConnectedComponents.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
 #include <networkit/graph/BFS.hpp>
-#include <networkit/graph/GraphTools.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
-#include <networkit/distance/Diameter.hpp>
-#include <networkit/generators/DorogovtsevMendesGenerator.hpp>
-#include <networkit/generators/HavelHakimiGenerator.hpp>
 #include <networkit/io/EdgeListReader.hpp>
 #include <networkit/io/KONECTGraphReader.hpp>
 #include <networkit/io/METISGraphReader.hpp>

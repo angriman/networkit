@@ -5,11 +5,13 @@
  *      Author: Lucas Petersen
  */
 
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
-#include <networkit/auxiliary/Log.hpp>
 #include <networkit/correlation/Assortativity.hpp>
-#include <networkit/io/METISGraphReader.hpp>
 
 namespace NetworKit {
 

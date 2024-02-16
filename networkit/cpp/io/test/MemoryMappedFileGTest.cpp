@@ -5,6 +5,14 @@
  *      Author: Manuel Penschuck (networkit@manuel.jetzt)
  */
 
+#include <cstdio>
+#include <cstring>
+#include <ios>
+#include <stdlib.h>
+#include <unistd.h>
+#include <utility>
+#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #ifdef NETWORKIT_WINDOWS
 #define NOMINMAX // windows.h by default defines the maros min/max, which prevent the usage of
                  // numeric_limits

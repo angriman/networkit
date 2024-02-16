@@ -5,13 +5,14 @@
  *      Author: Kolja Esders
  */
 
-#include <algorithm>
-
-#include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/linkprediction/LinkPredictor.hpp>
 
-#include <omp.h>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

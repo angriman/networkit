@@ -5,10 +5,15 @@
  *      Author: Christian Staudt
  */
 
+#include <cassert>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/community/ClusteringGenerator.hpp>
 #include <networkit/community/GraphClusteringTools.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

@@ -5,11 +5,18 @@
  * Created on 17. Dezember 2016, 16:35
  */
 
+#include <algorithm>
+#include <limits>
+#include <queue>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/distance/AffectedNodes.hpp>
 #include <networkit/distance/BFS.hpp>
 #include <networkit/distance/ReverseBFS.hpp>
-#include <networkit/distance/SSSP.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

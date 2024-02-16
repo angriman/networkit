@@ -6,6 +6,13 @@
  */
 
 #include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/algebraic/AlgebraicGlobals.hpp>
+#include <networkit/algebraic/Vector.hpp>
 
 #include <networkit/algebraic/DenseMatrix.hpp>
 #include <networkit/graph/Graph.hpp>

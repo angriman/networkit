@@ -9,6 +9,9 @@
 #include <algorithm>
 #include <atomic>
 #include <stdexcept>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/matching/Matcher.hpp>
 
 #include <networkit/matching/SuitorMatcher.hpp>
 

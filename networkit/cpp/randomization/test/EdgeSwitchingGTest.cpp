@@ -5,7 +5,11 @@
  *  Author: Manuel Penschuck <networkit@manuel.jetzt>
  */
 
+#include <algorithm>
+#include <utility>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
 
 #include <networkit/graph/Graph.hpp>
 #include <networkit/randomization/EdgeSwitching.hpp>

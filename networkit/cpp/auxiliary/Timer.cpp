@@ -5,8 +5,13 @@
  *      Author: Christian Staudt (christian.staudt@kit.edu)
  */
 
+#include <chrono>
+#include <cstdint>
 #include <iostream>
+#include <ratio>
 #include <sstream>
+#include <string>
+#include <networkit/auxiliary/Log.hpp>
 
 #include <networkit/auxiliary/Timer.hpp>
 

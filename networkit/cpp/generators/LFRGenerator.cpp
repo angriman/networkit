@@ -1,7 +1,14 @@
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 #include <random>
+#include <stdexcept>
+#include <tuple>
 #include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Parallel.hpp>
@@ -10,7 +17,6 @@
 #include <networkit/generators/EdgeSwitchingMarkovChainGenerator.hpp>
 #include <networkit/generators/LFRGenerator.hpp>
 #include <networkit/generators/PowerlawDegreeSequence.hpp>
-#include <networkit/generators/PubWebGenerator.hpp>
 #include <networkit/graph/GraphTools.hpp>
 
 #include <tlx/unused.hpp>

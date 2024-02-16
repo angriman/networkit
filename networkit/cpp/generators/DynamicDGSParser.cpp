@@ -5,7 +5,17 @@
  *      Author: forigem
  */
 
+#include <cassert>
+#include <cstdlib>
 #include <fstream>
+#include <functional>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/StringTools.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Parallel.hpp>

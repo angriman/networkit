@@ -5,9 +5,14 @@
  *      Author: Gerd Lindner
  */
 
-#include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/Timer.hpp>
+#include <iterator>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/edgescores/ChibaNishizekiTriangleEdgeScore.hpp>
+#include <networkit/edgescores/EdgeScore.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

@@ -5,9 +5,16 @@
  *      Author: cls
  */
 
+#include <cstddef>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
-#include <networkit/auxiliary/Log.hpp>
 #include <networkit/dynamics/DGSStreamParser.hpp>
 #include <networkit/dynamics/DGSWriter.hpp>
 #include <networkit/dynamics/GraphDifference.hpp>

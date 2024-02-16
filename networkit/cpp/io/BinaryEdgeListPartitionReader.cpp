@@ -1,4 +1,11 @@
+#include <cstdint>
 #include <fstream>
+#include <ios>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/io/BinaryEdgeListPartitionReader.hpp>
 

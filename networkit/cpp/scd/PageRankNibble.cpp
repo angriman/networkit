@@ -6,8 +6,16 @@
  */
 
 #include <algorithm>
+#include <cstddef>
+#include <limits>
+#include <set>
 #include <unordered_set>
+#include <utility>
 #include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/scd/SelectiveCommunityDetector.hpp>
 
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/scd/ApproximatePageRank.hpp>

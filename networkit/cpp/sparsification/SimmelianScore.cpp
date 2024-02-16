@@ -5,7 +5,15 @@
  *      Author: Gerd Lindner
  */
 
+#include <algorithm>
+#include <cmath>
 #include <limits>
+#include <stdexcept>
+#include <unordered_set>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/edgescores/EdgeScore.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/sparsification/SimmelianScore.hpp>
 
 namespace NetworKit {

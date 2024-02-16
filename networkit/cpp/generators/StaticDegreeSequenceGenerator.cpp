@@ -5,11 +5,17 @@
  *      Author: Henning
  */
 
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <functional>
+#include <iterator>
+#include <vector>
+#include "tlx/define/likely.hpp"
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/generators/StaticDegreeSequenceGenerator.hpp>
-
-#include <tlx/define.hpp>
 
 namespace NetworKit {
 

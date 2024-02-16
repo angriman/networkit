@@ -5,8 +5,10 @@
  *      Author: cls
  */
 
-#include <networkit/auxiliary/Log.hpp>
+#include <networkit/Globals.hpp>
+#include <networkit/dynamics/GraphEventHandler.hpp>
 #include <networkit/dynamics/GraphEventProxy.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

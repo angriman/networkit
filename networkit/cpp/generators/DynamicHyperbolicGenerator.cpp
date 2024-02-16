@@ -5,7 +5,21 @@
  *      Author: moritzl
  */
 
+#include <algorithm>
+#include <cassert>
 #include <cmath>
+#include <functional>
+#include <limits>
+#include <tuple>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/geometric/Point2DWithIndex.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/viz/Point.hpp>
 
 #include <tlx/unused.hpp>
 

@@ -5,7 +5,15 @@
  *      Author: Michael Hamann
  */
 
+#include <algorithm>
+#include <cstddef>
+#include <functional>
 #include <omp.h>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/edgescores/EdgeScore.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/edgescores/PrefixJaccardScore.hpp>
 

@@ -1,5 +1,13 @@
 
 #include <algorithm>
+#include <cassert>
+#include <random>
+#include <stdexcept>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Random.hpp>

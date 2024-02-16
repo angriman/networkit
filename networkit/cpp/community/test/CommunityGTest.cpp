@@ -5,18 +5,23 @@
  *      Author: cls
  */
 
+#include <cstddef>
+#include <cstdint>
+#include <stdexcept>
+#include <vector>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/NumericTools.hpp>
 #include <networkit/auxiliary/Parallelism.hpp>
+#include <networkit/auxiliary/Random.hpp>
 #include <networkit/community/AdjustedRandMeasure.hpp>
 #include <networkit/community/ClusteringGenerator.hpp>
 #include <networkit/community/CoverF1Similarity.hpp>
 #include <networkit/community/CoverHubDominance.hpp>
 #include <networkit/community/Coverage.hpp>
 #include <networkit/community/CutClustering.hpp>
-#include <networkit/community/DynamicNMIDistance.hpp>
 #include <networkit/community/EdgeCut.hpp>
 #include <networkit/community/GraphClusteringTools.hpp>
 #include <networkit/community/GraphStructuralRandMeasure.hpp>
@@ -41,13 +46,12 @@
 #include <networkit/community/SampledNodeStructuralRandMeasure.hpp>
 #include <networkit/community/StablePartitionNodes.hpp>
 #include <networkit/generators/ClusteredRandomGraphGenerator.hpp>
-#include <networkit/generators/DynamicBarabasiAlbertGenerator.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
 #include <networkit/generators/LFRGenerator.hpp>
-#include <networkit/graph/GraphTools.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/io/METISGraphReader.hpp>
-#include <networkit/overlap/HashingOverlapper.hpp>
 #include <networkit/scd/LocalTightnessExpansion.hpp>
+#include <networkit/structures/Cover.hpp>
 #include <networkit/structures/Partition.hpp>
 
 #include <tlx/unused.hpp>

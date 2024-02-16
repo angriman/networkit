@@ -4,6 +4,9 @@
 #include <limits>
 #include <queue>
 #include <unordered_set>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 
 namespace NetworKit {
 

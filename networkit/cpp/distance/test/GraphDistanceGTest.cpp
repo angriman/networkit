@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
 #include <networkit/distance/GraphDistance.hpp>
 #include <networkit/graph/Graph.hpp>

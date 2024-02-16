@@ -4,12 +4,16 @@
  *      Author: Maximilian Vogel
  */
 
+#include <algorithm>
 #include <cmath>
-#include <map>
 #include <omp.h>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/base/Algorithm.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Parallel.hpp>
-#include <networkit/auxiliary/Random.hpp>
 #include <networkit/components/ConnectedComponents.hpp>
 #include <networkit/distance/Diameter.hpp>
 #include <networkit/distance/NeighborhoodFunctionHeuristic.hpp>

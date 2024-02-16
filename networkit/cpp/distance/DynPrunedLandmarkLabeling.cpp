@@ -1,7 +1,8 @@
 #include <algorithm>
-#include <cassert>
+#include <queue>
 #include <stdexcept>
 #include <utility>
+#include <networkit/Globals.hpp>
 
 #include <networkit/distance/DynPrunedLandmarkLabeling.hpp>
 #include <networkit/distance/PrunedLandmarkLabeling.hpp>

@@ -1,6 +1,11 @@
+#include <algorithm>
 #include <cmath>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/community/GraphClusteringTools.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

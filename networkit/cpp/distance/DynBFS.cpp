@@ -5,11 +5,15 @@
  *      Author: cls, ebergamini
  */
 
-#include <cmath>
+#include <cassert>
 #include <queue>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/distance/DynSSSP.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 
-#include <networkit/auxiliary/Log.hpp>
-#include <networkit/distance/BFS.hpp>
 #include <networkit/distance/DynBFS.hpp>
 
 namespace NetworKit {

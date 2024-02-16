@@ -6,7 +6,13 @@
  *      Contributors: Hoske/Weisbarth
  */
 
+#include <algorithm>
+#include <cmath>
 #include <numeric>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/generators/StaticDegreeSequenceGenerator.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/auxiliary/Random.hpp>

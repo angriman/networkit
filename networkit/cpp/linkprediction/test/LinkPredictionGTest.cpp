@@ -6,8 +6,11 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/linkprediction/NeighborhoodUtility.hpp>
 
-#include <chrono>
+#include <utility>
+#include <vector>
 
 #include <networkit/graph/Graph.hpp>
 
@@ -15,7 +18,6 @@
 #include <networkit/linkprediction/AdamicAdarIndex.hpp>
 #include <networkit/linkprediction/AdjustedRandIndex.hpp>
 #include <networkit/linkprediction/CommonNeighborsIndex.hpp>
-#include <networkit/linkprediction/JaccardIndex.hpp>
 #include <networkit/linkprediction/KatzIndex.hpp>
 #include <networkit/linkprediction/LinkPredictor.hpp>
 #include <networkit/linkprediction/LinkThresholder.hpp>

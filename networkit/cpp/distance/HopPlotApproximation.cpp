@@ -6,7 +6,13 @@
  */
 
 #include <cmath>
-#include <omp.h>
+#include <map>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/base/Algorithm.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/components/ConnectedComponents.hpp>

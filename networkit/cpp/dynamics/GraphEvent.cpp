@@ -6,6 +6,8 @@
  */
 
 #include <sstream>
+#include <string>
+#include <networkit/Globals.hpp>
 
 #include <networkit/dynamics/GraphEvent.hpp>
 

@@ -1,4 +1,9 @@
+#include <algorithm>
+#include <set>
+#include <stdexcept>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/scd/SetConductance.hpp>
 
 namespace NetworKit {

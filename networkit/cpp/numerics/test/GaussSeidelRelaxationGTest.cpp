@@ -4,7 +4,10 @@
  *  Created on: 03.11.2014
  *      Author: Michael
  */
+#include <cmath>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/algebraic/AlgebraicGlobals.hpp>
 
 #include <networkit/algebraic/CSRMatrix.hpp>
 #include <networkit/algebraic/Vector.hpp>

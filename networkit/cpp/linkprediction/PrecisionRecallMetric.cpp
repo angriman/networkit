@@ -5,6 +5,9 @@
  *      Author: Kolja Esders
  */
 
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/linkprediction/PrecisionRecallMetric.hpp>
 
 namespace NetworKit {

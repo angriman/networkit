@@ -5,8 +5,11 @@
  *      Author: Michael Wegner (michael.wegner@student.kit.edu)
  */
 
+#include <algorithm>
+#include <vector>
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
 #include <networkit/flow/EdmondsKarp.hpp>
 #include <networkit/graph/Graph.hpp>

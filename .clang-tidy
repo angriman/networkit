@@ -23,6 +23,7 @@ Checks: >
     clang-analyzer-deadcode.*,
     clang-analyzer-nullability.*,
     cppcoreguidelines-narrowing-conversions,
+    misc-include-cleaner,
     modernize-deprecated-headers,
     modernize-make-shared,
     modernize-make-unique,

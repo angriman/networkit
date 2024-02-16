@@ -1,4 +1,7 @@
-#include <omp.h>
+#include <iterator>
+#include <stdexcept>
+#include <networkit/Globals.hpp>
+#include <networkit/centrality/Centrality.hpp>
 #include <networkit/centrality/LocalSquareClusteringCoefficient.hpp>
 #include <networkit/graph/Graph.hpp>
 #include <networkit/linkprediction/NeighborhoodUtility.hpp>

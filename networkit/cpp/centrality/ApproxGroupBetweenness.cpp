@@ -5,14 +5,20 @@
  *      Author: Marvin Pogoda
  */
 
+#include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <omp.h>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/BucketPQ.hpp>
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/centrality/ApproxGroupBetweenness.hpp>
 #include <networkit/distance/BFS.hpp>
-#include <networkit/distance/SSSP.hpp>
 #include <networkit/graph/GraphTools.hpp>
 
 namespace NetworKit {

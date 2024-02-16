@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cassert>
 #include <vector>
+#include <networkit/Globals.hpp>
 
 #include <networkit/randomization/CurveballGlobalTradeGenerator.hpp>
 

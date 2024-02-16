@@ -5,7 +5,9 @@
  *      Author: Gerd Lindner
  */
 
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/sparsification/MultiscaleScore.hpp>
 #include <networkit/sparsification/Sparsifiers.hpp>

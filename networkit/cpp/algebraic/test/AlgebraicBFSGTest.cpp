@@ -5,7 +5,11 @@
  *      Author: Michael Wegner (michael.wegner@student.kit.edu)
  */
 
+#include <limits>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/algebraic/CSRMatrix.hpp>
 #include <networkit/algebraic/algorithms/AlgebraicBFS.hpp>

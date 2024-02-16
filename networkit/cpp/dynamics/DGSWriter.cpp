@@ -6,6 +6,10 @@
  */
 
 #include <fstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <networkit/dynamics/GraphEvent.hpp>
 
 #include <networkit/dynamics/DGSWriter.hpp>
 

@@ -3,6 +3,11 @@
 
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
+#include <string>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Cover.hpp>
 
 namespace NetworKit {
 

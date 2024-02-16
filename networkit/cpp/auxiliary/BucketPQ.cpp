@@ -5,6 +5,12 @@
  *      Author: Henning
  */
 
+#include <cassert>
+#include <cstdint>
+#include <limits>
+#include <stdexcept>
+#include <utility>
+#include <vector>
 #include <networkit/auxiliary/BucketPQ.hpp>
 
 namespace Aux {

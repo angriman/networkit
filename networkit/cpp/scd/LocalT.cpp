@@ -1,11 +1,16 @@
 #include <algorithm>
-#include <limits>
-#include <unordered_map>
+#include <cassert>
+#include <cstdint>
+#include <set>
 #include <unordered_set>
 
 #include <networkit/scd/LocalT.hpp>
 
 #include "LocalDegreeDirectedGraph.hpp"
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/scd/SelectiveCommunityDetector.hpp>
 
 namespace NetworKit {
 

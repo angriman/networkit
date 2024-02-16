@@ -7,16 +7,12 @@
 
 #include <cmath>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
-#include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/Random.hpp>
 #include <networkit/geometric/HyperbolicSpace.hpp>
-#include <networkit/viz/Point.hpp>
 
 #include <cmath>
 
-#include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/Random.hpp>
 #include <networkit/geometric/HyperbolicSpace.hpp>
 #include <networkit/geometric/Point2DWithIndex.hpp>
 

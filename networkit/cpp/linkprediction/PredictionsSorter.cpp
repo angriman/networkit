@@ -5,7 +5,9 @@
  *      Author: Kolja Esders
  */
 
+#include <vector>
 #include <networkit/auxiliary/Parallel.hpp>
+#include <networkit/linkprediction/LinkPredictor.hpp>
 #include <networkit/linkprediction/PredictionsSorter.hpp>
 
 namespace NetworKit {

@@ -7,6 +7,14 @@
 
 // this define is an obscure fix for std::this_thread::sleep_for to work - the issue is described
 // here: http://stackoverflow.com/questions/4438084/stdthis-threadsleep-for-and-gcc
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <networkit/Globals.hpp>
 #define _GLIBCXX_USE_NANOSLEEP 1
 
 #include <gtest/gtest.h>
@@ -15,7 +23,6 @@
 #include <array>
 #include <chrono>
 #include <fstream>
-#include <iostream>
 #include <limits>
 #include <numeric>
 #include <set>

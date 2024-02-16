@@ -6,7 +6,8 @@
  */
 
 #include "CurveballImpl.hpp"
-#include <networkit/auxiliary/Random.hpp>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/randomization/Curveball.hpp>
 
 namespace NetworKit {

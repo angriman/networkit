@@ -6,8 +6,16 @@
  *  Inplace change on Jun 26, 2015 by Henning Meyerhenke
  */
 
+#include <algorithm>
 #include <omp.h>
-#include <set>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Cover.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/centrality/CoreDecomposition.hpp>
 #include <networkit/centrality/DegreeCentrality.hpp>

@@ -1,4 +1,8 @@
-#include <string>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/dynamics/GraphDifference.hpp>

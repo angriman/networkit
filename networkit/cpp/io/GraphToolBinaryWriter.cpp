@@ -5,10 +5,15 @@
  *      Author: Maximilian Vogel
  */
 
+#include <cstdint>
 #include <fstream>
+#include <ios>
+#include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Enforce.hpp>
-#include <networkit/auxiliary/Log.hpp>
 #include <networkit/graph/GraphTools.hpp>
 #include <networkit/io/GraphToolBinaryWriter.hpp>
 

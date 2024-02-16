@@ -5,10 +5,21 @@
  *      Author: Eugenio Angriman <angrimae@hu-berlin.de>
  */
 
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <numeric>
+#include <omp.h>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/algebraic/CSRMatrix.hpp>
+#include <networkit/algebraic/Vector.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Random.hpp>
+#include <networkit/centrality/Centrality.hpp>
 #include <networkit/centrality/ForestCentrality.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphTools.hpp>
 #include <networkit/numerics/ConjugateGradient.hpp>
 #include <networkit/numerics/Preconditioner/DiagonalPreconditioner.hpp>

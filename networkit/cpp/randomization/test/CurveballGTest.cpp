@@ -5,6 +5,8 @@
  *  Author: Author: Hung Tran <htran@ae.cs.uni-frankfurt.de>
  */
 
+#include <algorithm>
+#include <vector>
 #include <gtest/gtest.h>
 #include <networkit/graph/Graph.hpp>
 

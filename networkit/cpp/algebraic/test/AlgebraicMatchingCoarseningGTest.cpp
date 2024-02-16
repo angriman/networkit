@@ -5,7 +5,12 @@
  *      Author: Michael Wegner (michael.wegner@student.kit.edu)
  */
 
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/matching/Matching.hpp>
 
 #include <networkit/algebraic/CSRMatrix.hpp>
 #include <networkit/algebraic/algorithms/AlgebraicMatchingCoarsening.hpp>

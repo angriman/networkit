@@ -4,8 +4,15 @@
  * Author: cls
  */
 
-#include <unordered_map>
+#include <cstdint>
+#include <set>
+#include <stdexcept>
+#include <string>
 #include <utility>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/scd/SelectiveCommunityDetector.hpp>
 
 #include <networkit/auxiliary/IncrementalUniformRandomSelector.hpp>
 #include <networkit/scd/GCE.hpp>

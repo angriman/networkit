@@ -7,6 +7,8 @@
  *        as taught in "Algorithms 1"
  */
 
+#include <networkit/Globals.hpp>
+#include <networkit/structures/Partition.hpp>
 #include <networkit/structures/UnionFind.hpp>
 
 namespace NetworKit {

@@ -6,6 +6,9 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/Timer.hpp>
 
 #include <networkit/centrality/SpanningEdgeCentrality.hpp>
 #include <networkit/distance/CommuteTimeDistance.hpp>
@@ -16,10 +19,7 @@
 #include <tlx/unused.hpp>
 
 #include <cmath>
-#include <fstream>
-#include <iomanip>
 #include <string>
-#include <vector>
 
 namespace NetworKit {
 class CommuteTimeDistanceGTest : public testing::Test {};

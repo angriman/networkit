@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <networkit/Globals.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/community/PartitionIntersection.hpp>
 

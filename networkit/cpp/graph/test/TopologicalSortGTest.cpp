@@ -7,8 +7,12 @@
 
 #include <networkit/graph/TopologicalSort.hpp>
 
-#include <iostream>
+#include <algorithm>
+#include <iterator>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

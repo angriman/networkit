@@ -5,9 +5,15 @@
  *      Author: Henning
  */
 
+#include <algorithm>
+#include <cmath>
+#include <stdexcept>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/NumericTools.hpp>
+#include <networkit/centrality/Centrality.hpp>
 #include <networkit/centrality/KatzCentrality.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphTools.hpp>
 
 namespace NetworKit {

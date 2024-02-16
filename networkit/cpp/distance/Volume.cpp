@@ -5,6 +5,13 @@
  * Author: Franz-Benjamin Mocnik <mail@mocnik-science.net>
  */
 
+#include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/distance/Volume.hpp>
 #include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphTools.hpp>

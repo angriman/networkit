@@ -5,7 +5,10 @@
  *      Author: Christian Staudt
  */
 
+#include <stdexcept>
 #include <networkit/community/DissimilarityMeasure.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Cover.hpp>
 
 namespace NetworKit {
 

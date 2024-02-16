@@ -5,14 +5,18 @@
  *      Author: Michael
  */
 
+#include <cmath>
+#include <utility>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/algebraic/CSRMatrix.hpp>
 #include <networkit/algebraic/algorithms/AlgebraicPageRank.hpp>
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/io/SNAPGraphReader.hpp>
-
-#include <networkit/centrality/PageRank.hpp>
 
 namespace NetworKit {
 

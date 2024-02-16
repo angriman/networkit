@@ -10,7 +10,15 @@
 #include <networkit/auxiliary/NumberParsing.hpp>
 #include <networkit/io/METISParser.hpp>
 
+#include <cstdint>
+#include <exception>
+#include <sstream>
 #include <stdexcept>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 
 namespace NetworKit {
 

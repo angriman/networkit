@@ -6,11 +6,21 @@
  *      based on code by Elisabetta Bergamini
  */
 
+#include <algorithm>
+#include <cassert>
 #include <cfloat>
 #include <cmath>
+#include <cstddef>
 #include <omp.h>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 
-#include <networkit/auxiliary/NumericTools.hpp>
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/centrality/DynKatzCentrality.hpp>
 #include <networkit/graph/GraphTools.hpp>

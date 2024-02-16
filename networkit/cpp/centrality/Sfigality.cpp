@@ -6,7 +6,11 @@
  */
 
 #include <algorithm>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/centrality/Centrality.hpp>
 #include <networkit/centrality/Sfigality.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

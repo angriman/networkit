@@ -5,9 +5,15 @@
  *      Author: cls
  */
 
+#include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <map>
+#include <stdexcept>
+#include <string>
 #include <unordered_map>
+#include <vector>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/StringTools.hpp>

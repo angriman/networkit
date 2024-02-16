@@ -5,9 +5,13 @@
  *      Author: Michael Hamann, Gerd Lindner
  */
 
-#include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/Timer.hpp>
+#include <cmath>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/distance/AdamicAdarDistance.hpp>
+#include <networkit/distance/NodeDistance.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

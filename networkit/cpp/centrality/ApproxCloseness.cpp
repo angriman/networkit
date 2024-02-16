@@ -10,8 +10,16 @@
 #include <networkit/centrality/ApproxCloseness.hpp>
 #include <networkit/graph/GraphTools.hpp>
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
+#include <cstddef>
 #include <queue>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

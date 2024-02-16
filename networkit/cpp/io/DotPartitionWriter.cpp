@@ -1,5 +1,11 @@
 #include <fstream>
+#include <map>
+#include <string>
 #include <unordered_set>
+#include <utility>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/io/DotPartitionWriter.hpp>
 

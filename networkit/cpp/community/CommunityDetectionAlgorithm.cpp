@@ -5,7 +5,12 @@
  *      Author: Christian Staudt
  */
 
+#include <stdexcept>
+#include <utility>
+#include <networkit/base/Algorithm.hpp>
 #include <networkit/community/CommunityDetectionAlgorithm.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

@@ -5,10 +5,18 @@
  *      Author: Moritz v. Looz
  */
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
+#include <limits>
+#include <map>
+#include <random>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/geometric/Point2DWithIndex.hpp>
+#include <networkit/viz/Point.hpp>
 
-#include <networkit/auxiliary/Log.hpp>
 #include <networkit/geometric/HyperbolicSpace.hpp>
 
 using std::abs;

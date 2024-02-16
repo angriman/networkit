@@ -5,7 +5,13 @@
  *      Author: Simon Bischof
  */
 
-#include <limits>
+#include <algorithm>
+#include <cmath>
+#include <random>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/generators/RegularRingLatticeGenerator.hpp>

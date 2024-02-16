@@ -1,6 +1,4 @@
-#include <atomic>
 #include <csignal>
-#include <exception>
 #include <networkit/GlobalState.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
 

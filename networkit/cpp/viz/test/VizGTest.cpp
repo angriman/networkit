@@ -6,15 +6,17 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/viz/Point.hpp>
 
+#include <fstream>
+#include <string>
 #include <vector>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/generators/ClusteredRandomGraphGenerator.hpp>
-#include <networkit/generators/PubWebGenerator.hpp>
 #include <networkit/graph/Graph.hpp>
 #include <networkit/io/DibapGraphReader.hpp>
-#include <networkit/io/PartitionWriter.hpp>
 #include <networkit/viz/PostscriptWriter.hpp>
 
 namespace NetworKit {

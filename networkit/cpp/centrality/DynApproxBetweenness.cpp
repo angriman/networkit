@@ -5,7 +5,14 @@
  *      Author: ebergamini
  */
 
-#include <networkit/auxiliary/Log.hpp>
+#include <cassert>
+#include <cmath>
+#include <memory>
+#include <queue>
+#include <utility>
+#include <vector>
+#include "tlx/math/integer_log2.hpp"
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/NumericTools.hpp>
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/centrality/Centrality.hpp>
@@ -14,6 +21,8 @@
 #include <networkit/distance/Diameter.hpp>
 #include <networkit/distance/DynBFS.hpp>
 #include <networkit/distance/DynDijkstra.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphTools.hpp>
 #include <networkit/graph/TopologicalSort.hpp>
 

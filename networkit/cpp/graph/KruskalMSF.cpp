@@ -5,10 +5,15 @@
  *      Author: Henning
  */
 
+#include <algorithm>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Parallel.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphTools.hpp>
 #include <networkit/graph/KruskalMSF.hpp>
+#include <networkit/graph/SpanningForest.hpp>
 #include <networkit/structures/UnionFind.hpp>
 
 namespace NetworKit {

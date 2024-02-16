@@ -5,6 +5,10 @@
  *      Author: cls, Yassine Marrakchi
  */
 
+#include <map>
+#include <set>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/scd/SelectiveCommunityDetector.hpp>
 
 namespace NetworKit {

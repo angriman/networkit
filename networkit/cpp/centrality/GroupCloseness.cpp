@@ -10,10 +10,15 @@
 #include <networkit/centrality/GroupCloseness.hpp>
 #include <networkit/centrality/TopCloseness.hpp>
 
+#include <algorithm>
 #include <atomic>
-#include <memory>
+#include <cstdint>
 #include <omp.h>
 #include <queue>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/BFS.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

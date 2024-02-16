@@ -5,8 +5,21 @@
  *      Author: Maximilian Vogel
  */
 
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
 #include <limits>
+#include <map>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/distance/APSP.hpp>
 #include <networkit/distance/AStar.hpp>

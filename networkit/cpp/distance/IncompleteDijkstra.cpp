@@ -6,7 +6,12 @@
  */
 
 #include <limits>
-#include <type_traits>
+#include <stdexcept>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/distance/IncompleteDijkstra.hpp>
 

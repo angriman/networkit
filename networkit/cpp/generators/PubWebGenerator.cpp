@@ -5,8 +5,15 @@
  *      Author: Henning
  */
 
+#include <algorithm>
 #include <cmath>
+#include <numeric>
+#include <queue>
 #include <set>
+#include <utility>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/viz/Point.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/generators/PubWebGenerator.hpp>

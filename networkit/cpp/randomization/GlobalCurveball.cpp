@@ -6,9 +6,14 @@
  */
 
 #include "GlobalCurveballImpl.hpp"
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Random.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/randomization/DegreePreservingShuffle.hpp>
 #include <networkit/randomization/GlobalCurveball.hpp>
+#include <networkit/randomization/GlobalTradeSequence.hpp>
 
 namespace NetworKit {
 

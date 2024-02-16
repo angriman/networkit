@@ -5,8 +5,13 @@
  *      Author: Christian Staudt
  */
 
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Random.hpp>
+#include <networkit/base/Algorithm.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphTools.hpp>
 #include <networkit/simulation/EpidemicSimulationSEIR.hpp>
 

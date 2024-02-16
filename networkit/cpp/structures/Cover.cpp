@@ -6,7 +6,14 @@
  */
 
 #include <algorithm>
+#include <cassert>
+#include <iterator>
+#include <map>
+#include <set>
 #include <unordered_set>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/structures/Cover.hpp>
 

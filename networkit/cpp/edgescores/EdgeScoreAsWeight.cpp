@@ -5,7 +5,11 @@
  *      Author: Michael Hamann
  */
 
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/edgescores/EdgeScoreAsWeight.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

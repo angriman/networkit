@@ -1,5 +1,9 @@
+#include <algorithm>
 #include <atomic>
+#include <limits>
 #include <memory>
+#include <vector>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>

@@ -5,6 +5,20 @@
  *		 Author: nemes, Eugenio Angriman
  */
 
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
+#include <memory>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/VectorComparator.hpp>
+#include <networkit/components/WeaklyConnectedComponents.hpp>
+#include <networkit/graph/Graph.hpp>
 #ifndef NDEBUG
 #include <algorithm>
 #endif

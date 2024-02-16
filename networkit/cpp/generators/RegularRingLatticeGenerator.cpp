@@ -5,7 +5,10 @@
  *      Author: Simon Bischof
  */
 
+#include <algorithm>
+#include <networkit/Globals.hpp>
 #include <networkit/generators/RegularRingLatticeGenerator.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

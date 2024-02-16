@@ -6,10 +6,27 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/dynamics/GraphEventProxy.hpp>
+#include <networkit/generators/quadtree/QuadNode.hpp>
+#include <networkit/geometric/HyperbolicSpace.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
+#include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
+#include <functional>
+#include <iomanip>
 #include <numeric>
+#include <random>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include <networkit/generators/BarabasiAlbertGenerator.hpp>
 #include <networkit/generators/ChungLuGenerator.hpp>
@@ -36,16 +53,13 @@
 #include <networkit/generators/StochasticBlockmodel.hpp>
 #include <networkit/generators/WattsStrogatzGenerator.hpp>
 
-#include <networkit/auxiliary/MissingMath.hpp>
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/community/ClusteringGenerator.hpp>
 #include <networkit/community/Modularity.hpp>
 #include <networkit/community/PLM.hpp>
-#include <networkit/community/PLP.hpp>
 #include <networkit/dynamics/GraphUpdater.hpp>
 #include <networkit/global/ClusteringCoefficient.hpp>
-#include <networkit/io/DotGraphWriter.hpp>
 #include <networkit/io/GraphIO.hpp>
 #include <networkit/io/METISGraphReader.hpp>
 #include <networkit/io/METISGraphWriter.hpp>

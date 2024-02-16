@@ -5,7 +5,18 @@
  *      Author: Henning
  */
 
+#include <cassert>
+#include <cstddef>
+#include <fstream>
+#include <ios>
+#include <limits>
+#include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/community/ClusteringGenerator.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
+#include <networkit/viz/Point.hpp>
 #include <networkit/viz/PostscriptWriter.hpp>
 
 namespace NetworKit {

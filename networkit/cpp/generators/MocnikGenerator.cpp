@@ -6,10 +6,14 @@
  */
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <map>
+#include <tuple>
 #include <utility>
 #include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/generators/MocnikGenerator.hpp>

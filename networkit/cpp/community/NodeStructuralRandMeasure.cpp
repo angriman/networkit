@@ -5,8 +5,13 @@
  *      Author: Christian Staudt
  */
 
+#include <cassert>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/community/NodeStructuralRandMeasure.hpp>
 #include <networkit/community/PartitionIntersection.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

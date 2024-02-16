@@ -5,7 +5,10 @@
  *      Author: Christian Staudt (christian.staudt@kit.edu)
  */
 
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>

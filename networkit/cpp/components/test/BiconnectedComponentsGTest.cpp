@@ -5,9 +5,12 @@
  *     Author: Eugenio Angriman
  */
 
+#include <unordered_set>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/graph/Graph.hpp>
 
-#include <networkit/auxiliary/Log.hpp>
 #include <networkit/components/BiconnectedComponents.hpp>
 #include <networkit/components/ConnectedComponents.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>

@@ -5,8 +5,12 @@
  *      Author: Gerd Lindner
  */
 
-#include <limits>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/sparsification/SimmelianOverlapScore.hpp>
+#include <networkit/sparsification/SimmelianScore.hpp>
 
 namespace NetworKit {
 

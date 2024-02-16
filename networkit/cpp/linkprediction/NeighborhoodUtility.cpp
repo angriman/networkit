@@ -5,6 +5,13 @@
  *      Author: Kolja Esders
  */
 
+#include <algorithm>
+#include <iterator>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/linkprediction/NeighborhoodUtility.hpp>
 
 namespace NetworKit {

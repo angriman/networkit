@@ -6,12 +6,15 @@
 #include <algorithm>
 #include <cassert>
 #include <numeric>
+#include <utility>
 #include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include "CurveballImpl.hpp"
 #include <tlx/algorithm/random_bipartition_shuffle.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
-#include <networkit/auxiliary/Timer.hpp>
 
 namespace NetworKit {
 namespace CurveballDetails {

@@ -9,10 +9,16 @@
 #include <ctime>
 #include <memory>
 #include <queue>
-#include <unordered_set>
+#include <stack>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/NumericTools.hpp>
 #include <networkit/centrality/DynBetweenness.hpp>
 #include <networkit/distance/BFS.hpp>
 #include <networkit/distance/Dijkstra.hpp>

@@ -6,11 +6,19 @@
  *              Henning Meyerhenke
  */
 
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
 #include <networkit/coarsening/ClusteringProjector.hpp>
 #include <networkit/coarsening/MatchingCoarsening.hpp>
+#include <networkit/community/CommunityDetectionAlgorithm.hpp>
 #include <networkit/community/ParallelAgglomerativeClusterer.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/matching/Matching.hpp>
 #include <networkit/matching/PathGrowingMatcher.hpp>
 #include <networkit/scoring/ModularityScoring.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

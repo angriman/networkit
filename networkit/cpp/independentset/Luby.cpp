@@ -5,8 +5,11 @@
  *      Author: Christian Staudt
  */
 
-#include <networkit/auxiliary/Log.hpp>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Random.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/independentset/Luby.hpp>
 
 namespace NetworKit {

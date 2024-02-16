@@ -6,7 +6,14 @@
  */
 
 #include <atomic>
-#include <fstream>
+#include <cassert>
+#include <cstdint>
+#include <cstring>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/io/MemoryMappedFile.hpp>

@@ -15,10 +15,15 @@
 #include <networkit/distance/SSSP.hpp>
 #include <networkit/graph/GraphTools.hpp>
 
-#include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <memory>
-#include <omp.h>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Multiprecision.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

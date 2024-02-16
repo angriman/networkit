@@ -1,5 +1,8 @@
+#include <algorithm>
 #include <limits>
 #include <map>
+#include <vector>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/SignalHandling.hpp>
 #include <networkit/community/StablePartitionNodes.hpp>

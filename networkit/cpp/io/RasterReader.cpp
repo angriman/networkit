@@ -5,7 +5,14 @@
  *      Author: Henning
  */
 
+#include <cmath>
+#include <cstdint>
 #include <fstream>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
+#include <networkit/auxiliary/Enforce.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/NumberParsing.hpp>

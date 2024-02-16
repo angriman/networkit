@@ -5,11 +5,18 @@
  *      Author: ebergamini
  */
 
+#include <algorithm>
 #include <queue>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/VectorComparator.hpp>
+#include <networkit/distance/DynSSSP.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/NumericTools.hpp>
-#include <networkit/distance/Dijkstra.hpp>
 #include <networkit/distance/DynDijkstra.hpp>
 
 namespace NetworKit {

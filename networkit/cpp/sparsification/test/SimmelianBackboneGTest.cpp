@@ -5,7 +5,11 @@
  *      Author: Gerd Lindner
  */
 
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/sparsification/SimmelianScore.hpp>
 
 #include <networkit/edgescores/ChibaNishizekiTriangleEdgeScore.hpp>
 #include <networkit/sparsification/SimmelianOverlapScore.hpp>

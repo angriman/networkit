@@ -9,7 +9,16 @@
  *
  */
 
+#include <cassert>
+#include <cstddef>
+#include <cstdlib>
+#include <functional>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
 #include <tlx/unused.hpp>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/io/KONECTGraphReader.hpp>

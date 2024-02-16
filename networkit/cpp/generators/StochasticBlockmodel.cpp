@@ -5,8 +5,14 @@
  *      Author: Christian Staudt
  */
 
+#include <cassert>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/generators/StochasticBlockmodel.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

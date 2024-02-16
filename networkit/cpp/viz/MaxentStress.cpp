@@ -5,9 +5,25 @@
  *      Author: Henning Meyerhenke and Michael Wegner
  */
 
+#include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <limits>
+#include <memory>
 #include <queue>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/algebraic/CSRMatrix.hpp>
+#include <networkit/algebraic/Vector.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/distance/AlgebraicDistance.hpp>
+#include <networkit/distance/SSSP.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/viz/GraphLayoutAlgorithm.hpp>
+#include <networkit/viz/Octree.hpp>
+#include <networkit/viz/Point.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/PrioQueue.hpp>

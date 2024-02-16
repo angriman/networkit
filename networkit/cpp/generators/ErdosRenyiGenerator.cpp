@@ -5,8 +5,11 @@
  *      Author: Henning, Manuel Penschuck <networkit@manuel.jetzt>
  */
 
+#include <stdexcept>
+#include <networkit/Globals.hpp>
 #include <networkit/generators/ErdosRenyiEnumerator.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphBuilder.hpp>
 
 namespace NetworKit {

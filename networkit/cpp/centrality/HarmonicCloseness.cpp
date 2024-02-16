@@ -5,7 +5,12 @@
  * 		 Author: Eugenio Angriman
  */
 
+#include <limits>
 #include <memory>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/centrality/HarmonicCloseness.hpp>
 #include <networkit/distance/BFS.hpp>

@@ -5,7 +5,6 @@
  *      Author: Christian Staudt, Elisabetta Bergamini
  */
 
-#include <networkit/auxiliary/Parallelism.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
 #include <networkit/centrality/EstimateBetweenness.hpp>
 #include <networkit/distance/BFS.hpp>
@@ -15,6 +14,11 @@
 
 #include <memory>
 #include <omp.h>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Multiprecision.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

@@ -5,8 +5,12 @@
  *      Author: cls
  */
 
+#include <cassert>
+#include <utility>
+#include <networkit/Globals.hpp>
 #include <networkit/distance/Eccentricity.hpp>
 #include <networkit/graph/BFS.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

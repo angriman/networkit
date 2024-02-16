@@ -5,6 +5,7 @@
  *      Author: Henning
  */
 
+#include <functional>
 #include <networkit/auxiliary/BloomFilter.hpp>
 #include <networkit/auxiliary/Random.hpp>
 

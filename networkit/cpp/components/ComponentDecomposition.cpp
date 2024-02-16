@@ -1,5 +1,11 @@
 
+#include <cassert>
+#include <map>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/components/ComponentDecomposition.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

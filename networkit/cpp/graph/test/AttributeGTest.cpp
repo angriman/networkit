@@ -6,10 +6,13 @@
  */
 
 #include <cstdio>
-#include <iostream>
 #include <numeric>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
 #include <networkit/graph/Graph.hpp>
 

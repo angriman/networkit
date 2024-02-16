@@ -7,12 +7,16 @@
 
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Cover.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/StringTools.hpp>
 #include <networkit/io/SNAPEdgeListPartitionReader.hpp>
 
 #include <tlx/unused.hpp>

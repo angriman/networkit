@@ -1,4 +1,8 @@
+#include <cmath>
+#include <random>
 #include <stdexcept>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>

@@ -5,8 +5,11 @@
  *      Author: Marvin Ritter (marvin.ritter@gmail.com)
  */
 
+#include <cassert>
 #include <omp.h>
-#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/graph/GraphBuilder.hpp>
 

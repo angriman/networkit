@@ -5,7 +5,13 @@
  *      Author: Arie Slobbe
  */
 
+#include <memory>
 #include <omp.h>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/base/Algorithm.hpp>
+#include <networkit/distance/SSSP.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/distance/APSP.hpp>
 #include <networkit/distance/BFS.hpp>

@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/sparsification/ForestFireScore.hpp>
 

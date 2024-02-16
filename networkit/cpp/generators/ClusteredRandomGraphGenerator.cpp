@@ -6,14 +6,20 @@
  *              Eugenio Angriman <angrimae@hu-berlin.de>
  */
 
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 #ifndef NDEBUG
 #include <algorithm>
 #endif
 
-#include <omp.h>
 #include <random>
 #include <stdexcept>
-#include <unordered_set>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/generators/ClusteredRandomGraphGenerator.hpp>

@@ -5,7 +5,15 @@
  *      Author: Eugenio Angriman <angrimae@hu-berlin.de>
  */
 
+#include <algorithm>
+#include <cstdint>
+#include <deque>
 #include <limits>
+#include <stack>
+#include "tlx/container/d_ary_addressable_int_heap.hpp"
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/VectorComparator.hpp>
 
 #include <networkit/distance/BidirectionalDijkstra.hpp>
 

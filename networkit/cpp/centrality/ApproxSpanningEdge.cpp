@@ -5,10 +5,19 @@
  *     Authors: Eugenio Angriman <angrimae@hu-berlin.de>
  */
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <omp.h>
 #include <queue>
+#include <random>
+#include <stdexcept>
+#include <tuple>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <tlx/unused.hpp>
 

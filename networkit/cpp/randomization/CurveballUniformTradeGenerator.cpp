@@ -5,9 +5,7 @@
  *    Author: Hung Tran <htran@ae.cs.uni-frankfurt.de>
  */
 
-#include <algorithm>
-#include <cassert>
-#include <vector>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/randomization/CurveballUniformTradeGenerator.hpp>

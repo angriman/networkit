@@ -20,11 +20,21 @@
  */
 
 #include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
 #include <omp.h>
-#include <random>
+#include <stdexcept>
+#include <tuple>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/Timer.hpp>
+#include <networkit/generators/quadtree/QuadNode.hpp>
+#include <networkit/geometric/HyperbolicSpace.hpp>
+#include <networkit/geometric/Point2DWithIndex.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Parallel.hpp>
-#include <networkit/auxiliary/Random.hpp>
 #include <networkit/generators/HyperbolicGenerator.hpp>
 #include <networkit/generators/quadtree/Quadtree.hpp>
 #include <networkit/graph/GraphBuilder.hpp>

@@ -5,10 +5,16 @@
  *      Author: cls, ebergamini
  */
 
+#include <algorithm>
 #include <memory>
 #include <omp.h>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Multiprecision.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/distance/SSSP.hpp>
+#include <networkit/graph/Graph.hpp>
 
-#include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
 #include <networkit/centrality/Betweenness.hpp>
 #include <networkit/distance/BFS.hpp>

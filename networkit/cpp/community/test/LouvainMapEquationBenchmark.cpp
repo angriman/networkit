@@ -5,12 +5,18 @@
  * Author: Armin Wiebigke
  */
 
+#include <iostream>
+#include <ostream>
+#include <string>
 #include <gtest/gtest.h>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/community/LouvainMapEquation.hpp>
 #include <networkit/generators/ClusteredRandomGraphGenerator.hpp>
-#include <networkit/io/METISGraphReader.hpp>
 #include <networkit/io/SNAPGraphReader.hpp>
 
 namespace NetworKit {

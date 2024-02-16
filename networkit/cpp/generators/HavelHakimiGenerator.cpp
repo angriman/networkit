@@ -6,8 +6,15 @@
  *      Contributors: Hoske/Weisbarth
  */
 
+#include <algorithm>
 #include <list>
 #include <stack>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/generators/StaticDegreeSequenceGenerator.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/generators/HavelHakimiGenerator.hpp>

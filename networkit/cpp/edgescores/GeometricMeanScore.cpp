@@ -6,6 +6,11 @@
  */
 
 #include <cmath>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/edgescores/EdgeScore.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/edgescores/GeometricMeanScore.hpp>

@@ -5,7 +5,14 @@
  *      Author: Christian Staudt
  */
 
+#include <algorithm>
+#include <cstdlib>
+#include <fstream>
+#include <stdexcept>
+#include <string>
+#include <networkit/Globals.hpp>
 #include <networkit/io/PartitionReader.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

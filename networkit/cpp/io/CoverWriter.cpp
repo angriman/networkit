@@ -1,5 +1,10 @@
 
 #include <fstream>
+#include <set>
+#include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/structures/Cover.hpp>
 
 #include <networkit/io/CoverWriter.hpp>
 

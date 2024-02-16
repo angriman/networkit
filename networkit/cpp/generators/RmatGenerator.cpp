@@ -5,10 +5,16 @@
  *      Author: Henning, cls
  */
 
+#include <stdexcept>
+#include <tuple>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/NumericTools.hpp>
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/generators/RmatGenerator.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

@@ -5,13 +5,20 @@
  *     Author: Eugenio Angriman <angrimae@hu-berlin.de>
  */
 
+#include <algorithm>
 #include <atomic>
 #include <cassert>
-#include <cmath>
 #include <limits>
+#include <memory>
 #include <omp.h>
 #include <queue>
 #include <stdexcept>
+#include <tuple>
+#include <utility>
+#include <vector>
+#include "tlx/container/d_ary_addressable_int_heap.hpp"
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/VectorComparator.hpp>
 #include <networkit/centrality/GroupHarmonicCloseness.hpp>

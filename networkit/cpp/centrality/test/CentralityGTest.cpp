@@ -5,11 +5,25 @@
  *      Author: cls
  */
 
-#include <iomanip>
-#include <iostream>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstdlib>
+#include <limits>
 #include <random>
+#include <stdexcept>
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/distance/BFS.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/generators/quadtree/QuadNode.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Timer.hpp>
@@ -23,7 +37,6 @@
 #include <networkit/centrality/ComplexPaths.hpp>
 #include <networkit/centrality/CoreDecomposition.hpp>
 #include <networkit/centrality/DegreeCentrality.hpp>
-#include <networkit/centrality/DynApproxBetweenness.hpp>
 #include <networkit/centrality/DynKatzCentrality.hpp>
 #include <networkit/centrality/DynTopHarmonicCloseness.hpp>
 #include <networkit/centrality/EigenvectorCentrality.hpp>

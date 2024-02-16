@@ -2,7 +2,13 @@
  *
  */
 
-#include <stdexcept>
+#include <map>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/base/Algorithm.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>

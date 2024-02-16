@@ -3,12 +3,19 @@
 #include <atomic>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
+#include <functional>
+#include <limits>
+#include <memory>
 #include <omp.h>
 #include <queue>
 #include <random>
 #include <stdexcept>
 #include <unordered_set>
 #include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #ifdef __AVX2__
 #include <immintrin.h>
@@ -21,8 +28,6 @@
 #include <networkit/centrality/GroupClosenessGrowShrink.hpp>
 #include <networkit/centrality/GroupClosenessLocalSearch.hpp>
 #include <networkit/distance/Diameter.hpp>
-#include <networkit/graph/BFS.hpp>
-#include <networkit/graph/Dijkstra.hpp>
 
 #include <tlx/container/d_ary_addressable_int_heap.hpp>
 #include <tlx/container/d_ary_heap.hpp>

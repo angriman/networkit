@@ -5,8 +5,18 @@
  *      Author: cls
  */
 
+#include <algorithm>
+#include <cassert>
+#include <iterator>
+#include <set>
+#include <stack>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
+#include <networkit/base/Algorithm.hpp>
 #include <networkit/distance/SSSP.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

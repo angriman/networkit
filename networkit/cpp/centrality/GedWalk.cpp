@@ -5,8 +5,17 @@
  *             Alexander van der Grinten <avdgrinten@hu-berlin.de>
  */
 
+#include <algorithm>
+#include <cassert>
 #include <cmath>
-#include <omp.h>
+#include <limits>
+#include <random>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/centrality/GedWalk.hpp>

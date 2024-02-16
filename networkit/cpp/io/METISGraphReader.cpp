@@ -5,9 +5,15 @@
  *      Author: Christian Staudt
  */
 
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Enforce.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/StringTools.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/io/METISGraphReader.hpp>
 #include <networkit/io/METISParser.hpp>
 

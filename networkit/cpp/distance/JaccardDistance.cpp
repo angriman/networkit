@@ -5,9 +5,12 @@
  *      Author: Michael Hamann, Gerd Lindner
  */
 
-#include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/Random.hpp>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/distance/JaccardDistance.hpp>
+#include <networkit/distance/NodeDistance.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

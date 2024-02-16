@@ -6,6 +6,10 @@
  */
 
 #include <fstream>
+#include <stdexcept>
+#include <string>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Enforce.hpp>
 #include <networkit/graph/GraphTools.hpp>

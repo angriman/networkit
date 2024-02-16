@@ -8,8 +8,12 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <numeric>
+#include <omp.h>
 #include <tuple>
+#include <vector>
 
 #include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Parallelism.hpp>

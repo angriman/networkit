@@ -4,6 +4,11 @@
  *  Created on: 22.11.2021
  *      Author: Fabian Brandt-Tumescheit
  */
+#include <algorithm>
+#include <stack>
+#include <stdexcept>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/graph/TopologicalSort.hpp>
 
 namespace NetworKit {

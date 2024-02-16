@@ -5,9 +5,15 @@
  *      Author: cls
  */
 
+#include <algorithm>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/coarsening/ParallelPartitionCoarsening.hpp>
+#include <networkit/components/ComponentDecomposition.hpp>
 #include <networkit/components/ParallelConnectedComponents.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {

@@ -6,6 +6,10 @@
  */
 
 #include <unordered_set>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/graph/SpanningForest.hpp>
 
 #include <networkit/components/ConnectedComponents.hpp>
 #include <networkit/components/RandomSpanningForest.hpp>

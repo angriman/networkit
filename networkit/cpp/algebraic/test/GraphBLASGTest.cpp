@@ -5,8 +5,12 @@
  *      Author: Michael Wegner (michael.wegner@student.kit.edu)
  */
 
-#include <iostream>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/algebraic/AlgebraicGlobals.hpp>
+#include <networkit/algebraic/Semirings.hpp>
+#include <networkit/algebraic/Vector.hpp>
 
 #include <networkit/algebraic/CSRMatrix.hpp>
 #include <networkit/algebraic/GraphBLAS.hpp>

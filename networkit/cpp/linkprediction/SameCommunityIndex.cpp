@@ -5,7 +5,10 @@
  *      Author: Kolja Esders
  */
 
+#include <networkit/Globals.hpp>
 #include <networkit/community/PLM.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/linkprediction/LinkPredictor.hpp>
 #include <networkit/linkprediction/SameCommunityIndex.hpp>
 
 namespace NetworKit {

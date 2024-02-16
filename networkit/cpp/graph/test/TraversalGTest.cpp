@@ -1,4 +1,15 @@
+#include <algorithm>
+#include <cassert>
+#include <limits>
+#include <queue>
+#include <stack>
+#include <utility>
+#include <vector>
+#include "tlx/container/d_ary_addressable_int_heap.hpp"
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/VectorComparator.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>

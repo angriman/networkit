@@ -6,6 +6,10 @@
  */
 
 #include "DynConnectedComponentsImpl.hpp"
+#include <vector>
+#include <networkit/components/ComponentDecomposition.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/components/DynWeaklyConnectedComponents.hpp>
 

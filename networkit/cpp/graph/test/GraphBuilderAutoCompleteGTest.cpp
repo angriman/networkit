@@ -6,15 +6,16 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
-#include <algorithm>
 #include <tuple>
+#include <utility>
+#include <vector>
 
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphBuilder.hpp>
-#include <networkit/graph/GraphTools.hpp>
 
 namespace NetworKit {
 

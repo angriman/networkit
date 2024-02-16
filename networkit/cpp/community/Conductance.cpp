@@ -5,7 +5,14 @@
  *      Author: Henning
  */
 
+#include <algorithm>
+#include <cassert>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/NumericTools.hpp>
 #include <networkit/community/Conductance.hpp>
+#include <networkit/community/EdgeCut.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

@@ -6,6 +6,8 @@
  */
 
 #include <cmath>
+#include <vector>
+#include <networkit/Globals.hpp>
 
 #include <networkit/linkprediction/AdamicAdarIndex.hpp>
 #include <networkit/linkprediction/NeighborhoodUtility.hpp>

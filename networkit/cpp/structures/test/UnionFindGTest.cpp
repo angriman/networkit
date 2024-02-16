@@ -5,9 +5,8 @@
  *      Author: Maximilian Vogel (uocvf@student.kit.edu)
  */
 
-#include <iostream>
-
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
 #include <networkit/structures/UnionFind.hpp>
 

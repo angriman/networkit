@@ -5,6 +5,9 @@
  *      Author: cls
  */
 
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
 #include <networkit/generators/DynamicPathGenerator.hpp>
 
 namespace NetworKit {

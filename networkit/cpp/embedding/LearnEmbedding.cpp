@@ -13,6 +13,7 @@
  */
 
 #include <algorithm>
+#include <cmath>
 #include <vector>
 
 #include <networkit/auxiliary/Random.hpp>
@@ -20,6 +21,7 @@
 #include "AliasSampler.hpp"
 #include "BiasedRandomWalk.hpp"
 #include "LearnEmbedding.hpp"
+#include <networkit/Globals.hpp>
 
 // Code from https://github.com/nicholas-leonard/word2vec/blob/master/word2vec.c
 // Customized for SNAP and node2vec

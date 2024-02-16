@@ -5,10 +5,14 @@
  *      Author: cls
  */
 
-#include <fstream>
-#include <sstream>
+#include <cstddef>
+#include <cstdlib>
+#include <map>
+#include <stdexcept>
+#include <string>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
-#include <networkit/auxiliary/Enforce.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/graph/GraphTools.hpp>
 #include <networkit/io/EdgeListReader.hpp>

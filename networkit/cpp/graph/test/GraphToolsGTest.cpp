@@ -5,12 +5,20 @@
  *      Author: Maximilian Vogel
  */
 
+#include <algorithm>
 #include <array>
+#include <limits>
+#include <random>
+#include <tuple>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
-#include <networkit/generators/DorogovtsevMendesGenerator.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
 #include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphTools.hpp>

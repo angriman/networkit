@@ -5,7 +5,12 @@
  *      Author: cls
  */
 
+#include <cstddef>
+#include <functional>
+#include <networkit/Globals.hpp>
+#include <networkit/dynamics/GraphEventProxy.hpp>
 #include <networkit/generators/DynamicGraphSource.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

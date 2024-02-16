@@ -5,9 +5,18 @@
  *      Author: ebergamini, michele borassi
  */
 
+#include <algorithm>
+#include <cassert>
+#include <cstdlib>
+#include <limits>
+#include <memory>
 #include <omp.h>
 #include <queue>
 #include <stack>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/components/StronglyConnectedComponents.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/VectorComparator.hpp>

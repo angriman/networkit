@@ -5,8 +5,14 @@
  * 		 Author: Eugenio Angriman
  */
 
-#include <cmath>
+#include <algorithm>
+#include <iterator>
 #include <stack>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/components/BiconnectedComponents.hpp>
 

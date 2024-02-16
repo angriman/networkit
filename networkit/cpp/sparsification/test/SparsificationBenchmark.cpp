@@ -5,7 +5,13 @@
  *      Author: Gerd Lindner
  */
 
+#include <cstdint>
+#include <iostream>
+#include <ostream>
+#include <string>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Timer.hpp>
@@ -17,7 +23,6 @@
 #include <networkit/sparsification/GlobalThresholdFilter.hpp>
 #include <networkit/sparsification/LocalSimilarityScore.hpp>
 #include <networkit/sparsification/MultiscaleScore.hpp>
-#include <networkit/sparsification/RandomEdgeScore.hpp>
 #include <networkit/sparsification/SimmelianOverlapScore.hpp>
 
 namespace NetworKit {

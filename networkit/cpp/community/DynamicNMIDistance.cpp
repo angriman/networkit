@@ -5,10 +5,16 @@
  *      Author: Henning
  */
 
+#include <cassert>
+#include <cmath>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/MissingMath.hpp>
 #include <networkit/auxiliary/NumericTools.hpp>
 #include <networkit/community/DynamicNMIDistance.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <tlx/unused.hpp>
 

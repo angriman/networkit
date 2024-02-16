@@ -1,6 +1,13 @@
+#include <map>
+#include <set>
+#include <stdexcept>
 #include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/scd/SCDGroundTruthComparison.hpp>
+#include <networkit/structures/Cover.hpp>
 
 namespace NetworKit {
 SCDGroundTruthComparison::SCDGroundTruthComparison(const Graph &g, const Cover &groundTruth,

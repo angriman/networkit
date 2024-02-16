@@ -1,4 +1,13 @@
+#include <atomic>
+#include <cstdint>
+#include <fstream>
+#include <ios>
+#include <mutex>
+#include <string>
+
 #include <networkit/GlobalState.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/SignalHandling.hpp>
 
 namespace NetworKit {
 

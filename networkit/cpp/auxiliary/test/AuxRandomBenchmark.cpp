@@ -6,6 +6,9 @@
 #include <networkit/auxiliary/Timer.hpp>
 
 #include <atomic>
+#include <cstddef>
+#include <cstdint>
+#include <iostream>
 #include <omp.h>
 #include <random>
 

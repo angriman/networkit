@@ -5,7 +5,16 @@
  *      Author: Christian Staudt
  */
 
+#include <cassert>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/coarsening/GraphCoarsening.hpp>
 #include <networkit/coarsening/MatchingCoarsening.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/matching/Matching.hpp>
 
 namespace NetworKit {
 

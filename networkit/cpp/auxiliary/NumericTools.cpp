@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <networkit/auxiliary/NumericTools.hpp>
 
 namespace Aux {

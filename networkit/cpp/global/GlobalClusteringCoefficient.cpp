@@ -4,8 +4,12 @@
  *  Created on: 12.11.2013
  */
 
+#include <cstdlib>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/global/GlobalClusteringCoefficient.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphTools.hpp>
 
 namespace NetworKit {

@@ -1,6 +1,14 @@
 
+#include <algorithm>
+#include <cassert>
+#include <limits>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
 #include <networkit/community/CoverF1Similarity.hpp>
+#include <networkit/community/LocalCoverEvaluation.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Cover.hpp>
 
 namespace NetworKit {
 

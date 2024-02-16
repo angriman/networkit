@@ -5,7 +5,13 @@
  *      Author: Henning
  */
 
+#include <cassert>
 #include <cmath>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/NumericTools.hpp>
 #include <networkit/centrality/EigenvectorCentrality.hpp>

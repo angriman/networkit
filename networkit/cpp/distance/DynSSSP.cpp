@@ -5,7 +5,10 @@
  *      Author: cls, ebergamini
  */
 
+#include <networkit/Globals.hpp>
 #include <networkit/distance/DynSSSP.hpp>
+#include <networkit/distance/SSSP.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

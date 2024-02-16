@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <unordered_set>
+#include <networkit/Globals.hpp>
 
 namespace NetworKit {
 

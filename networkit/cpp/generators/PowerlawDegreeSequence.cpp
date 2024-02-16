@@ -1,8 +1,13 @@
 #include <algorithm>
 #include <cmath>
+#include <iterator>
+#include <limits>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/NumericTools.hpp>
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/generators/PowerlawDegreeSequence.hpp>
 

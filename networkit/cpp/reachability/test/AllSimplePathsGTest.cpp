@@ -6,11 +6,13 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <algorithm>
 #include <string>
+#include <vector>
 
-#include <networkit/auxiliary/Random.hpp>
 #include <networkit/io/EdgeListReader.hpp>
 #include <networkit/reachability/AllSimplePaths.hpp>
 

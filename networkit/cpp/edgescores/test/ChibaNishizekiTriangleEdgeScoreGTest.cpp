@@ -5,7 +5,11 @@
  *      Author: Gerd Lindner
  */
 
+#include <cstdint>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/edgescores/ChibaNishizekiTriangleEdgeScore.hpp>
 #include <networkit/edgescores/TriangleEdgeScore.hpp>

@@ -8,6 +8,10 @@
 #include <networkit/centrality/GroupClosenessGrowShrink.hpp>
 
 #include "GroupClosenessGrowShrinkImpl.hpp"
+#include <memory>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

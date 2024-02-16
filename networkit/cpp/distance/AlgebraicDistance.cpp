@@ -5,7 +5,18 @@
  *      Author: Henning Meyerhenke, Christian Staudt, Michael Hamann
  */
 
+#include <algorithm>
+#include <cmath>
+#include <limits>
 #include <omp.h>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/distance/NodeDistance.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/distance/AlgebraicDistance.hpp>

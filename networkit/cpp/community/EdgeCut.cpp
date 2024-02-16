@@ -5,7 +5,10 @@
  *      Author: Henning
  */
 
+#include <networkit/Globals.hpp>
 #include <networkit/community/EdgeCut.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

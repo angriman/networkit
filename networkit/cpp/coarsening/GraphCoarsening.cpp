@@ -5,7 +5,12 @@
  *      Author: Christian Staudt (christian.staudt@kit.edu)
  */
 
+#include <map>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/base/Algorithm.hpp>
 #include <networkit/coarsening/GraphCoarsening.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

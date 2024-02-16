@@ -6,9 +6,23 @@
  *              Alexander van der Grinten <avdgrinten@hu-berlin.de>
  */
 
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstdint>
 #include <numeric>
 #include <omp.h>
 #include <queue>
+#include <stack>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/algebraic/Vector.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/components/BiconnectedComponents.hpp>
+#include <networkit/distance/Diameter.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/algebraic/CSRMatrix.hpp>
 #include <networkit/auxiliary/Random.hpp>

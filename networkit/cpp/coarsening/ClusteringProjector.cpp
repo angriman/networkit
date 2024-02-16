@@ -5,8 +5,13 @@
  *      Author: Christian Staudt
  */
 
+#include <cassert>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/coarsening/ClusteringProjector.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

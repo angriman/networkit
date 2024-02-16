@@ -5,9 +5,15 @@
  *      Author: Michael Wegner (michael.wegner@student.kit.edu)
  */
 
+#include <atomic>
+#include <cmath>
+#include <cstdint>
 #include <type_traits>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/algebraic/CSRGeneralMatrix.hpp>
 
 #include <networkit/algebraic/AlgebraicGlobals.hpp>
 #include <networkit/algebraic/CSRMatrix.hpp>

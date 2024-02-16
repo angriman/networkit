@@ -6,6 +6,8 @@
  */
 
 #include <tuple>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/generators/DorogovtsevMendesGenerator.hpp>
 #include <networkit/graph/GraphTools.hpp>

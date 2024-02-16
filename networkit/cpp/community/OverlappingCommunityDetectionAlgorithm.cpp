@@ -5,7 +5,11 @@
  *      Author: John Gelhausen
  */
 
+#include <stdexcept>
+#include <networkit/base/Algorithm.hpp>
 #include <networkit/community/OverlappingCommunityDetectionAlgorithm.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Cover.hpp>
 
 namespace NetworKit {
 

@@ -5,7 +5,12 @@
  *      Author: cls
  */
 
+#include <cassert>
+#include <stdexcept>
+#include <networkit/Globals.hpp>
 #include <networkit/community/GraphStructuralRandMeasure.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

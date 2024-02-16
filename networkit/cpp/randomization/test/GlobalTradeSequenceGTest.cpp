@@ -5,12 +5,12 @@
  *      Author: Manuel Penschuck (networkit@manuel.jetzt)
  */
 
+#include <cstdint>
 #include <map>
 #include <gtest/gtest.h>
+#include <networkit/randomization/GlobalTradeSequence.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
-
-#include "../GlobalTradeSequence.hpp"
 
 namespace NetworKit {
 

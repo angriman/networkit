@@ -5,17 +5,25 @@
  *      Author: Daniel Hoske, Christian Staudt
  */
 
-#include <numeric>
+#include <algorithm>
+#include <cassert>
+#include <limits>
+#include <stdexcept>
+#include <tuple>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/SignalHandling.hpp>
+#include <networkit/base/Algorithm.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/components/ConnectedComponents.hpp>
 #include <networkit/distance/BFS.hpp>
 #include <networkit/distance/Diameter.hpp>
 #include <networkit/distance/Dijkstra.hpp>
-#include <networkit/distance/Eccentricity.hpp>
 #include <networkit/graph/BFS.hpp>
 #include <networkit/graph/GraphTools.hpp>
-#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

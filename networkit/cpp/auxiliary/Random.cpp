@@ -5,10 +5,12 @@
  *      Author: FJW
  */
 
-#include <atomic>
+#include <cassert>
 #include <cmath>
-#include <limits>
+#include <cstddef>
+#include <cstdint>
 #include <omp.h>
+#include <random>
 
 #include <networkit/GlobalState.hpp>
 #include <networkit/auxiliary/Random.hpp>

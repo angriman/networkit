@@ -5,7 +5,9 @@
  *      Author: Angus Petholz
  */
 
+#include <stdexcept>
 #include <gtest/gtest.h>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/sparsification/RandomEdgeScore.hpp>
 #include <networkit/sparsification/RandomNodeEdgeScore.hpp>

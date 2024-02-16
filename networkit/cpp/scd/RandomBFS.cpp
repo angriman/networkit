@@ -1,4 +1,13 @@
+#include <algorithm>
+#include <cassert>
 #include <iterator>
+#include <set>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/scd/SelectiveCommunityDetector.hpp>
+#include <networkit/structures/Cover.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/scd/RandomBFS.hpp>

@@ -5,7 +5,10 @@
  *      Author: Henning
  */
 
+#include <stdexcept>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/graph/Graph.hpp>
@@ -13,7 +16,6 @@
 #include <networkit/io/DibapGraphReader.hpp>
 #include <networkit/io/METISGraphReader.hpp>
 #include <networkit/matching/LocalMaxMatcher.hpp>
-#include <networkit/matching/Matcher.hpp>
 #include <networkit/matching/Matching.hpp>
 #include <networkit/matching/PathGrowingMatcher.hpp>
 #include <networkit/matching/SuitorMatcher.hpp>

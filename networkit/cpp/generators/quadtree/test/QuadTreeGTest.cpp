@@ -6,10 +6,18 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/generators/quadtree/QuadNode.hpp>
+#include <networkit/generators/quadtree/QuadNodeCartesianEuclid.hpp>
+#include <networkit/geometric/Point2DWithIndex.hpp>
+#include <networkit/viz/Point.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
+#include <random>
 #include <stack>
+#include <tuple>
 #include <vector>
 
 #include <networkit/auxiliary/Log.hpp>

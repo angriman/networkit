@@ -6,8 +6,13 @@
  */
 
 #include <algorithm>
+#include <limits>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/VectorComparator.hpp>
 #include <networkit/distance/Dijkstra.hpp>
+#include <networkit/distance/SSSP.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

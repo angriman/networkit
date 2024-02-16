@@ -5,6 +5,10 @@
  *      Author: Gerd Lindner
  */
 
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphBuilder.hpp>
 #include <networkit/sparsification/GlobalThresholdFilter.hpp>
 

@@ -5,8 +5,14 @@
  *      Author: Christian Staudt
  */
 
+#include <cassert>
 #include <cmath>
 #include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/community/QualityMeasure.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/community/Coverage.hpp>

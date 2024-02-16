@@ -1,10 +1,15 @@
 #include <algorithm>
 #include <cassert>
 
+#include <functional>
+#include <stdexcept>
 #include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
 #include <networkit/centrality/CoreDecomposition.hpp>
 #include <networkit/clique/MaximalCliques.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace {
 // Private implementation namespace

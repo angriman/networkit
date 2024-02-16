@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <queue>
 #include <vector>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Parallel.hpp>

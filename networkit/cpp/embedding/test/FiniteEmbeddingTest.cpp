@@ -5,10 +5,12 @@
  *      Author: Klaus Ahrens
  */
 
-#include <iomanip>
-#include <iostream>
+#include <cmath>
+#include <stdexcept>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/embedding/Node2Vec.hpp>
 #include <networkit/io/METISGraphReader.hpp>

@@ -1,4 +1,10 @@
 #include "ConnectedComponentsImpl.hpp"
+#include <queue>
+#include <stdexcept>
+#include <utility>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/graph/GraphTools.hpp>
 

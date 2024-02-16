@@ -5,6 +5,10 @@
  *      Author: cls
  */
 
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
 #include <networkit/generators/DynamicDorogovtsevMendesGenerator.hpp>
 
 namespace NetworKit {

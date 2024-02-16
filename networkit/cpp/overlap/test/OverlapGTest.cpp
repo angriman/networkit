@@ -5,8 +5,13 @@
  *      Author: Christian Staudt (christian.staudt@kit.edu)
  */
 
-#include <functional>
+#include <algorithm>
+#include <cstdint>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/overlap/HashingOverlapper.hpp>
 

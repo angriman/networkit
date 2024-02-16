@@ -5,8 +5,12 @@
  *      Author: Alexander van der Grinten
  */
 
+#include <cstdlib>
+#include <stdexcept>
+#include <string>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/StringTools.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/io/MemoryMappedFile.hpp>
 #include <networkit/io/SNAPGraphReader.hpp>
 

@@ -7,18 +7,22 @@
  */
 
 #include <algorithm>
+#include <iterator>
+#include <map>
+#include <set>
 #include <tuple>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
 
-#include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/NumericTools.hpp>
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
 #include <networkit/graph/Graph.hpp>
-#include <networkit/graph/GraphBuilder.hpp>
 #include <networkit/graph/GraphTools.hpp>
-#include <networkit/io/METISGraphReader.hpp>
 
 namespace NetworKit {
 

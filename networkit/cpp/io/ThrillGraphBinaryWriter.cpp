@@ -4,7 +4,16 @@
  * @author Michael Hamann
  */
 
+#include <cstddef>
+#include <cstdint>
 #include <fstream>
+#include <ios>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/io/ThrillGraphBinaryWriter.hpp>
 

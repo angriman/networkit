@@ -5,7 +5,18 @@
  *      Author: Michael Wegner (michael.wegner@student.kit.edu)
  */
 
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/algebraic/AlgebraicGlobals.hpp>
 #include <networkit/algebraic/DynamicMatrix.hpp>
+#include <networkit/algebraic/SparseAccumulator.hpp>
+#include <networkit/algebraic/Vector.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

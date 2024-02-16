@@ -5,9 +5,14 @@
  *      Author: cls
  */
 
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/StringTools.hpp>
 #include <networkit/dynamics/DGSStreamParser.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
 
 namespace NetworKit {
 

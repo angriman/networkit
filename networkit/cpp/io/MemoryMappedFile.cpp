@@ -1,4 +1,8 @@
+#include <iterator>
 #include <stdexcept>
+#include <string>
+#include <utility>
+#include <sys/fcntl.h>
 
 #include <networkit/io/MemoryMappedFile.hpp>
 
@@ -109,7 +113,6 @@ void MemoryMappedFile::close() noexcept {
 
 #else
 
-#include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/stat.h>

@@ -5,7 +5,11 @@
  *      Author: Kolja Esders
  */
 
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/centrality/Centrality.hpp>
 #include <networkit/centrality/LaplacianCentrality.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

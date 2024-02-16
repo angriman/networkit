@@ -7,7 +7,13 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cassert>
+#include <iterator>
+#include <map>
 #include <memory>
+#include <set>
+#include <vector>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/structures/Partition.hpp>

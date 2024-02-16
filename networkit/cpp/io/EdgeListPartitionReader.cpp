@@ -5,7 +5,16 @@
  *      Author: forigem
  */
 
+#include <algorithm>
+#include <cstdlib>
+#include <fstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/StringTools.hpp>
 #include <networkit/io/EdgeListPartitionReader.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 

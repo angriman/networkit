@@ -6,9 +6,14 @@
  *              Michael Hamann <michael.hamann@kit.edu>
  */
 
+#include <algorithm>
+#include <cassert>
 #include <limits>
 #include <queue>
 #include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/flow/EdmondsKarp.hpp>
 

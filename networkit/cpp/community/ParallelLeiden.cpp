@@ -1,4 +1,27 @@
+#include <algorithm>
+#include <atomic>
+#include <cassert>
+#include <condition_variable>
+#include <cstdint>
+#include <limits>
+#include <mutex>
+#include <numeric>
+#include <omp.h>
+#include <queue>
+#include <stdexcept>
+#include <thread>
+#include <utility>
+#include <vector>
+#include "tlx/unused.hpp"
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/auxiliary/Timer.hpp>
+#include <networkit/coarsening/ParallelPartitionCoarsening.hpp>
+#include <networkit/community/CommunityDetectionAlgorithm.hpp>
 #include <networkit/community/ParallelLeiden.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 namespace NetworKit {
 ParallelLeiden::ParallelLeiden(const Graph &graph, int iterations, bool randomize, double gamma)

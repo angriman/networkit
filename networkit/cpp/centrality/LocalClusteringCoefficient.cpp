@@ -1,5 +1,11 @@
+#include <cstddef>
 #include <omp.h>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/centrality/Centrality.hpp>
 #include <networkit/centrality/LocalClusteringCoefficient.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

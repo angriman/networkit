@@ -6,8 +6,15 @@
  *              Eugenio Angriman <angrimae@hu-berlin.de>
  */
 
+#include <algorithm>
+#include <cstdint>
 #include <omp.h>
 #include <queue>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/centrality/Closeness.hpp>
 #include <networkit/components/ConnectedComponents.hpp>

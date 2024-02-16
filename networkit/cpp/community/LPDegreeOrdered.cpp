@@ -5,7 +5,14 @@
  *      Author: cls
  */
 
+#include <algorithm>
 #include <unordered_map>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/community/CommunityDetectionAlgorithm.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Parallel.hpp>

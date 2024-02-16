@@ -6,15 +6,21 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/dynamics/GraphEventProxy.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Cover.hpp>
 
+#include <algorithm>
 #include <array>
-#include <cassert>
-#include <chrono>
+#include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <limits>
-#include <unordered_set>
+#include <random>
+#include <string>
 #include <vector>
 
 #include <networkit/algebraic/CSRMatrix.hpp>
@@ -45,7 +51,6 @@
 #include <networkit/io/NetworkitBinaryWriter.hpp>
 #include <networkit/io/PartitionReader.hpp>
 #include <networkit/io/PartitionWriter.hpp>
-#include <networkit/io/SNAPEdgeListPartitionReader.hpp>
 #include <networkit/io/SNAPGraphReader.hpp>
 #include <networkit/io/SNAPGraphWriter.hpp>
 #include <networkit/io/ThrillGraphBinaryReader.hpp>

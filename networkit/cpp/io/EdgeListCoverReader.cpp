@@ -1,7 +1,10 @@
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
+#include <string>
+#include <networkit/Globals.hpp>
+#include <networkit/structures/Cover.hpp>
 
-#include <networkit/auxiliary/StringTools.hpp>
 #include <networkit/graph/Graph.hpp>
 #include <networkit/io/EdgeListCoverReader.hpp>
 

@@ -6,6 +6,11 @@
  */
 
 #include <queue>
+#include <set>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/scd/ApproximatePageRank.hpp>
 

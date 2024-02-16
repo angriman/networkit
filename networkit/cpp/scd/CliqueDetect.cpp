@@ -1,4 +1,12 @@
+#include <cassert>
+#include <set>
+#include <stdexcept>
 #include <unordered_map>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/scd/SelectiveCommunityDetector.hpp>
 
 #include <networkit/auxiliary/IncrementalUniformRandomSelector.hpp>
 #include <networkit/clique/MaximalCliques.hpp>

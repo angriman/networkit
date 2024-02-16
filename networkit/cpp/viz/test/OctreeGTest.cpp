@@ -5,9 +5,12 @@
  *      Author: Michael
  */
 
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/viz/Point.hpp>
 
 #include <networkit/algebraic/Vector.hpp>
 #include <networkit/auxiliary/Log.hpp>

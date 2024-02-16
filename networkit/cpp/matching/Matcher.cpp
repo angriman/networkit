@@ -5,7 +5,11 @@
  *      Author: Christian Staudt
  */
 
+#include <stdexcept>
+#include <vector>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/matching/Matcher.hpp>
+#include <networkit/matching/Matching.hpp>
 
 namespace NetworKit {
 

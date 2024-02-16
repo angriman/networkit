@@ -6,13 +6,26 @@
  *             Alexander van der Grinten <avdgrinten@hu-berlin.de>
  */
 
+#include <algorithm>
+#include <atomic>
+#include <cassert>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <deque>
 #include <limits>
+#include <memory>
 #include <omp.h>
+#include <random>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/SortedList.hpp>
+#include <networkit/components/ConnectedComponents.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Parallel.hpp>
-#include <networkit/auxiliary/Parallelism.hpp>
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/centrality/KadabraBetweenness.hpp>
 #include <networkit/distance/Diameter.hpp>

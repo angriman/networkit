@@ -5,8 +5,14 @@
  *      Author: Michael Hamann
  */
 
-#include <numeric>
+#include <functional>
+#include <limits>
+#include <stdexcept>
 #include <tuple>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/edgescores/EdgeScore.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/auxiliary/Random.hpp>

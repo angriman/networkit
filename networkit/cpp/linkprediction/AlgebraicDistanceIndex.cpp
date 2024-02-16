@@ -5,9 +5,16 @@
  *      Authors: cls, Kolja Esders
  */
 
+#include <cmath>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Random.hpp>
+#include <networkit/auxiliary/Timer.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/linkprediction/AlgebraicDistanceIndex.hpp>
+#include <networkit/linkprediction/LinkPredictor.hpp>
 
 namespace NetworKit {
 

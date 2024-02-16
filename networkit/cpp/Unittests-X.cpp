@@ -7,10 +7,8 @@
  *              Manuel Penschuck <networkit@manuel.jetzt>
  */
 
-#include <algorithm>
 #include <iostream>
-#include <omp.h>
-#include <utility>
+#include <string>
 
 #include <gtest/gtest.h>
 

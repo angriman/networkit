@@ -1,3 +1,12 @@
+#include <cassert>
+#include <set>
+#include <stdexcept>
+#include <tuple>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/structures/LocalCommunity.hpp>
 
 namespace NetworKit {

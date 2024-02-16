@@ -5,9 +5,15 @@
  *      Author: John Gelhausen
  */
 
-#include <iostream>
+#include <set>
+#include <utility>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
 #include <networkit/community/LFM.hpp>
+#include <networkit/community/OverlappingCommunityDetectionAlgorithm.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/scd/SelectiveCommunityDetector.hpp>
+#include <networkit/structures/Cover.hpp>
 
 namespace NetworKit {
 

@@ -5,7 +5,14 @@
  *      Author: Eugenio Angriman <angrimae@hu-berlin.de>
  */
 
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
 #include <limits>
+#include <queue>
+#include <utility>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
 
 #include <networkit/distance/BidirectionalBFS.hpp>
 

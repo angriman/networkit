@@ -5,7 +5,11 @@
  *      Author: cls
  */
 
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/centrality/Centrality.hpp>
 #include <networkit/centrality/DegreeCentrality.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

@@ -6,9 +6,9 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/auxiliary/Log.hpp>
 
-#include <functional>
-#include <map>
+#include <string>
 
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/centrality/Betweenness.hpp>

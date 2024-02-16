@@ -5,11 +5,16 @@
  *      Author: Christian Staudt (christian.staudt@kit.edu)
  */
 
+#include <cassert>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/matching/Matching.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/coarsening/ClusteringProjector.hpp>
-#include <networkit/coarsening/GraphCoarsening.hpp>
 #include <networkit/coarsening/MatchingCoarsening.hpp>
 #include <networkit/coarsening/ParallelPartitionCoarsening.hpp>
 #include <networkit/community/ClusteringGenerator.hpp>

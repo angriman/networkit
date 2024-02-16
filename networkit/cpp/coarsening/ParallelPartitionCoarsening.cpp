@@ -6,12 +6,13 @@
  */
 
 #include <numeric>
-#include <omp.h>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/coarsening/GraphCoarsening.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Partition.hpp>
 
-#include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/Timer.hpp>
 #include <networkit/coarsening/ParallelPartitionCoarsening.hpp>
-#include <networkit/graph/GraphBuilder.hpp>
 
 namespace NetworKit {
 

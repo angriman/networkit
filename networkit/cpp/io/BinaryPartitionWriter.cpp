@@ -1,4 +1,11 @@
+#include <cstdint>
 #include <fstream>
+#include <ios>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <networkit/Globals.hpp>
+#include <networkit/structures/Partition.hpp>
 
 #include <networkit/io/BinaryPartitionWriter.hpp>
 

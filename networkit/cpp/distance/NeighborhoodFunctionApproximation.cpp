@@ -6,9 +6,12 @@
  */
 
 #include <cmath>
-#include <map>
+#include <numeric>
 #include <omp.h>
+#include <stdexcept>
 #include <vector>
+#include <networkit/base/Algorithm.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/Globals.hpp>
 #include <networkit/auxiliary/Random.hpp>

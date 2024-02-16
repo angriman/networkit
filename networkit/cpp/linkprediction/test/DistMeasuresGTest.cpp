@@ -5,16 +5,11 @@
  *      Author: Henning
  */
 
-#include <cstdio>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
-#include <networkit/community/Modularity.hpp>
 #include <networkit/graph/Graph.hpp>
-#include <networkit/io/DibapGraphReader.hpp>
-#include <networkit/io/METISGraphReader.hpp>
 #include <networkit/linkprediction/AlgebraicDistanceIndex.hpp>
-#include <networkit/structures/Partition.hpp>
-#include <networkit/viz/PostscriptWriter.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 

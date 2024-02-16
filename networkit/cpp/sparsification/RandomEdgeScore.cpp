@@ -5,6 +5,11 @@
  *      Author: Gerd Lindner
  */
 
+#include <stdexcept>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/edgescores/EdgeScore.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/sparsification/RandomEdgeScore.hpp>
 
 namespace NetworKit {

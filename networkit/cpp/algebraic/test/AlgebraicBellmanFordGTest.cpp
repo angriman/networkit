@@ -5,7 +5,12 @@
  *      Author: Michael Wegner (michael.wegner@student.kit.edu)
  */
 
+#include <algorithm>
+#include <limits>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
 
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/graph/Graph.hpp>
@@ -13,7 +18,6 @@
 
 #include <networkit/algebraic/CSRMatrix.hpp>
 
-#include <networkit/algebraic/DynamicMatrix.hpp>
 #include <networkit/algebraic/algorithms/AlgebraicBellmanFord.hpp>
 #include <networkit/distance/Dijkstra.hpp>
 

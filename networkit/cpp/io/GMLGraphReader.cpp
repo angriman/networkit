@@ -7,13 +7,17 @@
 
 #include <exception>
 #include <fstream>
+#include <stdexcept>
+#include <string>
 #include <unordered_map>
+#include <utility>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <tlx/define/attribute_fallthrough.hpp>
 
 #include <networkit/auxiliary/Enforce.hpp>
 #include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/StringTools.hpp>
 #include <networkit/io/GMLGraphReader.hpp>
 
 namespace NetworKit {

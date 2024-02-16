@@ -2,6 +2,10 @@
 #include <algorithm>
 #include <cassert>
 #include <omp.h>
+#include <queue>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/components/ConnectedComponents.hpp>
 #include <networkit/components/StronglyConnectedComponents.hpp>

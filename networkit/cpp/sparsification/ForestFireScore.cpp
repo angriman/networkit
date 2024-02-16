@@ -5,11 +5,17 @@
  *      Author: Gerd Lindner
  */
 
-#include <limits>
 #include <queue>
 #include <set>
+#include <stdexcept>
+#include <tuple>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/edgescores/EdgeScore.hpp>
+#include <networkit/graph/Graph.hpp>
 
-#include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/graph/GraphTools.hpp>
 #include <networkit/sparsification/ForestFireScore.hpp>

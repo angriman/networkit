@@ -1,6 +1,13 @@
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <fstream>
+#include <ios>
 #include <stdexcept>
+#include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/graph/GraphBuilder.hpp>
 #include <networkit/io/ThrillGraphBinaryReader.hpp>

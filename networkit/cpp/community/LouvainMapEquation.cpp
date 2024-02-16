@@ -10,7 +10,17 @@
 #include <algorithm>
 #include <cassert>
 
+#include <cmath>
+#include <cstddef>
 #include <omp.h>
+#include <stdexcept>
+#include <tuple>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/auxiliary/SparseVector.hpp>
+#include <networkit/community/CommunityDetectionAlgorithm.hpp>
 
 #include <networkit/auxiliary/Parallelism.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>

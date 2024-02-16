@@ -6,6 +6,14 @@
  */
 
 #include <limits>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/algebraic/AlgebraicGlobals.hpp>
+#include <networkit/algebraic/CSRMatrix.hpp>
+#include <networkit/algebraic/Vector.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/viz/GraphLayoutAlgorithm.hpp>
 
 #include <networkit/auxiliary/PrioQueue.hpp>
 #include <networkit/auxiliary/Random.hpp>

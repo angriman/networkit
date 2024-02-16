@@ -6,11 +6,11 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
 #include <networkit/centrality/SpanningEdgeCentrality.hpp>
 
 #include <networkit/graph/Graph.hpp>
-#include <networkit/io/METISGraphReader.hpp>
 
 namespace NetworKit {
 

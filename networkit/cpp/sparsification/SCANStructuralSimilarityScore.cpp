@@ -1,3 +1,10 @@
+#include <cmath>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/edgescores/EdgeScore.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/sparsification/SCANStructuralSimilarityScore.hpp>
 
 NetworKit::SCANStructuralSimilarityScore::SCANStructuralSimilarityScore(

@@ -8,37 +8,18 @@
 #include <string>
 #include <vector>
 #include <gtest/gtest.h>
+#include <networkit/auxiliary/Log.hpp>
 
 #include <networkit/graph/Graph.hpp>
-#include <networkit/viz/Point.hpp>
 
-#include <networkit/components/ConnectedComponents.hpp>
 #include <networkit/graph/Graph.hpp>
 #include <networkit/io/METISGraphReader.hpp>
-#include <networkit/io/METISGraphWriter.hpp>
 #include <networkit/viz/MaxentStress.hpp>
-
-#include <networkit/numerics/ConjugateGradient.hpp>
-#include <networkit/numerics/LAMG/Lamg.hpp>
-#include <networkit/numerics/Preconditioner/DiagonalPreconditioner.hpp>
-#include <networkit/numerics/Preconditioner/IdentityPreconditioner.hpp>
-
-#include <networkit/community/PLM.hpp>
-
-#include <networkit/sparsification/GlobalThresholdFilter.hpp>
-#include <networkit/sparsification/LocalDegreeScore.hpp>
-#include <networkit/sparsification/RandomEdgeScore.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/auxiliary/Timer.hpp>
 
-#include <iostream>
-#include <random>
-#include <unordered_map>
-
 #include <networkit/viz/PivotMDS.hpp>
-
-#include <cstdio>
 
 namespace NetworKit {
 

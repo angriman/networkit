@@ -6,11 +6,14 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/structures/Cover.hpp>
 
-#include <iostream>
+#include <map>
+#include <set>
+#include <vector>
 
 namespace NetworKit {
 

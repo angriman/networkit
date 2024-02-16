@@ -5,6 +5,10 @@
  *      Author: Kolja Esders
  */
 
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/linkprediction/ROCMetric.hpp>
 
 namespace NetworKit {

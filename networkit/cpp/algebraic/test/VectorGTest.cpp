@@ -5,12 +5,14 @@
  *      Author: Michael Wegner (michael.wegner@student.kit.edu)
  */
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
 
 #include <cmath>
+#include <cstdint>
+#include <vector>
 #include <networkit/algebraic/AlgebraicGlobals.hpp>
 #include <networkit/algebraic/DynamicMatrix.hpp>
 #include <networkit/algebraic/Vector.hpp>
-#include <networkit/auxiliary/Log.hpp>
 
 namespace NetworKit {
 

@@ -5,7 +5,12 @@
  *      Author: cls
  */
 
+#include <cassert>
+#include <cstdint>
+#include <stdexcept>
 #include <unordered_set>
+#include <networkit/Globals.hpp>
+#include <networkit/generators/DynamicGraphSource.hpp>
 
 #include <networkit/auxiliary/Random.hpp>
 #include <networkit/generators/DynamicBarabasiAlbertGenerator.hpp>

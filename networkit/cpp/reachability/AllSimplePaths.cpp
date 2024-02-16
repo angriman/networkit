@@ -5,8 +5,13 @@
  *      Author: Eugenio Angriman
  */
 
-#include <memory>
 #include <omp.h>
+#include <queue>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/reachability/AllSimplePaths.hpp>
 

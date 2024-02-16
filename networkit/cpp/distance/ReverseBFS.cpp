@@ -5,8 +5,14 @@
  *      Author: Henning
  */
 
+#include <limits>
 #include <queue>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/distance/ReverseBFS.hpp>
+#include <networkit/distance/SSSP.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

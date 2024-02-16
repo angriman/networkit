@@ -8,6 +8,9 @@
 #include <networkit/community/CoverHubDominance.hpp>
 #include <networkit/community/HubDominance.hpp>
 #include <networkit/community/PartitionHubDominance.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/structures/Cover.hpp>
+#include <networkit/structures/Partition.hpp>
 
 double NetworKit::HubDominance::getQuality(const NetworKit::Partition &zeta,
                                            const NetworKit::Graph &G) {

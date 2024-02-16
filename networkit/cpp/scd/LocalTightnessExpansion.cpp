@@ -1,6 +1,6 @@
-#include <algorithm>
-#include <limits>
-#include <unordered_map>
+#include <cmath>
+#include <set>
+#include <stdexcept>
 
 #include <tlx/container/d_ary_addressable_int_heap.hpp>
 #include <tlx/unused.hpp>
@@ -9,6 +9,10 @@
 #include <networkit/scd/LocalTightnessExpansion.hpp>
 
 #include "LocalDegreeDirectedGraph.hpp"
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
+#include <networkit/scd/SelectiveCommunityDetector.hpp>
 
 namespace NetworKit {
 

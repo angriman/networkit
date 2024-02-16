@@ -1,3 +1,7 @@
+#include <algorithm>
+#include <limits>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/auxiliary/SignalHandling.hpp>
 #include <networkit/community/IntrapartitionDensity.hpp>
 

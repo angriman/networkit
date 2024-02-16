@@ -5,6 +5,10 @@
  *      Author: Kolja Esders
  */
 
+#include <stdexcept>
+#include <utility>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/graph/GraphTools.hpp>
 #include <networkit/linkprediction/RandomLinkSampler.hpp>
 

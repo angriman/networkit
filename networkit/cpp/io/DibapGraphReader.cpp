@@ -5,13 +5,18 @@
  *      Author: Henning
  */
 
+#include <stdexcept>
+#include <string>
+#include <vector>
+#include <sys/_endian.h>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 #ifndef NETWORKIT_WINDOWS
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/io/DibapGraphReader.hpp>
 
 #include <cstdio>
-#include <netinet/in.h>
 
 // codes in file headers to distinguish type
 namespace NetworKit {

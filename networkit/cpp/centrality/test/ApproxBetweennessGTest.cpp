@@ -6,11 +6,9 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/centrality/ApproxBetweenness.hpp>
-#include <networkit/centrality/Betweenness.hpp>
-#include <networkit/distance/Diameter.hpp>
-#include <networkit/generators/DorogovtsevMendesGenerator.hpp>
 #include <networkit/generators/ErdosRenyiGenerator.hpp>
 
 namespace NetworKit {

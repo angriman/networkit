@@ -1,4 +1,10 @@
+#include <limits>
+#include <stdexcept>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/edgescores/EdgeScore.hpp>
 #include <networkit/edgescores/EdgeScoreNormalizer.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

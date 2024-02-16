@@ -6,8 +6,12 @@
  */
 
 #include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Random.hpp>

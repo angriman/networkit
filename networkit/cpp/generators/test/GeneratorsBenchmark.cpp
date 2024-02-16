@@ -6,24 +6,26 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/auxiliary/Timer.hpp>
+#include <networkit/generators/quadtree/QuadNode.hpp>
+#include <networkit/generators/quadtree/Quadtree.hpp>
+#include <networkit/geometric/HyperbolicSpace.hpp>
+#include <networkit/graph/Graph.hpp>
 
-#include <functional>
-#include <omp.h>
-#include <random>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <vector>
 
-#include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Parallel.hpp>
-#include <networkit/auxiliary/Parallelism.hpp>
 
 #include <networkit/generators/BarabasiAlbertGenerator.hpp>
 #include <networkit/generators/ChungLuGenerator.hpp>
 #include <networkit/generators/DynamicHyperbolicGenerator.hpp>
-#include <networkit/generators/ErdosRenyiEnumerator.hpp>
 #include <networkit/generators/HyperbolicGenerator.hpp>
 #include <networkit/generators/MocnikGenerator.hpp>
-#include <networkit/generators/MocnikGeneratorBasic.hpp>
-
-#include <networkit/graph/GraphBuilder.hpp>
 
 namespace NetworKit {
 

@@ -1,6 +1,10 @@
 
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/generators/EdgeSwitchingMarkovChainGenerator.hpp>
 #include <networkit/generators/HavelHakimiGenerator.hpp>
+#include <networkit/generators/StaticDegreeSequenceGenerator.hpp>
+#include <networkit/graph/Graph.hpp>
 #include <networkit/randomization/EdgeSwitching.hpp>
 
 namespace NetworKit {

@@ -6,14 +6,16 @@
  */
 
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Multiprecision.hpp>
+#include <networkit/graph/Graph.hpp>
 
-#include <stack>
+#include <set>
+#include <vector>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/distance/BFS.hpp>
 #include <networkit/distance/Dijkstra.hpp>
-#include <networkit/distance/DynBFS.hpp>
-#include <networkit/distance/DynDijkstra.hpp>
 #include <networkit/io/METISGraphReader.hpp>
 
 #include <tlx/unused.hpp>

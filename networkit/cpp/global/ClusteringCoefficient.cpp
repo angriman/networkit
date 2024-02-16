@@ -5,8 +5,11 @@
  *      Author: Lukas Barth, David Weiss
  */
 
+#include <cstddef>
 #include <omp.h>
-#include <unordered_set>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Random.hpp>

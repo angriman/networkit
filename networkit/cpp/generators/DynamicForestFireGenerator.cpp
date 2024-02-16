@@ -5,9 +5,15 @@
  *      Author: cls
  */
 
+#include <cassert>
+#include <functional>
 #include <queue>
 #include <set>
 #include <unordered_map>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Random.hpp>

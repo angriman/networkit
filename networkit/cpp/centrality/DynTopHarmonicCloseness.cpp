@@ -5,14 +5,25 @@
  *      Author: nemes, Eugenio Angriman
  */
 
+#include <algorithm>
+#include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <limits>
+#include <map>
 #include <omp.h>
+#include <queue>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/components/DynConnectedComponents.hpp>
+#include <networkit/components/DynWeaklyConnectedComponents.hpp>
+#include <networkit/dynamics/GraphEvent.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/PrioQueue.hpp>
 #include <networkit/centrality/DynTopHarmonicCloseness.hpp>
-#include <networkit/components/ConnectedComponents.hpp>
-#include <networkit/components/StronglyConnectedComponents.hpp>
 #include <networkit/distance/AffectedNodes.hpp>
 #include <networkit/graph/BFS.hpp>
 

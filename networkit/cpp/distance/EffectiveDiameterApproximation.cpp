@@ -5,8 +5,16 @@
  *      Author: Maximilian Vogel
  */
 
+#include <cmath>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/base/Algorithm.hpp>
 #include <networkit/components/ConnectedComponents.hpp>
 #include <networkit/distance/EffectiveDiameterApproximation.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 EffectiveDiameterApproximation::EffectiveDiameterApproximation(const Graph &G, const double ratio,

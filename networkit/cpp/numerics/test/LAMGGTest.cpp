@@ -5,17 +5,23 @@
  *      Author: Michael
  */
 
+#include <cassert>
+#include <cstddef>
+#include <random>
+#include <string>
+#include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Log.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/numerics/LAMG/LevelHierarchy.hpp>
 
 #include <networkit/algebraic/CSRMatrix.hpp>
 #include <networkit/algebraic/Vector.hpp>
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/components/ConnectedComponents.hpp>
-#include <networkit/generators/BarabasiAlbertGenerator.hpp>
 #include <networkit/graph/Graph.hpp>
-#include <networkit/io/LineFileReader.hpp>
 #include <networkit/io/METISGraphReader.hpp>
-#include <networkit/io/METISGraphWriter.hpp>
 #include <networkit/numerics/GaussSeidelRelaxation.hpp>
 #include <networkit/numerics/LAMG/MultiLevelSetup.hpp>
 #include <networkit/numerics/LAMG/SolverLamg.hpp>

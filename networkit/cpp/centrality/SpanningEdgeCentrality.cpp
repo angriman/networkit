@@ -9,10 +9,17 @@
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/centrality/SpanningEdgeCentrality.hpp>
 
-#include <fstream>
-#include <sstream>
+#include <cmath>
+#include <cstdint>
 
-#include <omp.h>
+#include <string>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/algebraic/CSRMatrix.hpp>
+#include <networkit/algebraic/Vector.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/centrality/Centrality.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

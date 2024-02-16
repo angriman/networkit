@@ -5,7 +5,14 @@
  *      Author: Kolja Esders
  */
 
+#include <algorithm>
+#include <iterator>
 #include <list>
+#include <stdexcept>
+#include <utility>
+#include <vector>
+#include <networkit/Globals.hpp>
+#include <networkit/linkprediction/LinkPredictor.hpp>
 
 #include <networkit/auxiliary/Parallel.hpp>
 #include <networkit/linkprediction/LinkThresholder.hpp>

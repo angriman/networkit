@@ -6,18 +6,25 @@
  */
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <fstream>
+#include <ostream>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 #include <gtest/gtest.h>
+#include <networkit/Globals.hpp>
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/geometric/Point2DWithIndex.hpp>
+#include <networkit/graph/Graph.hpp>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Timer.hpp>
 #include <networkit/io/METISGraphReader.hpp>
 
-#include <networkit/generators/quadtree/QuadtreeCartesianEuclid.hpp>
 #include <networkit/generators/quadtree/QuadtreePolarEuclid.hpp>
 #include <networkit/geometric/HyperbolicSpace.hpp>
 #include <networkit/io/RasterReader.hpp>

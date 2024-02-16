@@ -5,9 +5,12 @@
  *      Author: Michael Wegner (michael.wegner@student.kit.edu)
  */
 
+#include <cassert>
+#include <cmath>
+#include <initializer_list>
+#include <vector>
+#include <networkit/Globals.hpp>
 #include <networkit/algebraic/Vector.hpp>
-
-#include <networkit/algebraic/DynamicMatrix.hpp>
 
 namespace NetworKit {
 
