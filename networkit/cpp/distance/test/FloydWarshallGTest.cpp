@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 #include <networkit/distance/FloydWarshall.hpp>
+#include <networkit/graph/Graph.hpp>
 
 namespace NetworKit {
 

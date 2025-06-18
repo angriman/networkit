@@ -201,7 +201,15 @@ public:
     using EdgeStringAttribute = Attribute<PerEdge, AdjListGraph, std::string, false>;
 
 private:
-    static constexpr EdgeWeightT defaultEdgeWeightT = EdgeWeightT{1};
+    using EdgeWeightInput =
+        std::conditional_t<std::same_as<EdgeWeightT, Unweighted>, edgeweight, EdgeWeightT>;
+    static constexpr EdgeWeightT defaultEdgeWeightT = []() {
+        if constexpr (std::same_as<EdgeWeightT, Unweighted>) {
+            return Unweighted{};
+        } else {
+            return EdgeWeightT{1};
+        }
+    }();
     /**
      * Returns the index of node u in the array of incoming edges of node v.
      * (for directed graphs inEdges is searched, while for indirected outEdges

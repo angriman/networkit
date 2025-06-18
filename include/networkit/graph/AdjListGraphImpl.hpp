@@ -1,6 +1,11 @@
 #ifndef NETWORKIT_GRAPH_ADJ_LIST_GRAPH_IMPL_HPP_
 #define NETWORKIT_GRAPH_ADJ_LIST_GRAPH_IMPL_HPP_
 
+#include <concepts>
+#include <stdexcept>
+
+#include <networkit/graph/GraphConcepts.hpp>
+
 namespace NetworKit {
 
 /* NODE ITERATORS */
@@ -555,7 +560,13 @@ AdjListGraph<NodeT, EdgeWeightT>::AdjListGraph(count n, bool weighted, bool dire
       undirected edges*/
       outEdges(n), inEdgeWeights(weighted && directed ? n : 0), outEdgeWeights(weighted ? n : 0),
       inEdgeIds(edgesIndexed && directed ? n : 0), outEdgeIds(edgesIndexed ? n : 0),
-      nodeAttributeMap(this), edgeAttributeMap(this) {}
+      nodeAttributeMap(this), edgeAttributeMap(this) {
+    // Validate weighted flag against EdgeWeightT
+    if (this->weighted && std::same_as<EdgeWeightT, Unweighted>) {
+        throw std::invalid_argument(
+            "Constructor received weighted = true but EdgeWeightT is Unweighted");
+    }
+}
 
 template <GraphNode NodeT, GraphEdgeWeight EdgeWeightT>
 AdjListGraph<NodeT, EdgeWeightT>::AdjListGraph(
