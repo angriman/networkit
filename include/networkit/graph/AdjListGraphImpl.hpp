@@ -1,6 +1,11 @@
 #ifndef NETWORKIT_GRAPH_ADJ_LIST_GRAPH_IMPL_HPP_
 #define NETWORKIT_GRAPH_ADJ_LIST_GRAPH_IMPL_HPP_
 
+#include <concepts>
+#include <stdexcept>
+
+#include <networkit/graph/GraphConcepts.hpp>
+
 namespace NetworKit {
 
 /* NODE ITERATORS */
@@ -108,8 +113,8 @@ inline void AdjListGraph<NodeT, EdgeWeightT>::forOutEdgesOfImpl(NodeT u, L handl
         NodeT v = outEdges[u][i];
 
         if (useEdgeInIteration<graphIsDirected>(u, v)) {
-            edgeLambda<L>(handle, u, v, getOutEdgeWeight<hasWeights>(u, i),
-                          getOutEdgeId<graphHasEdgeIds>(u, i));
+            callEdgeLambda<NodeT, EdgeWeightT>(handle, u, v, getOutEdgeWeight<hasWeights>(u, i),
+                                               getOutEdgeId<graphHasEdgeIds>(u, i));
         }
     }
 }
@@ -121,15 +126,15 @@ inline void AdjListGraph<NodeT, EdgeWeightT>::forInEdgesOfImpl(NodeT u, L handle
         for (index i = 0; i < inEdges[u].size(); ++i) {
             NodeT v = inEdges[u][i];
 
-            edgeLambda<L>(handle, u, v, getInEdgeWeight<hasWeights>(u, i),
-                          getInEdgeId<graphHasEdgeIds>(u, i));
+            callEdgeLambda<NodeT, EdgeWeightT>(handle, u, v, getInEdgeWeight<hasWeights>(u, i),
+                                               getInEdgeId<graphHasEdgeIds>(u, i));
         }
     } else {
         for (index i = 0; i < outEdges[u].size(); ++i) {
             NodeT v = outEdges[u][i];
 
-            edgeLambda<L>(handle, u, v, getOutEdgeWeight<hasWeights>(u, i),
-                          getOutEdgeId<graphHasEdgeIds>(u, i));
+            callEdgeLambda<NodeT, EdgeWeightT>(handle, u, v, getOutEdgeWeight<hasWeights>(u, i),
+                                               getOutEdgeId<graphHasEdgeIds>(u, i));
         }
     }
 }
@@ -164,8 +169,9 @@ inline double AdjListGraph<NodeT, EdgeWeightT>::parallelSumForEdgesImpl(L handle
             // undirected, do not iterate over edges twice
             // {u, v} instead of (u, v); if v == nullNodeId, u > v is not fulfilled
             if (useEdgeInIteration<graphIsDirected>(u, v)) {
-                sum += edgeLambda<L>(handle, u, v, getOutEdgeWeight<hasWeights>(u, i),
-                                     getOutEdgeId<graphHasEdgeIds>(u, i));
+                sum += callEdgeLambda<NodeT, EdgeWeightT>(handle, u, v,
+                                                          getOutEdgeWeight<hasWeights>(u, i),
+                                                          getOutEdgeId<graphHasEdgeIds>(u, i));
             }
         }
     }
@@ -555,7 +561,13 @@ AdjListGraph<NodeT, EdgeWeightT>::AdjListGraph(count n, bool weighted, bool dire
       undirected edges*/
       outEdges(n), inEdgeWeights(weighted && directed ? n : 0), outEdgeWeights(weighted ? n : 0),
       inEdgeIds(edgesIndexed && directed ? n : 0), outEdgeIds(edgesIndexed ? n : 0),
-      nodeAttributeMap(this), edgeAttributeMap(this) {}
+      nodeAttributeMap(this), edgeAttributeMap(this) {
+    // Validate weighted flag against EdgeWeightT
+    if (this->weighted && std::same_as<EdgeWeightT, Unweighted>) {
+        throw std::invalid_argument(
+            "Constructor received weighted = true but EdgeWeightT is Unweighted");
+    }
+}
 
 template <GraphNode NodeT, GraphEdgeWeight EdgeWeightT>
 AdjListGraph<NodeT, EdgeWeightT>::AdjListGraph(
