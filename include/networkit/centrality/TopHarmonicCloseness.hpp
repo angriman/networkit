@@ -13,6 +13,7 @@
 #include <networkit/auxiliary/VectorComparator.hpp>
 #include <networkit/base/Algorithm.hpp>
 #include <networkit/components/WeaklyConnectedComponents.hpp>
+#include "TopHarmonicClosenessConfig.pb.h"
 #include <networkit/graph/Graph.hpp>
 
 #include <tlx/container/d_ary_addressable_int_heap.hpp>

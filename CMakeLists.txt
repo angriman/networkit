@@ -135,6 +135,20 @@ if (NETWORKIT_SANITY_CHECKS)
     set(NETWORKIT_CXX_FLAGS "${NETWORKIT_CXX_FLAGS} -DNETWORKIT_SANITY_CHECKS")
 endif()
 
+# find and create the protobuf target.
+find_package(Protobuf CONFIG REQUIRED)
+if (Protobuf_FOUND)
+	message("Found protobuf version ${Protobuf_VERSION}")
+	set(PROTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+	set(PROTO_ROOT ${CMAKE_SOURCE_DIR}/proto)
+	message("proto root dir is ${PROTO_ROOT}")
+	message(STATUS "Protobuf version: ${Protobuf_VERSION}")
+	get_target_property(PROTOBUF_INCLUDE protobuf::libprotobuf INTERFACE_INCLUDE_DIRECTORIES)
+	message(STATUS "Protobuf include dirs from target: ${PROTOBUF_INCLUDE}")
+
+else()
+	message(FATAL_ERROR "Protobuf not found, but necessary to compile NetworKit.")
+endif()
 
 # finding or creating OpenMP target. This is likely to fail for CMake Version < 3.12.
 find_package(OpenMP)
@@ -264,6 +278,7 @@ if(NETWORKIT_BUILD_CORE AND NETWORKIT_MONOLITH)
 	endif()
 
 	target_link_libraries(networkit PRIVATE OpenMP::OpenMP_CXX PUBLIC tlx)
+	target_link_libraries(networkit PRIVATE protobuf::libprotobuf)
 
 	set_target_properties(networkit PROPERTIES
 			CXX_STANDARD ${NETWORKIT_CXX_STANDARD}
@@ -277,6 +292,7 @@ if(NETWORKIT_BUILD_CORE AND NETWORKIT_MONOLITH)
 
 	target_include_directories(networkit BEFORE PUBLIC "${PROJECT_SOURCE_DIR}/include")
 	target_include_directories(networkit PUBLIC "${PROJECT_SOURCE_DIR}/extlibs/ttmath/")
+	target_include_directories(networkit PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/generated>)
 
 endif()
 
@@ -390,6 +406,7 @@ function(networkit_add_module modname)
 			LINK_FLAGS "${NETWORKIT_LINK_FLAGS}")
 
 		target_link_libraries(${MODULE_TARGET} PRIVATE OpenMP::OpenMP_CXX PUBLIC tlx)
+		target_link_libraries(${MODULE_TARGET} PRIVATE protobuf::libprotobuf)
 		target_include_directories(${MODULE_TARGET} BEFORE PUBLIC "${PROJECT_SOURCE_DIR}/include")
 		target_include_directories(${MODULE_TARGET} PUBLIC "${PROJECT_SOURCE_DIR}/extlibs/ttmath/")
 
@@ -409,6 +426,65 @@ function(networkit_add_module modname)
 			PRIVATE ${CMAKE_CURRENT_LIST_DIR}/${file})
 	endforeach()
 endfunction()
+
+target_include_directories(networkit PRIVATE ${PROTOBUF_GEN_DIR})
+file(MAKE_DIRECTORY ${PROTO_BINARY_DIR})
+function(networkit_add_proto_module modname)
+	message("Adding proto module ${modname}")
+	if(NOT NETWORKIT_BUILD_CORE)
+		return()
+	endif()
+
+	if(NETWORKIT_MONOLITH)
+		# in case we are building a monolith, no submodule are registered
+		# and we simple add the source file to the networkkit target
+		set(MODULE_TARGET "networkit")
+	else()
+		set(MODULE_TARGET "networkit_${modname}")
+	endif()
+ set(PROTO_IMPORT_DIR ${CMAKE_SOURCE_DIR}/networkit/proto/${modname})
+    set(PROTO_FILES ${ARGN})
+
+    message("Proto import dir is ${PROTO_IMPORT_DIR}")
+    message("Proto files are ${PROTO_FILES}")
+    message("Proto binary dir is ${PROTO_BINARY_DIR}")
+
+    # Build absolute paths
+    set(ABS_PROTO_FILES)
+    set(GENERATED_PROTO_SRCS)
+    foreach(proto_file ${PROTO_FILES})
+        list(APPEND ABS_PROTO_FILES "${PROTO_IMPORT_DIR}/${proto_file}")
+        get_filename_component(proto_name ${proto_file} NAME_WE)
+        list(APPEND GENERATED_PROTO_SRCS
+            "${PROTO_BINARY_DIR}/${proto_name}.pb.cc"
+        )
+    endforeach()
+	message("ABS proto files: ${ABS_PROTO_FILES}")
+	message("Generate proto srcs: ${GENERATED_PROTO_SRCS}")
+
+    # Use protobuf_generate with APPEND_PATH to handle relative paths correctly
+    protobuf_generate(
+        LANGUAGE cpp
+        OUT_VAR PROTO_GEN_FILES
+        PROTOS ${ABS_PROTO_FILES}
+        PROTOC_OUT_DIR ${PROTO_BINARY_DIR}
+		PROTOC_OPTIONS --experimental_allow_proto3_optional
+    )
+
+	message("Proto out dir: ${PROTO_BINARY_DIR}")
+    # Add the generated .cc files as a library
+    add_library(proto_${modname} OBJECT ${GENERATED_PROTO_SRCS})
+    set_source_files_properties(${GENERATED_PROTO_SRCS} PROPERTIES GENERATED TRUE)
+    target_link_libraries(proto_${modname} PUBLIC protobuf::libprotobuf)
+    target_include_directories(proto_${modname} PUBLIC ${PROTO_BINARY_DIR})
+
+    # Link this proto library to main target
+    target_link_libraries(${MODULE_TARGET} PRIVATE proto_${modname})
+	target_link_libraries(${MODULE_TARGET} PUBLIC protobuf::libprotobuf)
+    target_include_directories(${MODULE_TARGET} PUBLIC ${PROTO_BINARY_DIR})
+endfunction()
+
+
 
 # Analogous to target_link_libraries with KEYWORDS.
 # Use the module's name (without networkit_ prefix) for target.
@@ -699,6 +775,7 @@ endif()
 ################################################################################
 # Subdirectories
 add_subdirectory(networkit/cpp)
+add_subdirectory(networkit/proto)
 
 # Install NetworKit header files
 set(NETWORKIT_LIBRARIES networkit)
