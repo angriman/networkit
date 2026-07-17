@@ -17,13 +17,11 @@
 #include <functional>
 #include <numeric>
 #include <omp.h>
-#include <ranges>
 #include <span>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
 #include <typeindex>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 

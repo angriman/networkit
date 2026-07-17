@@ -1,6 +1,8 @@
 #ifndef NETWORKIT_GRAPH_ADJ_LIST_GRAPH_IMPL_HPP_
 #define NETWORKIT_GRAPH_ADJ_LIST_GRAPH_IMPL_HPP_
 
+#include <unordered_set>
+
 namespace NetworKit {
 
 /* NODE ITERATORS */
