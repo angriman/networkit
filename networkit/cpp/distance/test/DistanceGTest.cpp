@@ -5,10 +5,15 @@
  *      Author: Maximilian Vogel
  */
 
+#include <algorithm>
 #include <limits>
+#include <utility>
+#include <vector>
 #include <gmock/gmock-more-matchers.h>
 #include <gtest/gtest.h>
 
+#include <networkit/auxiliary/Random.hpp>
+#include <networkit/components/StronglyConnectedComponents.hpp>
 #include <networkit/distance/APSP.hpp>
 #include <networkit/distance/AStar.hpp>
 #include <networkit/distance/AdamicAdarDistance.hpp>
@@ -486,6 +491,147 @@ TEST_F(DistanceGTest, testExactDiameter) {
         diam.run();
         count diameter = diam.getDiameter().first;
         EXPECT_EQ(diameter, testInstance.second);
+    }
+}
+
+namespace {
+
+// Largest finite distance in the graph, found by running a shortest paths algorithm from each node.
+template <class ShortestPaths>
+edgeweight largestFiniteDistance(const Graph &G) {
+    edgeweight largest = 0;
+    G.forNodes([&](node source) -> void {
+        ShortestPaths sssp(G, source);
+        sssp.run();
+        for (const auto dist : sssp.getDistances()) {
+            if (dist != std::numeric_limits<edgeweight>::max()) {
+                largest = std::max(largest, dist);
+            }
+        }
+    });
+    return largest;
+}
+
+std::vector<Graph> directedDiameterInstances() {
+    std::vector<Graph> instances;
+
+    Graph path(50, false, true);
+    Graph cycle(50, false, true);
+    for (node u = 0; u < 50; ++u) {
+        if (u + 1 < 50) {
+            path.addEdge(u, u + 1);
+        }
+        cycle.addEdge(u, (u + 1) % 50);
+    }
+    instances.push_back(path);
+    instances.push_back(cycle);
+
+    // A cycle with a path that leads into it and a path that leaves it.
+    Graph tendrils(40, false, true);
+    for (node u = 0; u < 39; ++u) {
+        tendrils.addEdge(u, u + 1);
+    }
+    tendrils.addEdge(29, 10);
+    instances.push_back(tendrils);
+
+    // Two components without a path between them.
+    Graph disconnected(10, false, true);
+    disconnected.addEdge(0, 1);
+    disconnected.addEdge(1, 2);
+    disconnected.addEdge(2, 3);
+    disconnected.addEdge(5, 6);
+    disconnected.addEdge(6, 5);
+    instances.push_back(disconnected);
+
+    instances.emplace_back(5, false, true);
+
+    Graph removedNode(6, false, true);
+    removedNode.addEdge(0, 2);
+    removedNode.addEdge(2, 3);
+    removedNode.addEdge(3, 0);
+    removedNode.addEdge(3, 4);
+    removedNode.removeNode(1);
+    instances.push_back(removedNode);
+
+    for (const double p : {0.01, 0.02, 0.04, 0.1, 0.3}) {
+        for (count i = 0; i < 5; ++i) {
+            instances.push_back(ErdosRenyiGenerator(100, p, true).generate());
+
+            // Keeping only the edges that go forward gives a DAG.
+            Graph dag(100, false, true);
+            instances.back().forEdges([&](node u, node v) -> void {
+                if (u < v) {
+                    dag.addEdge(u, v);
+                }
+            });
+            instances.push_back(std::move(dag));
+        }
+    }
+
+    return instances;
+}
+
+} // namespace
+
+TEST_F(DistanceGTest, testDiameterDirectedExact) {
+    Aux::Random::setSeed(42, false);
+    for (const auto &G : directedDiameterInstances()) {
+        const auto expected = static_cast<count>(largestFiniteDistance<BFS>(G));
+
+        Diameter exact(G, DiameterAlgo::EXACT);
+        exact.run();
+        EXPECT_EQ(exact.getDiameter().first, expected);
+
+        Diameter range(G, DiameterAlgo::ESTIMATED_RANGE, 0.);
+        range.run();
+        EXPECT_EQ(range.getDiameter(), std::make_pair(expected, expected));
+    }
+}
+
+TEST_F(DistanceGTest, testDiameterDirectedRange) {
+    Aux::Random::setSeed(42, false);
+    constexpr double error = 0.5;
+    for (const auto &G : directedDiameterInstances()) {
+        const auto expected = static_cast<count>(largestFiniteDistance<BFS>(G));
+
+        Diameter range(G, DiameterAlgo::ESTIMATED_RANGE, error);
+        range.run();
+        const auto [lower, upper] = range.getDiameter();
+        EXPECT_LE(lower, expected);
+        EXPECT_GE(upper, expected);
+        EXPECT_LE(static_cast<double>(upper), static_cast<double>(lower) * (1. + error));
+    }
+}
+
+TEST_F(DistanceGTest, testDiameterDirectedWeightedExact) {
+    Aux::Random::setSeed(42, false);
+    for (const auto &unweighted : directedDiameterInstances()) {
+        auto G = GraphTools::toWeighted(unweighted);
+        G.forEdges([&](node u, node v) -> void { G.setWeight(u, v, Aux::Random::real(0.5, 3.)); });
+
+        Diameter exact(G, DiameterAlgo::EXACT);
+        exact.run();
+        EXPECT_EQ(exact.getDiameter().first,
+                  static_cast<count>(largestFiniteDistance<Dijkstra>(G)));
+    }
+}
+
+TEST_F(DistanceGTest, testVertexDiameterDirected) {
+    Aux::Random::setSeed(42, false);
+    for (const auto &G : directedDiameterInstances()) {
+        const auto vertexDiameter = static_cast<count>(largestFiniteDistance<BFS>(G)) + 1;
+
+        Diameter pedantic(G, DiameterAlgo::ESTIMATED_PEDANTIC);
+        pedantic.run();
+        EXPECT_GE(pedantic.getDiameter().first, vertexDiameter);
+
+        StronglyConnectedComponents scc(G);
+        scc.run();
+        if (scc.numberOfComponents() == 1) {
+            Diameter samples(G, DiameterAlgo::ESTIMATED_SAMPLES, -1., 5);
+            samples.run();
+            EXPECT_GE(samples.getDiameter().first, vertexDiameter);
+        }
     }
 }
 
