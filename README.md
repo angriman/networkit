@@ -203,12 +203,10 @@ Building from source requires:
 ```bash
 git clone https://github.com/networkit/networkit networkit
 cd networkit
-pip install cython numpy setuptools wheel
-python setup.py build_ext [-jX]
 pip install -e .
 ```
 
-The `-jX` option specifies the number of threads for compilation (e.g., `-j4` for 4 threads). If omitted, it uses all available CPU cores.
+The build uses all available CPU cores. To limit it, set the `CMAKE_BUILD_PARALLEL_LEVEL` environment variable (e.g., `CMAKE_BUILD_PARALLEL_LEVEL=4` for 4 threads).
 
 ### C++ Core Library
 

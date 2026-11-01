@@ -40,6 +40,16 @@ set(NETWORKIT_INSTALL_INCLUDE_DIR "include"
 set(NETWORKIT_INSTALL_PKGCONFIG_DIR "lib/pkgconfig"
 	CACHE PATH "Installation directory for pkg-config file")
 
+# scikit-build-core sets SKBUILD and selects the interpreter to build for.
+if(SKBUILD)
+	find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module NumPy)
+	set(NETWORKIT_PYTHON "${Python_INCLUDE_DIRS}")
+	set(NETWORKIT_PYTHON_EXECUTABLE "${Python_EXECUTABLE}")
+	set(NETWORKIT_PYTHON_SOABI "${Python_SOABI}")
+	set(NETWORKIT_PYTHON_VERSION "${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}")
+	set(NETWORKIT_NUMPY "${Python_NumPy_INCLUDE_DIRS}")
+endif()
+
 if (NETWORKIT_PYTHON)
 	if (NOT NETWORKIT_MONOLITH)
 		message(FATAL_ERROR "When building NetworKit as a Python module, NETWORKIT_MONOLITH=ON is required")
@@ -324,19 +334,32 @@ if(NETWORKIT_PYTHON)
 		endif()
 	endif()
 	
+	file(GLOB CYTHON_DECLARATIONS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/networkit/*.pxd")
 	foreach (EXT base centrality clique coarsening community components correlation
 			 distance dynamics dynbase embedding engineering flow generators globals graph graphio
 			 graphtools helpers independentset linkprediction matching planarity
 			 randomization reachability scd simulation sparsification stats
 			 structures traversal viz)
 
-		if(NOT EXISTS "${PROJECT_SOURCE_DIR}/networkit/${EXT}.cpp")
-			message(FATAL_ERROR "networkit/${EXT}.cpp is missing. Invoke Cython manually.")
-		endif()
-
 		set(TARGET_LIB ${EXT})
 
-		add_library(${TARGET_LIB} MODULE networkit/${EXT}.cpp)
+		set(CYTHON_OUTPUT "${PROJECT_BINARY_DIR}/cython/${EXT}.cpp")
+		set(CYTHON_DIRECTIVES "language_level=3")
+		if(NETWORKIT_BUILD_TESTS)
+			string(APPEND CYTHON_DIRECTIVES ",linetrace=True")
+			# Cython.Coverage looks for the generated source next to the .pyx file.
+			set(CYTHON_OUTPUT "${PROJECT_SOURCE_DIR}/networkit/${EXT}.cpp")
+		endif()
+		add_custom_command(OUTPUT "${CYTHON_OUTPUT}"
+			COMMAND "${NETWORKIT_PYTHON_EXECUTABLE}" -m cython --cplus
+				--directive "${CYTHON_DIRECTIVES}"
+				--output-file "${CYTHON_OUTPUT}" "networkit/${EXT}.pyx"
+			WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+			DEPENDS "networkit/${EXT}.pyx" ${CYTHON_DECLARATIONS}
+			VERBATIM)
+
+		add_library(${TARGET_LIB} MODULE "${CYTHON_OUTPUT}")
+		target_include_directories(${TARGET_LIB} PRIVATE "${PROJECT_SOURCE_DIR}/networkit")
 		target_include_directories(${TARGET_LIB} BEFORE PUBLIC "${PROJECT_SOURCE_DIR}/include")
 		target_include_directories(${TARGET_LIB} PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/ttmath/")
 		target_include_directories(${TARGET_LIB} PRIVATE "${NETWORKIT_PYTHON}")

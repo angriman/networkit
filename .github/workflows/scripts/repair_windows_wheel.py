@@ -2,17 +2,8 @@ import argparse
 import pathlib
 import subprocess
 import sys
-
-
-def find_windows_package_dir():
-    build_root = pathlib.Path("build")
-    candidates = sorted(build_root.glob("lib.win-*/networkit"))
-    for candidate in candidates:
-        if (candidate / "networkit_state.dll").is_file():
-            return candidate
-    raise FileNotFoundError(
-        "Unable to find build/lib.win-*/networkit/networkit_state.dll"
-    )
+import tempfile
+import zipfile
 
 
 def main():
@@ -21,21 +12,23 @@ def main():
     parser.add_argument("--dest-dir", required=True)
     args = parser.parse_args()
 
-    package_dir = find_windows_package_dir()
-    subprocess.check_call(
-        [
-            sys.executable,
-            "-m",
-            "delvewheel",
-            "repair",
-            "-w",
-            args.dest_dir,
-            "-v",
-            "--add-path",
-            str(package_dir),
-            args.wheel,
-        ]
-    )
+    # delvewheel has to find the core library, which is inside of the wheel it repairs.
+    with tempfile.TemporaryDirectory() as directory:
+        zipfile.ZipFile(args.wheel).extract("networkit/networkit_state.dll", directory)
+        subprocess.check_call(
+            [
+                sys.executable,
+                "-m",
+                "delvewheel",
+                "repair",
+                "-w",
+                args.dest_dir,
+                "-v",
+                "--add-path",
+                str(pathlib.Path(directory) / "networkit"),
+                args.wheel,
+            ]
+        )
 
 
 if __name__ == "__main__":

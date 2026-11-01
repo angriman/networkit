@@ -48,10 +48,55 @@ changelog = "https://github.com/networkit/networkit/blob/master/CHANGES.md"
 
 [build-system]
 requires = [
-  "cython<3.3.0",
-  "cmake",
+  "cython>=3.0.9,<3.3.0",
   "numpy",
-  "scipy",
-  "setuptools",
-  "wheel"
+  "scikit-build-core>=0.11"
 ]
+build-backend = "scikit_build_core.build"
+
+[tool.scikit-build]
+minimum-version = "0.11"
+cmake.version = ">=3.21"
+cmake.build-type = "Release"
+wheel.packages = ["networkit"]
+wheel.exclude = ["cpp/", "**.cpp"]
+sdist.include = [
+  "extlibs/dhb/CMakeLists.txt",
+  "extlibs/dhb/Config.cmake.in",
+  "extlibs/dhb/LICENSE",
+  "extlibs/dhb/include/",
+  "extlibs/dhb/src/",
+  "extlibs/tlx/CMakeLists.txt",
+  "extlibs/tlx/LICENSE",
+  "extlibs/tlx/misc/",
+  "extlibs/tlx/tlx/",
+  "extlibs/ttmath/COPYRIGHT",
+  "extlibs/ttmath/ttmath/"
+]
+sdist.exclude = [
+  ".*",
+  "/benchmarks/",
+  "/docs/",
+  "/extlibs/",
+  "/extrafiles/",
+  "/input/",
+  "/notebooks/",
+  "/scripts/"
+]
+
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.regex"
+input = "version.py"
+
+[tool.scikit-build.cmake.define]
+NETWORKIT_FLATINSTALL = "ON"
+NETWORKIT_BUILD_TESTS = {env = "NETWORKIT_BUILD_TESTS", default = "OFF"}
+NETWORKIT_BUILD_CORE = {env = "NETWORKIT_BUILD_CORE", default = "ON"}
+NETWORKIT_EXT_TLX = {env = "NETWORKIT_EXT_TLX", default = ""}
+
+# Only static core builds are supported on Windows.
+[[tool.scikit-build.overrides]]
+if.platform-system = "win32"
+inherit.cmake.define = "append"
+cmake.define.NETWORKIT_STATIC = "ON"
+cmake.define.NETWORKIT_BUILDING_STATELIB = "ON"

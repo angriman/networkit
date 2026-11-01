@@ -470,14 +470,13 @@ jobs:
           cd ../..
           python -m venv pyenv
           . ./pyenv/Scripts/activate
-          pip install cython==3.0.9 ipython ipywidgets==7.7.1 jupyter jupyterlab-widgets==1.1.1 numpy setuptools
+          pip install cython==3.0.9 ipython ipywidgets==7.7.1 jupyter jupyterlab-widgets==1.1.1 numpy scikit-build-core
           mkdir build && cd build
           cmake -GNinja -DNETWORKIT_BUILD_TESTS=ON -DNETWORKIT_STATIC=ON -DCMAKE_BUILD_TYPE=Release -DNETWORKIT_CXX_STANDARD=${{ env.CXX_STANDARD }} -DNETWORKIT_WARNINGS=ON -DNETWORKIT_WARNINGS_AS_ERRORS=ON -DNETWORKIT_EXT_TLX=${{ env.TLX_PATH_WIN }} -DNETWORKIT_NATIVE=${{ env.NATIVE }} ..
           ninja
           ctest -V -C Release
           cd ..
-          python setup.py build_ext --inplace --external-tlx=${{ env.TLX_PATH_WIN }}
-          pip install -e .
+          NETWORKIT_EXT_TLX=${{ env.TLX_PATH_WIN }} pip install --no-build-isolation -e .
           python -c 'import networkit'
           pip install -r requirements.txt
           pip install ipycytoscape seaborn plotly anywidget

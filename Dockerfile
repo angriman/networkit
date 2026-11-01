@@ -28,7 +28,7 @@ RUN chown -R jovyan:users ${HOME}/*
 
 # Build and install networkit from current branch
 USER 1000
-RUN cd ${HOME}/networkit && python3 setup.py build_ext && pip install -e .
+RUN cd ${HOME}/networkit && pip install -e .
 
 # Configure Jupyter to enable ipycytoscape
 RUN conda install -y nodejs

@@ -2,7 +2,7 @@
 
 python3 -m venv pyenv && . pyenv/bin/activate
 pip3 install --upgrade pip
-pip3 install coveralls cython gcovr==8.3 matplotlib requests setuptools tabulate numpy networkx ipycytoscape seaborn plotly anywidget
+pip3 install coveralls 'cython<3.3.0' gcovr==8.3 matplotlib requests scikit-build-core tabulate numpy networkx ipycytoscape seaborn plotly anywidget
 
 mkdir core_build && cd "$_"
 export CPU_COUNT=$(python3 $GITHUB_WORKSPACE/.github/workflows/scripts/get_core_count.py)
@@ -15,5 +15,4 @@ cd ..
 export CMAKE_LIBRARY_PATH=${CMAKE_LIBRARY_PATH:+$CMAKE_LIBRARY_PATH:}$(pwd)/core_build
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$(pwd)/core_build
 
-NETWORKIT_PARALLEL_JOBS=$CPU_COUNT python3 setup.py build_ext --inplace
-NETWORKIT_PARALLEL_JOBS=$CPU_COUNT pip3 install -e .
+CMAKE_BUILD_PARALLEL_LEVEL=$CPU_COUNT pip3 install --no-build-isolation -e .

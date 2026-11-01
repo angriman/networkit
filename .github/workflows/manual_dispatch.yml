@@ -78,7 +78,7 @@ jobs:
     strategy:
       matrix:
         buildplat:
-        - [macos-latest, arm64]
+        - [macos-15, arm64]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -95,6 +95,7 @@ jobs:
             brew install libomp ninja
           CIBW_ARCHS_MACOS: ${{ matrix.buildplat[1] }}
           CIBW_BUILD: 'cp315-*'
+          CIBW_ENVIRONMENT: CXX='c++' MACOSX_DEPLOYMENT_TARGET='15.0'
           CIBW_SKIP: "pp* *-musllinux_*"
           CIBW_TEST_COMMAND: python3 -c 'import networkit'
           CIBW_TEST_SKIP: "*-macosx_x86_64 *-macosx_universal2:x86_64"

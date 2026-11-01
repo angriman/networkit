@@ -25,8 +25,7 @@ cd ..
 export CMAKE_LIBRARY_PATH=${CMAKE_LIBRARY_PATH:+$CMAKE_LIBRARY_PATH:}$(pwd)/core_build
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$(pwd)/core_build
 export CPU_COUNT=$(python3 $GITHUB_WORKSPACE/.github/workflows/scripts/get_core_count.py)
-NETWORKIT_PARALLEL_JOBS=$CPU_COUNT python3 ./setup.py build_ext --inplace --networkit-external-core
-NETWORKIT_PARALLEL_JOBS=$CPU_COUNT pip3 install -e .
+CMAKE_BUILD_PARALLEL_LEVEL=$CPU_COUNT NETWORKIT_BUILD_CORE=OFF pip3 install --no-build-isolation -e .
 
 # Ensure notebook sources are available under docs/, as expected by docs/notebooks.rst.
 rm -rf docs/notebooks

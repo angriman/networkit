@@ -327,12 +327,10 @@ For the **Python** unit tests, run:
 
 ::
 
-   python3 setup.py test [--cpp-tests/-c]
+   python3 -m unittest discover -v networkit/test/
 
-This command will compile the \_NetworKit extension and then run all
-test cases on the Python layer. If you append ``--cpp-tests/-c``, the
-unit tests of the c++ side will be compiled and run before the Python
-test cases.
+This command will run all test cases on the Python layer. It needs the
+Python module to be installed, see the build instructions in the README.
 
 Test-driven development
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -536,7 +534,6 @@ the following must be done:
 
           ::
 
-            python3 setup.py build_ext [-jX]
             pip3 install -e .
     #. Once the features shared object is successfully created, import it in the
        ``networkit/__init__.py`` file as is done with the other modules.

@@ -6,10 +6,9 @@ $CXX --version
 python3 --version
 cmake --version
 
-# Note: setuptools<69.0.0 is needed for editable installs. Normal installs work with more recent releases of setuptools
 python3 -m venv pyenv && . pyenv/bin/activate
 pip3 install --upgrade pip
-pip3 install cython==3.0.9 numpy ipython jupyter setuptools
+pip3 install cython==3.0.9 numpy ipython jupyter scikit-build-core
 
 # Build tlx
 cd tlx
@@ -32,8 +31,7 @@ export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH:+$DYLD_LIBRARY_PATH:}$(pwd)/core_bu
 export CPU_COUNT=$(python3 $GITHUB_WORKSPACE/.github/workflows/scripts/get_core_count.py)
 
 # Build networkit
-NETWORKIT_PARALLEL_JOBS=$CPU_COUNT python3 ./setup.py build_ext --inplace --networkit-external-core --external-tlx=$TLX_PATH
-NETWORKIT_PARALLEL_JOBS=$CPU_COUNT pip3 install -e .
+CMAKE_BUILD_PARALLEL_LEVEL=$CPU_COUNT NETWORKIT_BUILD_CORE=OFF NETWORKIT_EXT_TLX=$TLX_PATH pip3 install --no-build-isolation -e .
 
 # Test Python module
 python3 -c 'import networkit'
