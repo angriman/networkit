@@ -40,6 +40,7 @@ networkit_add_module(centrality
     SpanningEdgeCentrality.cpp
     TopCloseness.cpp
     TopHarmonicCloseness.cpp
+    VoteRank.cpp
     )
 
 networkit_module_link_modules(centrality

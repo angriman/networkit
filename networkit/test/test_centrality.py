@@ -656,6 +656,21 @@ class TestCentrality(unittest.TestCase):
         CL = nk.centrality.LocalPartitionCoverage(self.L, part)
         CL.run()
 
+    def testVoteRank(self):
+        G = nk.Graph(5)
+        G.addEdge(0, 1)
+        G.addEdge(0, 2)
+        G.addEdge(0, 3)
+        G.addEdge(1, 4)
+
+        algo = nk.centrality.VoteRank(G)
+        algo.run()
+        self.assertEqual(algo.getSpreaders(), [0, 1])
+
+        algo = nk.centrality.VoteRank(G, 1)
+        algo.run()
+        self.assertEqual(algo.getSpreaders(), [0])
+
     def testPageRank(self):
         CL = nk.centrality.PageRank(self.L)
         CL.run()

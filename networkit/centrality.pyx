@@ -2351,6 +2351,51 @@ cdef class EigenvectorCentrality(Centrality):
 		self._G = G
 		self._this = new _EigenvectorCentrality(G._this, tol)
 
+cdef extern from "<networkit/centrality/VoteRank.hpp>":
+
+	cdef cppclass _VoteRank "NetworKit::VoteRank" (_Algorithm):
+		_VoteRank(_Graph, count k) except +
+		const vector[node] &getSpreaders() except +
+
+cdef class VoteRank(Algorithm):
+	"""
+	VoteRank(G, k=None)
+
+	Identifies a set of influential spreaders with the VoteRank algorithm from "Identifying a set of
+	influential spreaders in complex networks" by J. Zhang et al. (2016). Nodes vote for their
+	neighbors and the node with the most votes is elected in each round. The elected node stops
+	voting and its neighbors lose part of their voting ability, which keeps the spreaders apart.
+
+	In directed graphs a node receives the votes of its out-neighbors, and an elected node weakens
+	them. Edge weights are ignored.
+
+	Parameters
+	----------
+	G : networkit.Graph
+		The graph.
+	k : int, optional
+		Maximum number of spreaders. The algorithm stops earlier if no node gets votes. By default
+		it continues until then.
+	"""
+	cdef Graph _G
+
+	def __cinit__(self, Graph G, k=None):
+		self._G = G
+		self._this = new _VoteRank(G._this, _none if k is None else <count>k)
+
+	def getSpreaders(self):
+		"""
+		getSpreaders()
+
+		Returns the elected spreaders, in order of election.
+
+		Returns
+		-------
+		list(int)
+			The spreaders, the most influential one first.
+		"""
+		return (<_VoteRank*>(self._this)).getSpreaders()
+
 cdef extern from "<networkit/centrality/PageRank.hpp>" namespace "NetworKit::PageRank":
 
 	cdef enum _Norm "NetworKit::PageRank::Norm":
