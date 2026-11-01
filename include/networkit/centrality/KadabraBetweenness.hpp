@@ -105,6 +105,10 @@ public:
      * the graph. Thus, the worst-case performance is O(w * (|E| + |V|)), but
      * performs better in practice.
      *
+     * The score of a node is the expected fraction of shortest paths through it
+     * between two random distinct nodes, which may include the node itself. It
+     * therefore equals (n - 2) / n times the normalized score of Betweenness.
+     *
      * @param G The graph
      * @param err Maximum additive error guaranteed when approximating the
      * betweenness centrality of all nodes.

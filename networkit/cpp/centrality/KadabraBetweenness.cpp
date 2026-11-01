@@ -348,6 +348,10 @@ void KadabraBetweenness::run() {
     computeDeltaGuess();
     nPairs = 0;
     std::fill(approxSum.begin(), approxSum.end(), 0.0);
+    // The samples of the calibration phase must not count towards the final estimate.
+    for (auto &frame : firstFrames) {
+        frame.reset(0);
+    }
     epochToRead.store(-1, std::memory_order_relaxed);
     epochRead = -1;
 
@@ -432,8 +436,6 @@ void KadabraBetweenness::run() {
 #pragma omp parallel for
     for (omp_index i = 0; i < static_cast<omp_index>(n); ++i) {
         approxSum[i] /= (double)nPairs;
-        if (!G.isDirected())
-            approxSum[i] *= 2.;
     }
 
     if (!absolute) {
@@ -626,7 +628,7 @@ void SpSampler::backtrackPath(const node source, const node target, const node s
             if (dist[t] == dist[start] - 1
                 && ((timestamp[start] & ballMask) == (timestamp[t] & ballMask))) {
                 w = t;
-                curPred += nPaths[target];
+                curPred += nPaths[t];
                 if (curPred > randomPred) {
                     stop = true;
                 }

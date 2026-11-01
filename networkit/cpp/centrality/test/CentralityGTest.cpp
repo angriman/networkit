@@ -2032,6 +2032,45 @@ TEST_F(CentralityGTest, testKadabraAbsolute) {
  * that, for a different random seed, this test fails.
  */
 
+TEST_F(CentralityGTest, testKadabraMatchesExactBetweenness) {
+    const auto expectWithinError = [](const Graph &G, double err) -> void {
+        Betweenness exact(G, true);
+        exact.run();
+        Aux::Random::setSeed(42, true);
+        KadabraBetweenness kadabra(G, err, 0.1, true);
+        kadabra.run();
+
+        // Kadabra samples among all pairs of nodes, also those with an endpoint in the given node.
+        const double n = static_cast<double>(G.numberOfNodes());
+        const auto scores = kadabra.scores();
+        G.forNodes([&](node u) -> void {
+            EXPECT_NEAR(scores[u], (n - 2.) / n * exact.score(u), err);
+        });
+    };
+
+    // Nodes have predecessors with very different numbers of shortest paths.
+    const count side = 10;
+    Graph grid(side * side);
+    for (count i = 0; i < side; ++i) {
+        for (count j = 0; j < side; ++j) {
+            if (i + 1 < side) {
+                grid.addEdge(i * side + j, (i + 1) * side + j);
+            }
+            if (j + 1 < side) {
+                grid.addEdge(i * side + j, i * side + j + 1);
+            }
+        }
+    }
+    expectWithinError(grid, 0.01);
+
+    // With a single shortest path per pair, only a bias of the estimator itself can cause errors.
+    Graph path(9);
+    for (node u = 0; u + 1 < path.numberOfNodes(); ++u) {
+        path.addEdge(u, u + 1);
+    }
+    expectWithinError(path, 0.002);
+}
+
 TEST_F(CentralityGTest, testKadabraTopK) {
     Aux::Random::setSeed(42, true);
     const count n = 10;
