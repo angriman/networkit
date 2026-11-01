@@ -15,3 +15,7 @@ networkit_add_test(graph GraphTestUtilsGTest graph)
 
 networkit_add_benchmark(graph Graph2Benchmark)
 networkit_add_benchmark(graph GraphBenchmark auxiliary)
+# MSVC only implements OpenMP 2.0, which cannot select a schedule at runtime.
+if(NOT MSVC)
+    networkit_add_benchmark(graph ParallelScheduleBenchmark auxiliary generators)
+endif()
