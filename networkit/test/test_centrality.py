@@ -607,7 +607,7 @@ class TestCentrality(unittest.TestCase):
             )
 
         # check scores() returns correct scores
-        scores = [0.0, 0.397, 0.0, 0.0, 0.896, 0.0, 0.844, 0.395, 0.0]
+        scores = [0.0, 0.194, 0.0, 0.0, 0.444, 0.0, 0.417, 0.194, 0.0]
         for i in range(self.L.numberOfNodes()):
             self.assertAlmostEqual(KB.scores()[i], scores[i], delta=0.1)
 

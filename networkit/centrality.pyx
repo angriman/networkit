@@ -327,6 +327,10 @@ cdef class KadabraBetweenness(Algorithm):
 	Thus, the worst-case performance is :math:`O(w * (|E| + |V|))`, but performs better
 	in practice.
 
+	The score of a node is the expected fraction of shortest paths through it
+	between two random distinct nodes, which may include the node itself. It
+	therefore equals :math:`(n - 2) / n` times the normalized score of Betweenness.
+
 	Notes
 	-----
 	In order to work properly, the Kadabra algorithm requires a random seed
