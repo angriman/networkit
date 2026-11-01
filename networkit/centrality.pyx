@@ -2351,6 +2351,81 @@ cdef class EigenvectorCentrality(Centrality):
 		self._G = G
 		self._this = new _EigenvectorCentrality(G._this, tol)
 
+cdef extern from "<networkit/centrality/HITS.hpp>":
+
+	cdef cppclass _HITS "NetworKit::HITS" (_Centrality):
+		_HITS(_Graph, double tol, count maxIterations) except +
+		const vector[double] &authorityScores() except +
+		const vector[double] &hubScores() except +
+		count numberOfIterations() except +
+
+cdef class HITS(Centrality):
+	"""
+	HITS(G, tol=1e-8, maxIterations=1000)
+
+	Computes the hub and authority scores of the HITS algorithm from "Authoritative sources in a
+	hyperlinked environment" by J. Kleinberg (1999). A node is a good authority if good hubs point
+	to it, and a good hub if it points to good authorities. Edge weights multiply the contribution
+	of an edge.
+
+	Both score vectors have Euclidean norm 1, unless the graph has no edges, in which case all
+	scores are 0. On connected, undirected, non-bipartite graphs hub and authority scores coincide;
+	on bipartite graphs they may differ. scores() and ranking() refer to the authority scores.
+
+	Parameters
+	----------
+	G : networkit.Graph
+		The graph.
+	tol : float, optional
+		Error tolerance: the algorithm stops when the Euclidean distance between the scores of two
+		consecutive iterations is at most tol. Must be positive. Default: 1e-8
+	maxIterations : int, optional
+		Maximum number of iterations. Must be positive. Default: 1000
+	"""
+
+	def __cinit__(self, Graph G, double tol=1e-8, count maxIterations=1000):
+		self._G = G
+		self._this = new _HITS(G._this, tol, maxIterations)
+
+	def authorityScores(self):
+		"""
+		authorityScores()
+
+		Returns the authority score of each node, same as scores().
+
+		Returns
+		-------
+		list(float)
+			Authority scores indexed by node id.
+		"""
+		return (<_HITS*>(self._this)).authorityScores()
+
+	def hubScores(self):
+		"""
+		hubScores()
+
+		Returns the hub score of each node.
+
+		Returns
+		-------
+		list(float)
+			Hub scores indexed by node id.
+		"""
+		return (<_HITS*>(self._this)).hubScores()
+
+	def numberOfIterations(self):
+		"""
+		numberOfIterations()
+
+		Returns the number of iterations performed by the algorithm.
+
+		Returns
+		-------
+		int
+			Number of iterations performed by the algorithm.
+		"""
+		return (<_HITS*>(self._this)).numberOfIterations()
+
 cdef extern from "<networkit/centrality/PageRank.hpp>" namespace "NetworKit::PageRank":
 
 	cdef enum _Norm "NetworKit::PageRank::Norm":

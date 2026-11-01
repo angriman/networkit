@@ -27,6 +27,7 @@ networkit_add_module(centrality
     GroupDegree.cpp
     GroupHarmonicCloseness.cpp
     HarmonicCloseness.cpp
+    HITS.cpp
     KadabraBetweenness.cpp
     KatzCentrality.cpp
     KPathCentrality.cpp

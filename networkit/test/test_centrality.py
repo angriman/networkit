@@ -656,6 +656,21 @@ class TestCentrality(unittest.TestCase):
         CL = nk.centrality.LocalPartitionCoverage(self.L, part)
         CL.run()
 
+    def testHITS(self):
+        G = nk.Graph(4, directed=True)
+        G.addEdge(0, 2)
+        G.addEdge(1, 2)
+        G.addEdge(1, 3)
+
+        hits = nk.centrality.HITS(G)
+        hits.run()
+
+        self.assertEqual(hits.scores(), hits.authorityScores())
+        self.assertAlmostEqual(sum(x * x for x in hits.hubScores()), 1, 6)
+        self.assertGreater(hits.hubScores()[1], hits.hubScores()[0])
+        self.assertEqual(hits.ranking()[0][0], 2)
+        self.assertGreater(hits.numberOfIterations(), 0)
+
     def testPageRank(self):
         CL = nk.centrality.PageRank(self.L)
         CL.run()
