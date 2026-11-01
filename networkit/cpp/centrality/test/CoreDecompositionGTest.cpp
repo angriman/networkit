@@ -129,7 +129,7 @@ TEST_F(CoreDecompositionGTest, benchCoreDecompositionLocal) {
         timer.stop();
         INFO("Time for ParK of ", filename, ": ", timer.elapsedTag());
 
-        CoreDecomposition coreDec2(G, true);
+        CoreDecomposition coreDec2(G, false, true);
         timer.start();
         coreDec2.run();
         timer.stop();
