@@ -1,4 +1,5 @@
 networkit_add_module(graph
+    EulerianPath.cpp
     GraphBuilder.cpp
     GraphTools.cpp
     KruskalMSF.cpp

@@ -1817,6 +1817,53 @@ cdef cppclass NodePairCallbackWrapper:
 		if (error):
 			throw_runtime_error(message)
 
+cdef class EulerianPath(Algorithm):
+	"""
+	EulerianPath(G)
+
+	Computes an Eulerian path of a graph, i.e., a walk that uses every edge exactly once, with
+	Hierholzer's algorithm. If such a walk can start and end at the same node, the result is a
+	circuit. Edge weights are ignored; parallel edges and self-loops are each used once.
+	Nodes without edges are ignored, so they do not make the graph disconnected.
+
+	Parameters
+	----------
+	G : networkit.Graph
+		Directed or undirected graph.
+	"""
+
+	def __cinit__(self, Graph G not None):
+		self._G = G
+		self._this = new _EulerianPath(G._this)
+
+	def hasEulerianPath(self):
+		"""
+		hasEulerianPath()
+
+		Returns whether the graph has an Eulerian path. This is the case for graphs without edges.
+
+		Returns
+		-------
+		bool
+			True if the graph has an Eulerian path.
+		"""
+		return (<_EulerianPath*>(self._this)).hasEulerianPath()
+
+	def getPath(self):
+		"""
+		getPath()
+
+		Returns the nodes along the Eulerian path, so that consecutive nodes are connected by an
+		edge and the path has m + 1 nodes. It is empty if there is no Eulerian path or the graph
+		has no edges.
+
+		Returns
+		-------
+		list(int)
+			The nodes along the Eulerian path.
+		"""
+		return (<_EulerianPath*>(self._this)).getPath()
+
 cdef class SpanningForest:
 	""" 
 	SpanningForest(G)

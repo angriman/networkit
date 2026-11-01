@@ -8,6 +8,21 @@ import scipy as sc
 
 class TestGraph(unittest.TestCase):
 
+    def testEulerianPath(self):
+        G = nk.Graph(3, directed=True)
+        G.addEdge(0, 1)
+        G.addEdge(1, 2)
+        algo = nk.graph.EulerianPath(G)
+        algo.run()
+        self.assertTrue(algo.hasEulerianPath())
+        self.assertEqual(algo.getPath(), [0, 1, 2])
+
+        G.addEdge(0, 2)
+        algo = nk.graph.EulerianPath(G)
+        algo.run()
+        self.assertFalse(algo.hasEulerianPath())
+        self.assertEqual(algo.getPath(), [])
+
     def testConstructorWithCooAndNumNodes(self):
         row = np.array([0, 1, 2])
         col = np.array([1, 2, 0])

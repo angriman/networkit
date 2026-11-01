@@ -339,6 +339,16 @@ cdef class EdgeStringAttribute:
 	cdef _Graph* _G
 	cdef setThis(self, _EdgeStringAttribute& other, _Graph* graph)
 
+cdef extern from "<networkit/graph/EulerianPath.hpp>":
+
+	cdef cppclass _EulerianPath "NetworKit::EulerianPath"(_Algorithm):
+		_EulerianPath(_Graph) except +
+		bool_t hasEulerianPath() except +
+		const vector[node] &getPath() except +
+
+cdef class EulerianPath(Algorithm):
+	cdef Graph _G
+
 cdef extern from "<networkit/graph/SpanningForest.hpp>":
 
 	cdef cppclass _SpanningForest "NetworKit::SpanningForest":
