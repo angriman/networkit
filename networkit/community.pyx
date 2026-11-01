@@ -753,6 +753,40 @@ cdef class LouvainMapEquation(CommunityDetector):
 		self._G = G
 		self._this = new _LouvainMapEquation(G._this, hierarchical, maxIterations, stdstring(parallelizationStrategy))
 
+cdef extern from "<networkit/community/Walktrap.hpp>":
+
+	cdef cppclass _Walktrap "NetworKit::Walktrap"(_CommunityDetectionAlgorithm):
+		_Walktrap(_Graph _G, count walkLength) except +
+
+cdef class Walktrap(CommunityDetector):
+	"""
+	Walktrap(G, walkLength=4)
+
+	Walktrap community detection from "Computing communities in large networks using random walks"
+	by P. Pons and M. Latapy (2005). Short random walks tend to stay in the community they start
+	from, so nodes that reach the rest of the graph with similar probabilities are likely to belong
+	together. The algorithm starts from singletons, repeatedly merges the two adjacent communities
+	with the most similar walks, and returns the partition with the highest modularity seen.
+
+	Connected components are never merged. Walks are stored as dense vectors, so the algorithm needs
+	O(n^2) memory and O(mn(t + H)) time for walks of length t and a dendrogram of height H, which is
+	O(mn^2) in the worst case. This limits it to graphs of up to some ten thousand nodes.
+
+	Each merge uses the exact costs of all candidate pairs. The authors' implementation, which is
+	also the one in igraph, estimates most of them to save time, so its results can differ.
+
+	Parameters
+	----------
+	G : networkit.Graph
+		An undirected graph with non-negative edge weights.
+	walkLength : int, optional
+		The length of the random walks. Must be positive. Default: 4
+	"""
+
+	def __cinit__(self, Graph G not None, count walkLength = 4):
+		self._G = G
+		self._this = new _Walktrap(G._this, walkLength)
+
 cdef extern from "<networkit/community/PLP.hpp>":
 
 	cdef cppclass _PLP "NetworKit::PLP"(_CommunityDetectionAlgorithm):

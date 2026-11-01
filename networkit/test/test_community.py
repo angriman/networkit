@@ -354,5 +354,22 @@ class TestCommunity(unittest.TestCase):
 		Cov = nk.community.Coverage()
 		self.assertAlmostEqual(Cov.getQuality(PLMLLP, self.LL), 0.929, 3)
 
+	def testWalktrap(self):
+		G = nk.Graph(10)
+		for offset in (0, 5):
+			for u in range(5):
+				for v in range(u + 1, 5):
+					G.addEdge(offset + u, offset + v)
+		G.addEdge(0, 5)
+
+		algo = nk.community.Walktrap(G, walkLength=3)
+		algo.run()
+		zeta = algo.getPartition()
+
+		self.assertEqual(zeta.numberOfSubsets(), 2)
+		self.assertEqual(len({zeta[u] for u in range(5)}), 1)
+		self.assertEqual(len({zeta[u] for u in range(5, 10)}), 1)
+
+
 if __name__ == "__main__":
 	unittest.main()
