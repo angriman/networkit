@@ -240,7 +240,7 @@ To build and run tests:
 ```bash
 cmake -DNETWORKIT_BUILD_TESTS=ON ..
 make
-./networkit_tests --gtest_filter=CentralityGTest.testBetweennessCentrality
+./networkit_tests --gtest_filter=BetweennessGTest.testBetweennessCentrality
 ```
 
 #### Building with Sanitizers

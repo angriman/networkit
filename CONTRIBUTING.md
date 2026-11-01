@@ -38,7 +38,7 @@ This is done by setting the [CMake] `NETWORKI_BUILD_TESTS` flag to `ON`:
 
 Single tests can be executed with:
 
-    ./networkit_tests --gtest_filter=CentralityGTest.testBetweennessCentrality
+    ./networkit_tests --gtest_filter=BetweennessGTest.testBetweennessCentrality
 
 Additionally, one can specify the level of the logs outputs by adding `--loglevel=<log_level>`;
 supported log levels are: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, and `FATAL`. For more details, see the
