@@ -1817,6 +1817,70 @@ cdef cppclass NodePairCallbackWrapper:
 		if (error):
 			throw_runtime_error(message)
 
+cdef class MinimumArborescence(Algorithm):
+	"""
+	MinimumArborescence(G, root)
+
+	Computes a minimum weight arborescence of a directed graph, i.e., the lightest set of edges
+	that contains exactly one path from a given root to every node. This is the directed
+	counterpart of a minimum spanning tree, which greedy algorithms cannot compute. The
+	Chu-Liu/Edmonds algorithm runs in O(nm) time and space.
+
+	Unweighted graphs are treated as having unit weights, and negative weights are allowed.
+	Self-loops and edges into the root are ignored.
+
+	Parameters
+	----------
+	G : networkit.Graph
+		A directed graph.
+	root : int
+		The node all paths of the arborescence start from.
+	"""
+
+	def __cinit__(self, Graph G not None, node root):
+		self._G = G
+		self._this = new _MinimumArborescence(G._this, root)
+
+	def hasArborescence(self):
+		"""
+		hasArborescence()
+
+		Returns whether an arborescence exists, i.e., whether the root reaches all nodes.
+
+		Returns
+		-------
+		bool
+			True if the graph has an arborescence with the given root.
+		"""
+		return (<_MinimumArborescence*>(self._this)).hasArborescence()
+
+	def getArborescence(self):
+		"""
+		getArborescence()
+
+		Returns the minimum arborescence, a directed and weighted graph with the same node ids as
+		the input graph. It has no edges if there is no arborescence.
+
+		Returns
+		-------
+		networkit.Graph
+			The minimum arborescence.
+		"""
+		return Graph().setThis((<_MinimumArborescence*>(self._this)).getArborescence())
+
+	def getTotalWeight(self):
+		"""
+		getTotalWeight()
+
+		Returns the total weight of the minimum arborescence.
+
+		Returns
+		-------
+		float
+			The total weight of the edges of the arborescence.
+		"""
+		return (<_MinimumArborescence*>(self._this)).getTotalWeight()
+
 cdef class SpanningForest:
 	""" 
 	SpanningForest(G)

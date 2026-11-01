@@ -339,6 +339,17 @@ cdef class EdgeStringAttribute:
 	cdef _Graph* _G
 	cdef setThis(self, _EdgeStringAttribute& other, _Graph* graph)
 
+cdef extern from "<networkit/graph/MinimumArborescence.hpp>":
+
+	cdef cppclass _MinimumArborescence "NetworKit::MinimumArborescence"(_Algorithm):
+		_MinimumArborescence(_Graph, node) except +
+		bool_t hasArborescence() except +
+		_Graph getArborescence() except +
+		edgeweight getTotalWeight() except +
+
+cdef class MinimumArborescence(Algorithm):
+	cdef Graph _G
+
 cdef extern from "<networkit/graph/SpanningForest.hpp>":
 
 	cdef cppclass _SpanningForest "NetworKit::SpanningForest":

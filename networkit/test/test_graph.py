@@ -8,6 +8,23 @@ import scipy as sc
 
 class TestGraph(unittest.TestCase):
 
+    def testMinimumArborescence(self):
+        G = nk.Graph(3, weighted=True, directed=True)
+        G.addEdge(0, 1, 10)
+        G.addEdge(0, 2, 11)
+        G.addEdge(1, 2, 1)
+        G.addEdge(2, 1, 1)
+
+        algo = nk.graph.MinimumArborescence(G, 0)
+        algo.run()
+
+        self.assertTrue(algo.hasArborescence())
+        self.assertEqual(algo.getTotalWeight(), 11)
+        tree = algo.getArborescence()
+        self.assertEqual(tree.numberOfEdges(), 2)
+        self.assertTrue(tree.hasEdge(0, 1))
+        self.assertTrue(tree.hasEdge(1, 2))
+
     def testConstructorWithCooAndNumNodes(self):
         row = np.array([0, 1, 2])
         col = np.array([1, 2, 0])
