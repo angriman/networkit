@@ -26,8 +26,9 @@ GroupClosenessGrowShrinkImpl<WeightType>::GroupClosenessGrowShrinkImpl(const Gra
       insertions(insertions == 0 ? computeConsecutiveInsertions(G, group.size()) : insertions),
       maxIterations(maxIterations), heap(distance), heap_(distance_) {
 
-    if (G.isDirected())
-        std::runtime_error("Error, this algorithm does not support directed graphs.");
+    if (G.isDirected()) {
+        throw std::runtime_error("Error, this algorithm does not support directed graphs.");
+    }
 
 #if __AVX2__
     INFO("AVX2 is available.");
