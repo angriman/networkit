@@ -47,7 +47,7 @@ void KPathCentrality::run() {
     std::stack<node> stack;
     node v = none;
 
-    for (index i = 1; i <= t; i++) { // FIXME: int -> count
+    for (index i = 1; i <= t; i++) {
         node s = GraphTools::randomNode(G);
         auto l = Aux::Random::integer(1, k);
         explored[s] = true;

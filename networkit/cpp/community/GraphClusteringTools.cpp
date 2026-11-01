@@ -86,13 +86,6 @@ bool isProperClustering(const Graph &G, const Partition &zeta) {
 
 bool isOneClustering(const Graph &, const Partition &zeta) {
     return (zeta.numberOfSubsets() == 1);
-    /*	index one = data[0];	// first subset id should be equal to all others
-        // TODO: use iterator forEntries and pair-wise comparison?
-        for (index e = 0; e < this->z; ++e) { // FIXME constructor initializes data with z+1, so <=
-       is necessary. if (data[e] != one) { return false;
-            }
-        }
-        return true;*/
 }
 
 bool isSingletonClustering(const Graph &G, const Partition &zeta) {

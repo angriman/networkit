@@ -100,7 +100,7 @@ Partition Matching::toPartition(const Graph &G) const {
 }
 
 std::vector<node> Matching::getVector() const {
-    return this->data; // FIXME is this appropriate? - why not?
+    return this->data;
 }
 
 } // namespace NetworKit

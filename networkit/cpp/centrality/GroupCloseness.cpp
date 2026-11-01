@@ -151,7 +151,7 @@ void GroupCloseness::run() {
                     }
                     omp_unset_lock(&lock);
                     INFO("New bound for v = ", imp);
-                    prevBound[v] = imp; // TODO use later
+                    prevBound[v] = imp;
                 } else {
                     prevBound[v] = 0;
                 }

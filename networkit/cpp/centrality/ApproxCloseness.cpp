@@ -413,7 +413,7 @@ void ApproxCloseness::orderNodesByIncreasingDistance(node c, std::vector<node> &
         while (!q.empty()) {
             node u = q.front();
             q.pop();
-            order[idx++] = u; // TODO: Is this correct?
+            order[idx++] = u;
             G.forNeighborsOf(u, [&](node v) {
                 if (!visited[v]) {
                     pivotDist[v] = pivotDist[u] + 1;
