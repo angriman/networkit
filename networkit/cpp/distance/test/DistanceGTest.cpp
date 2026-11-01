@@ -941,15 +941,118 @@ TEST_P(DistanceGTest, testPrunedLandmarkLabeling) {
     });
 }
 
-TEST_P(DistanceGTest, testDynPrunedLandmarkLabelingThrowsWithEdgeRemoval) {
+TEST_P(DistanceGTest, testDynPrunedLandmarkLabelingThrowsWithUnsupportedEvent) {
     Graph G(2, isWeighted(), isDirected());
     G.addEdge(0, 1);
 
     DynPrunedLandmarkLabeling pll(G);
     pll.run();
 
-    G.removeEdge(0, 1);
-    EXPECT_THROW(pll.update(GraphEvent(GraphEvent::EDGE_REMOVAL, 0, 1, 1)), std::runtime_error);
+    EXPECT_THROW(pll.update(GraphEvent(GraphEvent::EDGE_WEIGHT_UPDATE, 0, 1, 2)),
+                 std::runtime_error);
+}
+
+TEST_P(DistanceGTest, testDynPrunedLandmarkLabelingRemoveEdge) {
+    /**	 0---1
+     *	 |   |
+     *	 3---2---4
+     */
+
+    // Directed graphs get both orientations of every edge.
+    Graph G(5, isWeighted(), isDirected());
+    DynPrunedLandmarkLabeling pll(G);
+    const auto addEdge = [&](node u, node v) -> void {
+        G.addEdge(u, v);
+        if (isDirected()) {
+            G.addEdge(v, u);
+        }
+    };
+    const auto removeEdge = [&](node u, node v) -> void {
+        G.removeEdge(u, v);
+        pll.update(GraphEvent(GraphEvent::EDGE_REMOVAL, u, v));
+        if (isDirected()) {
+            G.removeEdge(v, u);
+            pll.update(GraphEvent(GraphEvent::EDGE_REMOVAL, v, u));
+        }
+    };
+
+    addEdge(0, 1);
+    addEdge(1, 2);
+    addEdge(2, 3);
+    addEdge(3, 0);
+    addEdge(2, 4);
+
+    pll.run();
+
+    EXPECT_EQ(pll.query(0, 2), 2);
+    EXPECT_EQ(pll.query(0, 4), 3);
+
+    // The distances increase but the nodes stay connected.
+    removeEdge(1, 2);
+    EXPECT_EQ(pll.query(0, 2), 2);
+    EXPECT_EQ(pll.query(1, 2), 3);
+    EXPECT_EQ(pll.query(1, 4), 4);
+
+    // The graph becomes disconnected.
+    removeEdge(2, 3);
+    EXPECT_EQ(pll.query(0, 2), none);
+    EXPECT_EQ(pll.query(0, 4), none);
+    EXPECT_EQ(pll.query(2, 4), 1);
+}
+
+TEST_P(DistanceGTest, testDynPrunedLandmarkLabelingRandomUpdates) {
+    Aux::Random::setSeed(42, false);
+
+    const count n = 40;
+    for (count iteration = 0; iteration < 12; ++iteration) {
+        Graph G = ErdosRenyiGenerator{n, 0.03 + 0.02 * (iteration % 6), isDirected()}.generate();
+        DynPrunedLandmarkLabeling pll(G);
+        pll.run();
+
+        APSP apsp(G);
+        const double infDistDouble = std::numeric_limits<double>::max();
+        const count infDistInt = std::numeric_limits<count>::max();
+
+        for (count step = 0; step < 60; ++step) {
+            node u = Aux::Random::index(n);
+            node v = Aux::Random::index(n);
+            if (u == v) {
+                continue;
+            }
+            // Mostly pick existing edges so that removals are well covered.
+            if (step % 3 != 0 && G.numberOfEdges() > 0) {
+                const auto e = GraphTools::randomEdge(G);
+                u = e.first;
+                v = e.second;
+            }
+
+            if (G.hasEdge(u, v)) {
+                G.removeEdge(u, v);
+                pll.update(GraphEvent(GraphEvent::EDGE_REMOVAL, u, v));
+            } else {
+                G.addEdge(u, v);
+                pll.update(GraphEvent(GraphEvent::EDGE_ADDITION, u, v));
+            }
+
+            // forNodePairs only visits s < t, which is not enough for directed graphs.
+            apsp.run();
+            G.forNodes([&](node s) -> void {
+                G.forNodes([&](node t) -> void {
+                    if (s == t) {
+                        return;
+                    }
+                    const double dist = apsp.getDistance(s, t);
+                    if (dist == infDistDouble) {
+                        ASSERT_EQ(pll.query(s, t), infDistInt)
+                            << "iteration " << iteration << " step " << step;
+                    } else {
+                        ASSERT_EQ(pll.query(s, t), dist)
+                            << "iteration " << iteration << " step " << step;
+                    }
+                });
+            });
+        }
+    }
 }
 
 TEST_P(DistanceGTest, testDynPrunedLandmarkLabelingAddEdge) {

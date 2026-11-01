@@ -345,6 +345,78 @@ class TestDistance(unittest.TestCase):
 		self.assertEqual(pll.query(0, 1), 1)
 		self.assertEqual(pll.query(2, 4), 2)
 
+		g.removeEdge(2, 3)
+		pll.update(nk.dynamics.GraphEvent(
+			nk.dynamics.GraphEventType.EDGE_REMOVAL, 2, 3, 1))
+
+		self.assertEqual(pll.query(0, 2), 2)
+		self.assertEqual(pll.query(2, 4), nk.none)
+
+	def testDynPrunedLandmarkLabelingDirectedEdgeRemoval(self):
+		# 0 -> 1 -> 2 and a longer path 0 -> 3 -> 4 -> 2.
+		g = nk.Graph(5, False, True)
+		for e in [[0, 1], [1, 2], [0, 3], [3, 4], [4, 2]]:
+			g.addEdge(e[0], e[1])
+
+		pll = nk.distance.DynPrunedLandmarkLabeling(g)
+		pll.run()
+		self.assertEqual(pll.query(0, 2), 2)
+
+		g.removeEdge(1, 2)
+		pll.update(nk.dynamics.GraphEvent(
+			nk.dynamics.GraphEventType.EDGE_REMOVAL, 1, 2, 1))
+
+		self.assertEqual(pll.query(0, 2), 3)
+		self.assertEqual(pll.query(1, 2), nk.none)
+		# The removed edge was directed: the opposite direction is unreachable anyway.
+		self.assertEqual(pll.query(2, 1), nk.none)
+
+	def testDynPrunedLandmarkLabelingRandomUpdates(self):
+		nk.engineering.setSeed(1, True)
+		random.seed(1)
+		n = 25
+
+		for directed in [False, True]:
+			for p in [0.05, 0.1, 0.2]:
+				g = nk.generators.ErdosRenyiGenerator(n, p, directed).generate()
+				pll = nk.distance.DynPrunedLandmarkLabeling(g)
+				pll.run()
+
+				for _ in range(40):
+					edges = list(g.iterEdges())
+					if edges and random.random() < 0.5:
+						u, v = random.choice(edges)
+						g.removeEdge(u, v)
+						event = nk.dynamics.GraphEventType.EDGE_REMOVAL
+					else:
+						u, v = random.randrange(n), random.randrange(n)
+						if u == v or g.hasEdge(u, v):
+							continue
+						g.addEdge(u, v)
+						event = nk.dynamics.GraphEventType.EDGE_ADDITION
+					pll.update(nk.dynamics.GraphEvent(event, u, v, 1))
+
+					apsp = nk.distance.APSP(g)
+					apsp.run()
+					# Check all ordered pairs, as distances in directed graphs are asymmetric.
+					for s in g.iterNodes():
+						for t in g.iterNodes():
+							expected = apsp.getDistance(s, t)
+							if expected > n:
+								self.assertEqual(pll.query(s, t), nk.none)
+							else:
+								self.assertEqual(pll.query(s, t), int(expected))
+
+	def testDynPrunedLandmarkLabelingUnsupportedEvent(self):
+		g = nk.Graph(3)
+		g.addEdge(0, 1)
+		pll = nk.distance.DynPrunedLandmarkLabeling(g)
+		pll.run()
+
+		with self.assertRaises(RuntimeError):
+			pll.update(nk.dynamics.GraphEvent(
+				nk.dynamics.GraphEventType.EDGE_WEIGHT_UPDATE, 0, 1, 2))
+
 	def testAdamicAdarDistance(self):
 		self.L.indexEdges()
 		adam = nk.distance.AdamicAdarDistance(self.L)
