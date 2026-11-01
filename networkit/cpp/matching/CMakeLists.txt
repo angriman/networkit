@@ -3,6 +3,7 @@ networkit_add_module(matching
     BMatching.cpp
     BSuitorMatcher.cpp
     DynamicBSuitorMatcher.cpp
+    HopcroftKarpMatcher.cpp
     LocalMaxMatcher.cpp
     Matcher.cpp
     Matching.cpp

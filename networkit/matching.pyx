@@ -256,6 +256,28 @@ cdef class PathGrowingMatcher(Matcher):
 		else:
 			self._this = new _PathGrowingMatcher(G._this)
 
+cdef extern from "<networkit/matching/HopcroftKarpMatcher.hpp>":
+
+	cdef cppclass _HopcroftKarpMatcher "NetworKit::HopcroftKarpMatcher"(_Matcher):
+		_HopcroftKarpMatcher(_Graph) except +
+
+cdef class HopcroftKarpMatcher(Matcher):
+	"""
+	HopcroftKarpMatcher(G)
+
+	Computes a maximum cardinality matching of a bipartite graph with the algorithm from "An n^(5/2)
+	algorithm for maximum matchings in bipartite graphs" by J. Hopcroft and R. Karp (1973). Edge
+	weights are ignored.
+
+	Parameters:
+	-----------
+	G : networkit.Graph
+		An undirected, bipartite graph. The two sides are detected automatically.
+	"""
+	def __cinit__(self, Graph G not None):
+		self.G = G
+		self._this = new _HopcroftKarpMatcher(G._this)
+
 cdef extern from "<networkit/matching/SuitorMatcher.hpp>":
 	cdef cppclass _SuitorMather "NetworKit::SuitorMatcher"(_Matcher):
 		_SuitorMather(_Graph, bool_t, bool_t) except +

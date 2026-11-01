@@ -19,6 +19,25 @@ class TestMatching(unittest.TestCase):
 				return True
 		return False
 
+	def testHopcroftKarpMatcher(self):
+		G = nk.Graph(6)
+		G.addEdge(0, 3)
+		G.addEdge(1, 3)
+		G.addEdge(1, 4)
+		G.addEdge(2, 4)
+		G.addEdge(2, 5)
+		matcher = nk.matching.HopcroftKarpMatcher(G)
+		matcher.run()
+		matching = matcher.getMatching()
+		self.assertTrue(matching.isProper(G))
+		self.assertEqual(matching.size(G), 3)
+
+		G.addEdge(0, 1)
+		G.addEdge(1, 5)
+		G.addEdge(0, 5)
+		with self.assertRaises(ValueError):
+			nk.matching.HopcroftKarpMatcher(G)
+
 	def testPathGrowingMatcher(self):
 		def runAlgo(g):
 			pgm = nk.matching.PathGrowingMatcher(self.g)
