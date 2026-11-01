@@ -339,6 +339,17 @@ cdef class EdgeStringAttribute:
 	cdef _Graph* _G
 	cdef setThis(self, _EdgeStringAttribute& other, _Graph* graph)
 
+cdef extern from "<networkit/graph/SubgraphIsomorphism.hpp>":
+
+	cdef cppclass _SubgraphIsomorphism "NetworKit::SubgraphIsomorphism"(_Algorithm):
+		_SubgraphIsomorphism(_Graph, _Graph, bool_t induced, count maxMatches) except +
+		const vector[vector[node]] &getMatches() except +
+		count numberOfMatches() except +
+
+cdef class SubgraphIsomorphism(Algorithm):
+	cdef Graph _G
+	cdef Graph _P
+
 cdef extern from "<networkit/graph/SpanningForest.hpp>":
 
 	cdef cppclass _SpanningForest "NetworKit::SpanningForest":

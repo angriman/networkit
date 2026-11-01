@@ -1817,6 +1817,65 @@ cdef cppclass NodePairCallbackWrapper:
 		if (error):
 			throw_runtime_error(message)
 
+cdef class SubgraphIsomorphism(Algorithm):
+	"""
+	SubgraphIsomorphism(G, P, induced=True, maxMatches=None)
+
+	Finds the occurrences of a pattern graph in a target graph with a backtracking search in the
+	style of "A (sub)graph isomorphism algorithm for matching large graphs" by L. Cordella et al.
+	(2004). A match assigns a different target node to each pattern node, such that each pattern
+	edge is mapped to a target edge. An induced match additionally forbids target edges between the
+	matched nodes that are not in the pattern.
+
+	Symmetric patterns are matched once per automorphism: a triangle has six matches on each
+	triangle of the target. Edge weights and the multiplicity of parallel edges are ignored. The
+	worst-case running time is exponential in the size of the pattern.
+
+	Parameters
+	----------
+	G : networkit.Graph
+		The target graph.
+	P : networkit.Graph
+		The pattern to look for. Must have at least one node.
+	induced : bool, optional
+		If True, matched nodes must not have additional edges among them. Default: True
+	maxMatches : int, optional
+		Stop after this number of matches. By default, all matches are stored, of which there can
+		be many more than target nodes.
+	"""
+
+	def __cinit__(self, Graph G not None, Graph P not None, bool_t induced=True, maxMatches=None):
+		self._G = G
+		self._P = P
+		self._this = new _SubgraphIsomorphism(G._this, P._this, induced, _none if maxMatches is None else <count>maxMatches)
+
+	def getMatches(self):
+		"""
+		getMatches()
+
+		Returns the matches found. Each one is indexed by pattern node id and contains the matched
+		target node, or networkit.none for ids that are not in the pattern.
+
+		Returns
+		-------
+		list(list(int))
+			The matches found.
+		"""
+		return (<_SubgraphIsomorphism*>(self._this)).getMatches()
+
+	def numberOfMatches(self):
+		"""
+		numberOfMatches()
+
+		Returns the number of matches found.
+
+		Returns
+		-------
+		int
+			The number of matches found.
+		"""
+		return (<_SubgraphIsomorphism*>(self._this)).numberOfMatches()
+
 cdef class SpanningForest:
 	""" 
 	SpanningForest(G)

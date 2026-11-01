@@ -8,6 +8,28 @@ import scipy as sc
 
 class TestGraph(unittest.TestCase):
 
+    def testSubgraphIsomorphism(self):
+        G = nk.Graph(3)
+        G.addEdge(0, 1)
+        G.addEdge(1, 2)
+        G.addEdge(2, 0)
+        P = nk.Graph(3)
+        P.addEdge(0, 1)
+        P.addEdge(1, 2)
+
+        induced = nk.graph.SubgraphIsomorphism(G, P)
+        induced.run()
+        self.assertEqual(induced.numberOfMatches(), 0)
+
+        notInduced = nk.graph.SubgraphIsomorphism(G, P, induced=False)
+        notInduced.run()
+        self.assertEqual(notInduced.numberOfMatches(), 6)
+        self.assertEqual(sorted(notInduced.getMatches())[0], [0, 1, 2])
+
+        limited = nk.graph.SubgraphIsomorphism(G, P, induced=False, maxMatches=2)
+        limited.run()
+        self.assertEqual(limited.numberOfMatches(), 2)
+
     def testConstructorWithCooAndNumNodes(self):
         row = np.array([0, 1, 2])
         col = np.array([1, 2, 0])
