@@ -2172,6 +2172,78 @@ TEST_P(CentralityGTest, testDynTopHarmonicCloseness) {
     }
 }
 
+namespace {
+
+// Connected weighted graph, with enough cycles for the scores to differ.
+Graph weightedConnectedGraph(count n) {
+    Graph G(ErdosRenyiGenerator(n, 0.3).generate(), true, false);
+    for (node u = 0; u + 1 < n; ++u) {
+        if (!G.hasEdge(u, u + 1)) {
+            G.addEdge(u, u + 1);
+        }
+    }
+    G.forEdges([&](node u, node v) -> void { G.setWeight(u, v, Aux::Random::real(0.5, 4.)); });
+    G.indexEdges();
+    return G;
+}
+
+} // namespace
+
+TEST_F(CentralityGTest, testSpanningEdgeCentralityWeightedTree) {
+    // Every edge is part of the only spanning tree, whatever its weight.
+    Graph G(4, true);
+    G.addEdge(0, 1, 2.);
+    G.addEdge(1, 2, 5.);
+    G.addEdge(1, 3, 0.25);
+    G.indexEdges();
+
+    SpanningEdgeCentrality centrality(G);
+    centrality.run();
+    G.forEdges([&](node, node, edgeid e) -> void { EXPECT_NEAR(centrality.score(e), 1., 1e-4); });
+    EXPECT_NEAR(centrality.runForEdge(0, 1), 1., 1e-4);
+}
+
+TEST_F(CentralityGTest, testSpanningEdgeCentralityWeighted) {
+    Aux::Random::setSeed(42, true);
+    constexpr double tol = 0.1;
+    const Graph G = weightedConnectedGraph(30);
+
+    SpanningEdgeCentrality exact(G, tol);
+    exact.run();
+    const auto exactScores = exact.scores();
+
+    // Foster's theorem: the probabilities that edges are in a spanning tree sum to n - 1.
+    double sum = 0.;
+    G.forEdges([&](node, node, edgeid e) -> void { sum += exactScores[e]; });
+    EXPECT_NEAR(sum, static_cast<double>(G.numberOfNodes() - 1), 1e-3);
+
+    SpanningEdgeCentrality sequential(G, tol);
+    sequential.runApproximation();
+    SpanningEdgeCentrality parallel(G, tol);
+    parallel.runParallelApproximation();
+    G.forEdges([&](node, node, edgeid e) -> void {
+        EXPECT_NEAR(sequential.score(e), exactScores[e], 2 * tol * exactScores[e]);
+        EXPECT_NEAR(parallel.score(e), exactScores[e], 2 * tol * exactScores[e]);
+    });
+}
+
+TEST_F(CentralityGTest, testSpanningEdgeCentralityRemovedEdge) {
+    // A cycle, whose edges all have the same score, with an extra edge that is removed again.
+    const count n = 5;
+    Graph G(n);
+    G.indexEdges();
+    G.addEdge(0, 2);
+    for (node u = 0; u < n; ++u) {
+        G.addEdge(u, (u + 1) % n);
+    }
+    G.removeEdge(0, 2);
+
+    SpanningEdgeCentrality centrality(G);
+    centrality.run();
+    EXPECT_EQ(centrality.scores().size(), G.upperEdgeIdBound());
+    G.forEdges([&](node, node, edgeid e) -> void { EXPECT_NEAR(centrality.score(e), 0.8, 1e-4); });
+}
+
 TEST_F(CentralityGTest, testApproxSpanningEdge) {
     Aux::Random::setSeed(42, false);
 

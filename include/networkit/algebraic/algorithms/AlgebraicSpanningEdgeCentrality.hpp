@@ -50,7 +50,7 @@ private:
 template <class Matrix>
 void AlgebraicSpanningEdgeCentrality<Matrix>::run() {
     const count n = G.numberOfNodes();
-    const count m = G.numberOfEdges();
+    const count m = G.upperEdgeIdBound();
     scoreData.clear();
     scoreData.resize(m, 0.0);
 
@@ -66,9 +66,9 @@ void AlgebraicSpanningEdgeCentrality<Matrix>::run() {
     lamg.setupConnected(Matrix::laplacianMatrix(this->G));
     lamg.parallelSolve(rhs, solutions);
 
-    this->G.parallelForEdges([&](node u, node v, edgeid e) {
+    this->G.parallelForEdges([&](node u, node v, edgeweight weight, edgeid e) {
         double diff = solutions[e][u] - solutions[e][v];
-        scoreData[e] = std::fabs(diff);
+        scoreData[e] = weight * std::fabs(diff);
     });
 
     hasRun = true;
@@ -77,7 +77,7 @@ void AlgebraicSpanningEdgeCentrality<Matrix>::run() {
 template <class Matrix>
 void AlgebraicSpanningEdgeCentrality<Matrix>::runApproximation() {
     const count n = G.numberOfNodes();
-    const count m = G.numberOfEdges();
+    const count m = G.upperEdgeIdBound();
     scoreData.clear();
     scoreData.resize(m, 0.0);
     double epsilon2 = tol * tol;
@@ -87,18 +87,18 @@ void AlgebraicSpanningEdgeCentrality<Matrix>::runApproximation() {
     const auto rhsLoader = [&](count, Vector &yRow) -> Vector & {
         yRow.fill(0);
         G.forEdges([&](node u, node v, edgeweight w, index) {
-            double rand = randTab[Aux::Random::integer(1)];
-            yRow[u] += w * rand;
-            yRow[v] -= w * rand;
+            double rand = randTab[Aux::Random::integer(1)] * std::sqrt(w);
+            yRow[u] += rand;
+            yRow[v] -= rand;
         });
         return yRow;
     };
 
     std::vector<std::atomic<double>> scoreDataAtom(m);
     const auto resultProcessor = [&](count, const Vector &zRow) {
-        G.forEdges([&](node u, node v, edgeid e) {
+        G.forEdges([&](node u, node v, edgeweight w, edgeid e) {
             double diff = (zRow[u] - zRow[v]);
-            diff *= diff;
+            diff *= w * diff;
             for (double old = scoreDataAtom[e].load(); !scoreDataAtom[e].compare_exchange_strong(
                      old, old + diff, std::memory_order_relaxed);)
                 ;

@@ -11,7 +11,7 @@ networkit_add_test(algebraic AlgebraicPageRankGTest
     algebraic auxiliary centrality io)
 
 networkit_add_test(algebraic AlgebraicSpanningEdgeCentralityGTest
-    algebraic centrality io numerics)
+    algebraic auxiliary centrality generators io numerics)
 
 networkit_add_test(algebraic AlgebraicTriangleCountingGTest
     algebraic auxiliary centrality io)

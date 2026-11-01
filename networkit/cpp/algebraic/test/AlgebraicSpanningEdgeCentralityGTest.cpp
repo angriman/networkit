@@ -10,12 +10,43 @@
 #include <networkit/algebraic/CSRMatrix.hpp>
 #include <networkit/algebraic/algorithms/AlgebraicSpanningEdgeCentrality.hpp>
 
+#include <networkit/auxiliary/Random.hpp>
 #include <networkit/centrality/SpanningEdgeCentrality.hpp>
+#include <networkit/generators/ErdosRenyiGenerator.hpp>
 #include <networkit/io/METISGraphReader.hpp>
 
 namespace NetworKit {
 
 class AlgebraicSpanningEdgeCentralityGTest : public testing::Test {};
+
+TEST_F(AlgebraicSpanningEdgeCentralityGTest, testWeightedGraph) {
+    Aux::Random::setSeed(42, true);
+    constexpr double tol = 0.1;
+    constexpr count n = 30;
+
+    Graph G(ErdosRenyiGenerator(n, 0.3).generate(), true, false);
+    for (node u = 0; u + 1 < n; ++u) {
+        if (!G.hasEdge(u, u + 1)) {
+            G.addEdge(u, u + 1);
+        }
+    }
+    G.forEdges([&](node u, node v) -> void { G.setWeight(u, v, Aux::Random::real(0.5, 4.)); });
+    G.indexEdges();
+
+    AlgebraicSpanningEdgeCentrality<CSRMatrix> exact(G, tol);
+    exact.run();
+
+    // Foster's theorem: the probabilities that edges are in a spanning tree sum to n - 1.
+    double sum = 0.;
+    G.forEdges([&](node, node, edgeid e) -> void { sum += exact.score(e); });
+    EXPECT_NEAR(sum, static_cast<double>(n - 1), 1e-3);
+
+    AlgebraicSpanningEdgeCentrality<CSRMatrix> approximation(G, tol);
+    approximation.runApproximation();
+    G.forEdges([&](node, node, edgeid e) -> void {
+        EXPECT_NEAR(approximation.score(e), exact.score(e), 2 * tol * exact.score(e));
+    });
+}
 
 TEST_F(AlgebraicSpanningEdgeCentralityGTest, testOnToyGraph) {
     /* Graph:

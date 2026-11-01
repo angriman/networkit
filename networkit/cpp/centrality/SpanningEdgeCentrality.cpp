@@ -33,7 +33,7 @@ SpanningEdgeCentrality::SpanningEdgeCentrality(const Graph &G, double tol)
 void SpanningEdgeCentrality::run() {
     count n = G.numberOfNodes();
     scoreData.clear();
-    scoreData.resize(G.numberOfEdges(), 0.0);
+    scoreData.resize(G.upperEdgeIdBound(), 0.0);
 
     // set up solution vector and status
     Vector solution(n);
@@ -42,7 +42,7 @@ void SpanningEdgeCentrality::run() {
     Vector zeroVector(n, 0.0);
 
     // solve for each edge
-    G.forEdges([&](node u, node v, edgeid e) {
+    G.forEdges([&](node u, node v, edgeweight weight, edgeid e) {
         // set up right-hand side
         rhs[u] = +1.0;
         rhs[v] = -1.0;
@@ -52,7 +52,7 @@ void SpanningEdgeCentrality::run() {
 
         lamg.solve(rhs, solution);
         double diff = solution[u] - solution[v];
-        scoreData[e] = std::fabs(diff); // TODO: check unweighted, fix weighted case, fix edge IDs!
+        scoreData[e] = weight * std::fabs(diff);
         rhs[u] = 0.0;
         rhs[v] = 0.0;
     });
@@ -66,21 +66,20 @@ uint64_t SpanningEdgeCentrality::getSetupTime() const {
 
 void SpanningEdgeCentrality::runApproximation() {
     const count n = G.numberOfNodes();
-    const count m = G.numberOfEdges();
     double epsilon2 = tol * tol;
     const count k = std::ceil(std::log2(n)) / epsilon2;
     double randTab[3] = {1 / std::sqrt(k), -1 / std::sqrt(k)};
     Vector solution(n);
     scoreData.clear();
-    scoreData.resize(m, 0.0);
+    scoreData.resize(G.upperEdgeIdBound(), 0.0);
 
     for (index i = 0; i < k; ++i) {
         Vector rhs(n, 0.0);
 
-        // rhs(v) = \sum_e=1 ^m q(e) * B(e, v)
-        //        = +/- q(e)
-        G.forEdges([&](node u, node v) {
-            double r = randTab[Aux::Random::integer(1)];
+        // rhs(v) = \sum_e=1 ^m q(e) * sqrt(w(e)) * B(e, v)
+        //        = +/- q(e) * sqrt(w(e))
+        G.forEdges([&](node u, node v, edgeweight weight) {
+            double r = randTab[Aux::Random::integer(1)] * std::sqrt(weight);
 
             if (u < v) {
                 rhs[u] += r;
@@ -93,9 +92,9 @@ void SpanningEdgeCentrality::runApproximation() {
 
         lamg.solve(rhs, solution);
 
-        G.forEdges([&](node u, node v, edgeid e) {
+        G.forEdges([&](node u, node v, edgeweight weight, edgeid e) {
             double diff = solution[u] - solution[v];
-            scoreData[e] += diff * diff; // TODO: fix weighted case!
+            scoreData[e] += weight * diff * diff;
         });
     }
 
@@ -104,21 +103,20 @@ void SpanningEdgeCentrality::runApproximation() {
 
 void SpanningEdgeCentrality::runParallelApproximation() {
     const count n = G.numberOfNodes();
-    const count m = G.numberOfEdges();
     double epsilon2 = tol * tol;
     const count k = std::ceil(std::log2(n)) / epsilon2;
     double randTab[3] = {1 / std::sqrt(k), -1 / std::sqrt(k)};
     std::vector<Vector> solutions(k, Vector(n));
     std::vector<Vector> rhs(k, Vector(n));
     scoreData.clear();
-    scoreData.resize(m, 0.0);
+    scoreData.resize(G.upperEdgeIdBound(), 0.0);
 
 #pragma omp parallel for
     for (omp_index i = 0; i < static_cast<omp_index>(k); ++i) {
-        // rhs(v) = \sum_e=1 ^m q(e) * B(e, v)
-        //        = +/- q(e)
-        G.forEdges([&](node u, node v) {
-            double r = randTab[Aux::Random::integer(1)];
+        // rhs(v) = \sum_e=1 ^m q(e) * sqrt(w(e)) * B(e, v)
+        //        = +/- q(e) * sqrt(w(e))
+        G.forEdges([&](node u, node v, edgeweight weight) {
+            double r = randTab[Aux::Random::integer(1)] * std::sqrt(weight);
 
             if (u < v) {
                 rhs[i][u] += r;
@@ -133,9 +131,9 @@ void SpanningEdgeCentrality::runParallelApproximation() {
     lamg.parallelSolve(rhs, solutions);
 
     for (index i = 0; i < k; ++i) {
-        G.parallelForEdges([&](node u, node v, edgeid e) {
+        G.parallelForEdges([&](node u, node v, edgeweight weight, edgeid e) {
             double diff = solutions[i][u] - solutions[i][v];
-            scoreData[e] += diff * diff; // TODO: fix weighted case!
+            scoreData[e] += weight * diff * diff;
         });
     }
 
@@ -165,7 +163,7 @@ double SpanningEdgeCentrality::runForEdge(node u, node v) {
     TRACE("before solve for ", u, " and ", v);
 
     lamg.solve(rhs, solution);
-    return std::fabs(solution[u] - solution[v]); // TODO: fix weighted case, fix edge IDs!
+    return G.weight(u, v) * std::fabs(solution[u] - solution[v]);
 }
 
 } // namespace NetworKit
