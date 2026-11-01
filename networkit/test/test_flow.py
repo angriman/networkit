@@ -8,6 +8,17 @@ class TestFlow(unittest.TestCase):
 	def setUp(self):
 		self.L = nk.readGraph("input/looptest1.gml", nk.Format.GML) #without self-loops
 
+	def testGomoryHuTree(self):
+		G = nk.Graph(4, weighted=True)
+		G.addEdge(0, 1, 3)
+		G.addEdge(1, 2, 1)
+		G.addEdge(2, 3, 2)
+		algo = nk.flow.GomoryHuTree(G)
+		algo.run()
+		self.assertEqual(algo.getMinCutValue(0, 1), 3)
+		self.assertEqual(algo.getMinCutValue(0, 3), 1)
+		self.assertEqual(algo.getTree().numberOfEdges(), 3)
+
 	def testEdmondsKarp(self):
 		G = nk.Graph(5)
 		G.addEdge(0,1)

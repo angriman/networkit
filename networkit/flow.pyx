@@ -108,6 +108,71 @@ cdef class EdmondsKarp(Algorithm):
 
 # === Dinic binding ===========================================================
 
+cdef extern from "<networkit/flow/GomoryHuTree.hpp>":
+
+	cdef cppclass _GomoryHuTree "NetworKit::GomoryHuTree"(_Algorithm):
+		_GomoryHuTree(const _Graph &graph) except +
+		_Graph getTree() except +
+		edgeweight getMinCutValue(node u, node v) except +
+
+cdef class GomoryHuTree(Algorithm):
+	"""
+	GomoryHuTree(graph)
+
+	Computes a Gomory-Hu tree of an undirected graph with the algorithm from "Very simple methods
+	for all pairs network flow analysis" by D. Gusfield (1990). The tree has the same nodes as the
+	graph, and the minimum cut between two nodes equals the lightest edge on their tree path.
+	Removing that edge splits the nodes into the two sides of such a cut. This answers all minimum
+	cut queries with n - 1 maximum flow computations instead of one per pair.
+
+	Unweighted graphs are treated as having unit weights. Self-loops are ignored and the weights of
+	parallel edges are summed up.
+
+	Parameters
+	----------
+	graph : networkit.Graph
+		An undirected graph with non-negative edge weights.
+	"""
+	cdef Graph _graph
+
+	def __cinit__(self, Graph graph not None):
+		self._graph = graph # store reference of graph for memory management, so the graph is not deallocated before this object
+		self._this = new _GomoryHuTree(graph._this)
+
+	def getTree(self):
+		"""
+		getTree()
+
+		Returns the Gomory-Hu tree, a weighted graph with the same node ids as the input graph.
+		Nodes in different components of the input are connected by edges of weight 0.
+
+		Returns
+		-------
+		networkit.Graph
+			The Gomory-Hu tree.
+		"""
+		return Graph().setThis((<_GomoryHuTree*>(self._this)).getTree())
+
+	def getMinCutValue(self, node u, node v):
+		"""
+		getMinCutValue(u, v)
+
+		Returns the value of the minimum cut between two nodes.
+
+		Parameters
+		----------
+		u : int
+			A node of the graph.
+		v : int
+			Another node of the graph.
+
+		Returns
+		-------
+		float
+			The weight of a minimum cut separating u and v.
+		"""
+		return (<_GomoryHuTree*>(self._this)).getMinCutValue(u, v)
+
 cdef extern from "<networkit/flow/Dinic.hpp>":
 
 	cdef cppclass _Dinic "NetworKit::Dinic"(_Algorithm):
