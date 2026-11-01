@@ -138,5 +138,21 @@ class TestMatching(unittest.TestCase):
 		M2 = nk.matching.BSuitorMatcher(G,2).run().getBMatching().getMatches()
 		self.assertEqual(M1, M2)
 
+	def testBlossomMatcher(self):
+		G = nk.Graph(5, weighted=True)
+		G.addEdge(0, 1, 6)
+		G.addEdge(1, 2, 5)
+		G.addEdge(2, 0, 5)
+		G.addEdge(1, 3, 4)
+		G.addEdge(2, 4, 4)
+
+		matcher = nk.matching.BlossomMatcher(G)
+		matcher.run()
+		matching = matcher.getMatching()
+
+		self.assertTrue(matching.isProper(G))
+		self.assertEqual(matching.weight(G), 10)
+
+
 if __name__ == "__main__":
 	unittest.main()

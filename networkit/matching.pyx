@@ -229,6 +229,35 @@ cdef class Matcher(Algorithm):
 		return Matching().setThis((<_Matcher*>(self._this)).getMatching())
 
 
+cdef extern from "<networkit/matching/BlossomMatcher.hpp>":
+
+	cdef cppclass _BlossomMatcher "NetworKit::BlossomMatcher"(_Matcher):
+		_BlossomMatcher(_Graph) except +
+
+cdef class BlossomMatcher(Matcher):
+	"""
+	BlossomMatcher(G)
+
+	Computes a maximum weight matching of a general graph with the primal-dual blossom method from
+	"Paths, trees, and flowers" by J. Edmonds (1965). Unlike the other matchers for general graphs,
+	which are approximations, the result is optimal. The running time is in O(n^2 (n + m log n)) in
+	the worst case, and much lower in practice.
+
+	Edges without a positive weight are never matched, and the matching does not have to be perfect
+	or of maximum cardinality. On unweighted graphs, where all weights are one, it is a maximum
+	cardinality matching. Self-loops are ignored, and only the heaviest of parallel edges is used.
+	Weights are floating-point numbers, so results for weights that are not integers are optimal up
+	to rounding errors.
+
+	Parameters:
+	-----------
+	G : networkit.Graph
+		An undirected graph.
+	"""
+	def __cinit__(self, Graph G not None):
+		self.G = G
+		self._this = new _BlossomMatcher(G._this)
+
 cdef extern from "<networkit/matching/PathGrowingMatcher.hpp>":
 
 	cdef cppclass _PathGrowingMatcher "NetworKit::PathGrowingMatcher"(_Matcher):

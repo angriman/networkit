@@ -2,6 +2,7 @@ networkit_add_module(matching
     BMatcher.cpp
     BMatching.cpp
     BSuitorMatcher.cpp
+    BlossomMatcher.cpp
     DynamicBSuitorMatcher.cpp
     LocalMaxMatcher.cpp
     Matcher.cpp
