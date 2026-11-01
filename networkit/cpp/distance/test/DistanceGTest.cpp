@@ -512,6 +512,23 @@ TEST_F(DistanceGTest, testDiameterEmptyGraph) {
     EXPECT_EQ(estimatedSamples.getDiameter(), expectedDiameter);
 }
 
+TEST_F(DistanceGTest, testEstimatedVertexDiameterIsUpperBound) {
+    // The two largest distances from any node add up to at least the diameter. In this path, the
+    // largest distance often appears before the second largest in the order of the node IDs.
+    const count n = 20;
+    Graph G(n);
+    for (node u = 0; u + 1 < n; ++u) {
+        G.addEdge(u, u + 1);
+    }
+
+    for (count seed = 1; seed <= 20; ++seed) {
+        Aux::Random::setSeed(seed, true);
+        Diameter diameter(G, DiameterAlgo::ESTIMATED_SAMPLES, -1., 1);
+        diameter.run();
+        EXPECT_GE(diameter.getDiameter().first, n);
+    }
+}
+
 TEST_F(DistanceGTest, testEstimatedDiameterRange) {
     using namespace std;
 

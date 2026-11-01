@@ -267,9 +267,14 @@ edgeweight Diameter::estimatedVertexDiameter(const Graph &G, count samples) {
         edgeweight maxD = 0;
         edgeweight maxD2 = 0; // second largest distance
         for (auto d : distances) {
-            if ((d != infDist) && (d >= maxD)) {
+            if (d == infDist) {
+                continue;
+            }
+            if (d >= maxD) {
                 maxD2 = maxD;
                 maxD = d;
+            } else if (d > maxD2) {
+                maxD2 = d;
             }
         }
 
