@@ -223,6 +223,32 @@ public:
         return result;
     }
 
+    /**
+     * Compute the expected average degree of a graph with Fermi-Dirac connection probabilities by
+     * integrating numerically over the positions of two nodes. Unlike the asymptotic formula used
+     * by getTargetRadius, this also holds for finite graphs with a temperature close to 1.
+     *
+     * @param n Number of nodes
+     * @param R Radius of the hyperbolic disk
+     * @param alpha Dispersion of the radial coordinates, as used to sample them
+     * @param T Temperature, must be positive
+     * @return The expected average degree
+     */
+    static double getExpectedAverageDegree(double n, double R, double alpha, double T);
+
+    /**
+     * Search for the radius at which graphs have a given expected average degree.
+     *
+     * @param n Number of nodes
+     * @param k Target average degree
+     * @param alpha Dispersion of the radial coordinates, as used to sample them
+     * @param T Temperature, must be positive
+     * @param initialR Radius to start the search from, usually from getTargetRadius
+     * @return The radius, or @a initialR if no radius reaches an average degree of @a k
+     */
+    static double calibrateTargetRadius(double n, double k, double alpha, double T,
+                                        double initialR);
+
     static inline double effectiveAreaInCell(double minPhi, double maxPhi, double minR, double maxR,
                                              double alpha) {
         double deltaPhi = maxPhi - minPhi;

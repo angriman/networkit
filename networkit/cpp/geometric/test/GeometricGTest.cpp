@@ -13,6 +13,7 @@
 #include <networkit/geometric/HyperbolicSpace.hpp>
 #include <networkit/viz/Point.hpp>
 
+#include <algorithm>
 #include <cmath>
 
 #include <networkit/auxiliary/Log.hpp>
@@ -103,6 +104,32 @@ TEST_F(GeometricGTest, testNativeDistanceOfNearbyPointsFarFromOrigin) {
     // Reference values were computed with 120 significant digits.
     EXPECT_NEAR(HyperbolicSpace::nativeDistance(0, 30, 1e-12, 29.5), 2.971469618934, 1e-9);
     EXPECT_NEAR(HyperbolicSpace::nativeDistance(1e-12, 28, 0, 28), 0.708233522592, 1e-9);
+}
+
+TEST_F(GeometricGTest, testExpectedAverageDegree) {
+    // Reference values were computed with a much finer quadrature.
+    EXPECT_NEAR(HyperbolicSpace::getExpectedAverageDegree(10000, 20, 1, 0.5), 1.814882, 0.01);
+    EXPECT_NEAR(HyperbolicSpace::getExpectedAverageDegree(10000, 22, 10. / 11, 1.1), 7.630244,
+                0.01);
+    EXPECT_NEAR(HyperbolicSpace::getExpectedAverageDegree(1000000, 30, 0.75, 0.9), 11.519722, 0.02);
+    EXPECT_NEAR(HyperbolicSpace::getExpectedAverageDegree(2000, 60, 0.2, 5), 21.884188, 0.03);
+}
+
+TEST_F(GeometricGTest, testCalibrateTargetRadius) {
+    const double n = 5000;
+    const double k = 10;
+    const double alpha = 1;
+    for (const double T : {0.1, 0.5, 0.9, 0.99, 1.01, 1.1, 2., 8.}) {
+        const double initialR = HyperbolicSpace::getTargetRadius(n, n * k / 2, alpha, T);
+        const double R =
+            HyperbolicSpace::calibrateTargetRadius(n, k, alpha / std::max(T, 1.), T, initialR);
+        EXPECT_NEAR(HyperbolicSpace::getExpectedAverageDegree(n, R, alpha / std::max(T, 1.), T), k,
+                    0.02)
+            << "T = " << T;
+    }
+
+    // Graphs of two nodes cannot reach this degree at any radius.
+    EXPECT_EQ(HyperbolicSpace::calibrateTargetRadius(2, 1.5, alpha, 0.5, 3), 3);
 }
 
 } /* namespace NetworKit */

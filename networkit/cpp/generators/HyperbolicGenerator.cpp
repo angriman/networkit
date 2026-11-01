@@ -52,6 +52,9 @@ HyperbolicGenerator::HyperbolicGenerator(count n, double avgDegree, double plexp
 
     // Only the radial dispersion depends on T: getTargetRadius derives the exponent from its alpha.
     R = HyperbolicSpace::getTargetRadius(n, n * avgDegree / 2, unscaledAlpha, T);
+    if (T > 0) {
+        R = HyperbolicSpace::calibrateTargetRadius(n, avgDegree, alpha, T, R);
+    }
     temperature = T;
     initialize();
 }

@@ -1234,6 +1234,17 @@ TEST_F(GeneratorsGTest, testHyperbolicGeneratorHighTemperatureDegree) {
     }
 }
 
+TEST_F(GeneratorsGTest, testHyperbolicGeneratorDegreeNearCriticalTemperature) {
+    Aux::Random::setSeed(0, false);
+    const count n = 5000;
+    const double k = 10;
+    const count m = n * k / 2;
+    for (const double T : {0.8, 0.9, 0.98, 1.02, 1.1, 1.2}) {
+        const Graph G = HyperbolicGenerator(n, k, 3, T).generate();
+        EXPECT_NEAR(G.numberOfEdges(), m, m / 5) << "T = " << T;
+    }
+}
+
 TEST_F(GeneratorsGTest, testHyperbolicGeneratorMechanicGraphs) {
     Aux::Random::setSeed(0, false);
     count n = 2000;

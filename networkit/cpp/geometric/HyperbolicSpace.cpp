@@ -5,8 +5,10 @@
  *      Author: Moritz v. Looz
  */
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <utility>
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/geometric/HyperbolicSpace.hpp>
@@ -15,6 +17,148 @@ using std::abs;
 using std::max;
 
 namespace NetworKit {
+
+namespace {
+
+/**
+ * @return Nodes and weights of the Gauss-Legendre quadrature rule on [lower, upper]
+ */
+std::pair<vector<double>, vector<double>> gaussLegendre(count size, double lower, double upper) {
+    vector<double> nodes(size), weights(size);
+    for (index i = 0; i < size; ++i) {
+        double x = std::cos(PI * (i + 0.75) / (size + 0.5));
+        double derivative = 0;
+        for (index iteration = 0; iteration < 100; ++iteration) {
+            double previous = 1;
+            double current = x;
+            for (index degree = 2; degree <= size; ++degree) {
+                const double next =
+                    ((2 * degree - 1) * x * current - (degree - 1) * previous) / degree;
+                previous = current;
+                current = next;
+            }
+            derivative = size * (x * current - previous) / (x * x - 1);
+            const double step = current / derivative;
+            x -= step;
+            if (std::abs(step) < 1e-14) {
+                break;
+            }
+        }
+        nodes[i] = lower + (x + 1) / 2 * (upper - lower);
+        weights[i] = (upper - lower) / ((1 - x * x) * derivative * derivative);
+    }
+    return {std::move(nodes), std::move(weights)};
+}
+
+} // namespace
+
+double HyperbolicSpace::getExpectedAverageDegree(double n, double R, double alpha, double T) {
+    assert(n > 1);
+    assert(R > 0);
+    assert(alpha > 0);
+    assert(T > 0);
+
+    // Most of the degree comes from small angles and radii, so integrate over the logarithm of the
+    // angle and over the radius itself rather than over its much more skewed distribution.
+    constexpr count radialPoints = 24;
+    constexpr count angularPoints = 64;
+    const auto [radii, radialWeights] = gaussLegendre(radialPoints, 0, R);
+    const auto [logAngles, logAngleWeights] =
+        gaussLegendre(angularPoints, std::log(1e-7 * std::min(1., 50. / n)), std::log(PI));
+
+    const double logTwo = std::log(2.);
+    const double normalization = std::pow(1 - std::exp(-alpha * R), 2);
+    vector<double> radialMass(radialPoints), logSinh(radialPoints);
+    for (index i = 0; i < radialPoints; ++i) {
+        const double density = alpha * std::exp(alpha * (radii[i] - R))
+                               * (1 - std::exp(-2 * alpha * radii[i])) / normalization;
+        radialMass[i] = radialWeights[i] * density;
+        logSinh[i] = radii[i] + std::log1p(-std::exp(-2 * radii[i])) - logTwo;
+    }
+
+    vector<double> angularMass(angularPoints), logTwoSinSquared(angularPoints);
+    for (index i = 0; i < angularPoints; ++i) {
+        const double angle = std::exp(logAngles[i]);
+        angularMass[i] = logAngleWeights[i] * angle;
+        logTwoSinSquared[i] = logTwo + 2 * std::log(std::sin(angle / 2));
+    }
+
+    double expected = 0;
+    for (index i = 0; i < radialPoints; ++i) {
+        for (index j = 0; j <= i; ++j) {
+            const double radialDifference = std::abs(radii[i] - radii[j]);
+            const double coshDifference = std::cosh(radialDifference);
+            double probability = 0;
+            for (index a = 0; a < angularPoints; ++a) {
+                // cosh(d) = cosh(r1 - r2) + 2 sinh(r1) sinh(r2) sin^2(angle / 2). Large values are
+                // added in log space because the products would overflow at high temperatures.
+                const double logAngularTerm = logSinh[i] + logSinh[j] + logTwoSinSquared[a];
+                double distance;
+                if (std::max(logAngularTerm, radialDifference) < 30) {
+                    distance = std::acosh(coshDifference + std::exp(logAngularTerm));
+                } else {
+                    const double logDoubled = logAngularTerm + logTwo;
+                    const double larger = std::max(logDoubled, radialDifference);
+                    const double smaller = std::min(logDoubled, radialDifference);
+                    distance = larger + std::log1p(std::exp(smaller - larger));
+                }
+                probability += angularMass[a] / (std::exp((distance - R) / (2 * T)) + 1);
+            }
+            expected += (i == j ? 1 : 2) * radialMass[i] * radialMass[j] * probability;
+        }
+    }
+    return (n - 1) * expected / PI;
+}
+
+double HyperbolicSpace::calibrateTargetRadius(double n, double k, double alpha, double T,
+                                              double initialR) {
+    const auto logDegreeRatio = [n, k, alpha, T](double R) -> double {
+        return std::log(getExpectedAverageDegree(n, R, alpha, T) / k);
+    };
+
+    // The degree falls with the radius, so first enclose the target.
+    double smallR = std::max(initialR, 1.);
+    double largeR = smallR;
+    double smallRatio = logDegreeRatio(smallR);
+    double largeRatio = smallRatio;
+    while (smallRatio < 0) {
+        if (smallR < 1e-3) {
+            return initialR;
+        }
+        largeR = smallR;
+        largeRatio = smallRatio;
+        smallR /= 2;
+        smallRatio = logDegreeRatio(smallR);
+    }
+    while (largeRatio > 0) {
+        smallR = largeR;
+        smallRatio = largeRatio;
+        largeR *= 2;
+        largeRatio = logDegreeRatio(largeR);
+    }
+
+    // The logarithm of the degree is almost linear in the radius, so false position is fast.
+    // Damping the bound that stays in place keeps it from stalling on the remaining curvature.
+    constexpr double tolerance = 1e-3;
+    double R = smallR;
+    for (index iteration = 0; iteration < 100; ++iteration) {
+        R = smallR + (largeR - smallR) * smallRatio / (smallRatio - largeRatio);
+        const double ratio = logDegreeRatio(R);
+        if (std::abs(ratio) < tolerance) {
+            break;
+        }
+        if (ratio > 0) {
+            smallR = R;
+            smallRatio = ratio;
+            largeRatio /= 2;
+        } else {
+            largeR = R;
+            largeRatio = ratio;
+            smallRatio /= 2;
+        }
+    }
+    return R;
+}
 
 double HyperbolicSpace::nativeDistance(double firstangle, double firstR, double secondangle,
                                        double secondR) {
