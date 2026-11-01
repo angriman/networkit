@@ -42,5 +42,23 @@ class TestGlobal(unittest.TestCase):
 		arr = np.array([0, 0, 0, 4], dtype=np.float64)
 		self.assertAlmostEqual(nk.stats.gini(arr), 0.75, places=12)
 
+	def testGraphletCensus(self):
+		G = nk.Graph(4)
+		G.addEdge(0, 1)
+		G.addEdge(1, 2)
+		G.addEdge(2, 0)
+		G.addEdge(2, 3)
+
+		census = nk.globals.GraphletCensus(G)
+		census.run()
+		counts = census.getCounts()
+
+		self.assertEqual(len(counts), 8)
+		self.assertEqual(counts["paw"], 1)
+		self.assertEqual(counts["triangle"], 1)
+		self.assertEqual(counts["wedge"], 2)
+		self.assertEqual(counts["clique"], 0)
+
+
 if __name__ == "__main__":
 	unittest.main()

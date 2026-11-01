@@ -1,7 +1,9 @@
 # distutils: language=c++
 
 from libcpp cimport bool as bool_t
+from libcpp.vector cimport vector
 
+from .base cimport _Algorithm, Algorithm
 from .graph cimport _Graph, Graph
 from .structures cimport count
 
@@ -126,3 +128,49 @@ def clustering(G, error=0.01):
 		nSamples = math.ceil(math.log(10) / (error**2)) # fixed confidence of 90%
 		logging.info("taking {0} samples".format(nSamples))
 		return ClusteringCoefficient().approxAvgLocal(G, nSamples)
+
+cdef extern from "<networkit/global/GraphletCensus.hpp>":
+
+	cdef cppclass _GraphletCensus "NetworKit::GraphletCensus"(_Algorithm):
+		_GraphletCensus(_Graph G) except +
+		vector[count] getCounts() except +
+
+cdef class GraphletCensus(Algorithm):
+	"""
+	GraphletCensus(G)
+
+	Counts the connected undirected graphlets on three and four nodes, i.e., the sets of nodes that
+	induce each of these subgraphs. A triangle with a pendant edge is a paw, a clique that misses an
+	edge is a diamond.
+
+	The counts are derived from subgraph counts with closed formulas rather than by visiting each
+	occurrence, which only cliques require on top of the triangles. The algorithm runs in O(m d^2)
+	time for a maximum degree d. Edge weights, the multiplicity of parallel edges and self-loops are
+	ignored.
+
+	Parameters
+	----------
+	G : networkit.Graph
+		An undirected graph.
+	"""
+
+	cdef Graph _G
+
+	def __cinit__(self, Graph G not None):
+		self._G = G
+		self._this = new _GraphletCensus(G._this)
+
+	def getCounts(self):
+		"""
+		getCounts()
+
+		Returns the number of occurrences of each graphlet, by name.
+
+		Returns
+		-------
+		dict(str, int)
+			The census of the graph, with the keys "wedge", "triangle", "path", "star", "cycle",
+			"paw", "diamond" and "clique".
+		"""
+		names = ("wedge", "triangle", "path", "star", "cycle", "paw", "diamond", "clique")
+		return dict(zip(names, (<_GraphletCensus*>(self._this)).getCounts()))
