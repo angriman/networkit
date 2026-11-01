@@ -8,6 +8,23 @@ import scipy as sc
 
 class TestGraph(unittest.TestCase):
 
+    def testSteinerTree(self):
+        G = nk.Graph(4, weighted=True)
+        G.addEdge(0, 3, 1)
+        G.addEdge(1, 3, 1)
+        G.addEdge(2, 3, 1)
+        G.addEdge(0, 1, 2.5)
+        G.addEdge(1, 2, 2.5)
+
+        algo = nk.graph.SteinerTree(G, [0, 1, 2])
+        algo.run()
+
+        self.assertTrue(algo.hasTree())
+        self.assertEqual(algo.getTotalWeight(), 3)
+        tree = algo.getTree()
+        self.assertEqual(tree.numberOfEdges(), 3)
+        self.assertEqual(tree.degree(3), 3)
+
     def testConstructorWithCooAndNumNodes(self):
         row = np.array([0, 1, 2])
         col = np.array([1, 2, 0])

@@ -5,6 +5,7 @@ networkit_add_module(graph
     PrimMSF.cpp
     RandomMaximumSpanningForest.cpp
     SpanningForest.cpp
+    SteinerTree.cpp
     UnionMaximumSpanningForest.cpp
     DHBGraph.cpp
     )
