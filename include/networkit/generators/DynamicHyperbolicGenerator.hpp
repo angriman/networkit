@@ -14,7 +14,7 @@
 namespace NetworKit {
 
 class DynamicHyperbolicGenerator final : public DynamicGraphGenerator {
-    friend class GeneratorsGTest;
+    friend class HyperbolicGeneratorGTest;
 
 public:
     /**
