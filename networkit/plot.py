@@ -95,10 +95,10 @@ def degreeDistribution(G, *args, **kwargs):
 	----------
 	G : networkit.Graph
 		The input graph.
-	`*args` : list()
-		Additional *args parameter passed to matplotlib.pyplot.bar.
-	`**kwargs` : dict()
-		Additional **kwargs parameter passed to matplotlib.pyplot.bar
+	*args : list()
+		Additional positional arguments passed to matplotlib.pyplot.bar.
+	**kwargs : dict()
+		Additional keyword arguments passed to matplotlib.pyplot.bar
 	"""
 	if not have_plt:
 		raise MissingDependencyError("matplotlib")
@@ -163,10 +163,10 @@ def coreDecompositionSequence(G, *args, **kwargs):
 	----------
 	G : networkit.Graph
 		The input graph.
-	`*args` : list()
-		Additional *args parameter passed to matplotlib.pyplot.bar.
-	`**kwargs` : dict()
-		Additional **kwargs parameter passed to matplotlib.pyplot.bar
+	*args : list()
+		Additional positional arguments passed to matplotlib.pyplot.bar.
+	**kwargs : dict()
+		Additional keyword arguments passed to matplotlib.pyplot.bar
 	"""
 	if not have_plt:
 		raise MissingDependencyError("matplotlib")
@@ -214,10 +214,10 @@ def hopPlot(G, *args, **kwargs):
 	----------
 	G : networkit.Graph
 		The input graph.
-	`*args` : list()
-		Additional *args parameter passed to matplotlib.pyplot.bar.
-	`**kwargs` : dict()
-		Additional **kwargs parameter passed to matplotlib.pyplot.bar
+	*args : list()
+		Additional positional arguments passed to matplotlib.pyplot.bar.
+	**kwargs : dict()
+		Additional keyword arguments passed to matplotlib.pyplot.bar
 	"""
 	#hop-plot
 	if not have_plt:

@@ -509,11 +509,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
+          fetch-depth: 0
       - name: Prepare environment and run checks
         id: build
-        continue-on-error: true
         run:  ${{ github.workspace }}/.github/workflows/scripts/documentation.sh
         shell: bash
+        env:
+          SPHINX_OPTIONS: '-W;--keep-going'
   style-guide-compliance-build:
     name: "Linux (default): code-style"
     runs-on: ubuntu-26.04

@@ -45,7 +45,6 @@ extensions = ['sphinx.ext.autodoc',
               'nbsphinx',
               'sphinx_copybutton',  
               'sphinx.ext.mathjax', 
-              'sphinxcontrib.bibtex',
               'sphinx_gallery.load_style',
               'sphinx_last_updated_by_git'
               ]
@@ -200,16 +199,23 @@ exhale_args = {
     "treeViewBootstrapExpandIcon": "glyphicon glyphicon-chevron-right",
     "treeViewBootstrapLevels": 3,
     "exhaleExecutesDoxygen": True,
-    "exhaleDoxygenStdin": "INPUT = ../include/networkit"
+    # Internal templates and friend declarations do not belong in the API
+    # reference, and the C++ domain of Sphinx cannot parse them.
+    "exhaleDoxygenStdin": """
+        INPUT = ../include/networkit
+        EXCLUDE_SYMBOLS = Aux::Impl Aux::FunctionTraits*
+        HIDE_FRIEND_COMPOUNDS = YES
+    """
 }
+
+# Exhale renders nested classes both on the page of their parent and on their own.
+suppress_warnings = ['duplicate_declaration.cpp']
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-
-html_title = None
 
 html_add_permalinks = None
 
@@ -361,6 +367,3 @@ texinfo_documents = [
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
 
-# -- Options for Bibtex output -------------------------------------------------
-
-bibtex_bibfiles = ['refs.bib']

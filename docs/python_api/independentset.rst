@@ -1,5 +1,5 @@
 networkit.independentset
-=======================
+========================
 
 .. automodule:: networkit.independentset
     :members:

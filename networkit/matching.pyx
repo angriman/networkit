@@ -491,18 +491,18 @@ cdef class BSuitorMatcher(BMatcher):
 	"""
 	BSuitorMatcher(G, second)
 
-    Computes a 1/2-approximate maximum weight b-matching of an undirected weighted Graph @c G
-    using the sequential b-Suitor algorithm published by Khan et al. in "Efficient Approximation
-    Algorithms For Weighted B-Matching", SIAM Journal on Scientific Computing, Vol. 38, Iss. 5
-    (2016).
+	Computes a 1/2-approximate maximum weight b-matching of an undirected weighted Graph :code:`G`
+	using the sequential b-Suitor algorithm published by Khan et al. in "Efficient Approximation
+	Algorithms For Weighted B-Matching", SIAM Journal on Scientific Computing, Vol. 38, Iss. 5
+	(2016).
 
 	Parameters
 	----------
 	G : networkit.Graph
 		The input graph, must be undirected.
-    second : The second parameter contains information about b-values of nodes. This can either be given as
-             single value (int), indicating the same b-value for all nodes. Other options: list of b-values
-             for each node, str-based path to file containing b-values.
+	second : int or list(int)
+		The b-values of the nodes: a single value used for all nodes, or a list with the b-value
+		of each node.
 	"""
 
 	def __cinit__(self, Graph G, second):
@@ -533,21 +533,21 @@ cdef extern from "<networkit/matching/DynamicBSuitorMatcher.hpp>":
 cdef class DynamicBSuitorMatcher(BSuitorMatcher, DynAlgorithm):
 	""" 
 	DynamicBSuitorMatcher(G, second)
-	
-    Implementation from the algorithm from "A Fully-dynamic Approximation Algorithm for Maximum 
-    Weight b-Matchings in Graphs" from Proceedings of The Thirteenth International Conference on 
-    Complex Networks and their Applications 2024 by Fabian Brandt-Tumescheit, Frieda Gerharz and
-    Henning Meyerhenke. The algorithm dynamically updates the b-matching based on the b-Suitor 
-    algorithm by Khan et al. The solution is the same as a complete recomputation of the b-Suitor
-    b-matching.
+
+	Implementation from the algorithm from "A Fully-dynamic Approximation Algorithm for Maximum
+	Weight b-Matchings in Graphs" from Proceedings of The Thirteenth International Conference on
+	Complex Networks and their Applications 2024 by Fabian Brandt-Tumescheit, Frieda Gerharz and
+	Henning Meyerhenke. The algorithm dynamically updates the b-matching based on the b-Suitor
+	algorithm by Khan et al. The solution is the same as a complete recomputation of the b-Suitor
+	b-matching.
 
 	Parameters
 	----------
 	G : networkit.Graph
 		An unweighted graph.
-    second : The second parameter contains information about b-values of nodes. This can either be given as
-             single value (int), indicating the same b-value for all nodes. Other options: list of b-values
-             for each node, str-based path to file containing b-values.
+	second : int or list(int)
+		The b-values of the nodes: a single value used for all nodes, or a list with the b-value
+		of each node.
 	"""
 
 	def __cinit__(self, Graph G, second):

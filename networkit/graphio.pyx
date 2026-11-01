@@ -238,7 +238,7 @@ cdef extern from "<networkit/io/GraphToolBinaryReader.hpp>":
 
 cdef class GraphToolBinaryReader(GraphReader):
 	""" 
-	GraphToolsBinaryReader()
+	GraphToolBinaryReader()
 
 	Reads the binary file format defined by graph-tool: http://graph-tool.skewed.de/static/doc/gt_format.html
 	"""
@@ -1988,10 +1988,12 @@ class GEXFReader:
 	def mapDynamicNodes(self):
 		"""
 		mapDynamicNodes()
+
 		Node ID of a dynamic node must be determined before it's mapped to its GEXF ID.
 		This requires processing the sorted eventStream and figuring out the addition order of the nodes.
 		After that, node addition/deletion/restoration operations of this node must be readded to eventStream
 		with correct mapping.
+
 		Note
 		----
 		New mapping of a node can be equal to old mapping of a node. In order to prevent collisions,

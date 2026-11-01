@@ -8,16 +8,17 @@ pip3 install --upgrade pip
 # cython is required because git does not contain _NetworKit.
 pip3 install 'cython<3.3.0' setuptools
 
-# Several modules are required to build the documentation.
-pip3 install sphinx
-pip3 install Jinja2 sphinx_bootstrap_theme numpydoc exhale nbsphinx breathe
-pip3 install sphinx_copybutton sphinxcontrib.bibtex sphinx_gallery sphinx_last_updated_by_git
+# Several modules are required to build the documentation. The ones that affect the warnings are
+# pinned, since CI treats warnings as errors.
+pip3 install sphinx==9.2.0
+pip3 install Jinja2 sphinx_bootstrap_theme numpydoc==1.11.0 exhale==0.3.7 nbsphinx==0.9.8 breathe==5.1.0
+pip3 install sphinx_copybutton sphinx_gallery sphinx_last_updated_by_git
 pip3 install ipykernel ipython matplotlib nbconvert jupyter-client networkx tabulate
 pip3 install ipycytoscape plotly seaborn powerlaw anywidget
 
 # Build the C++ core library (no need for optimizations).
 mkdir core_build && cd "$_"
-cmake -DCMAKE_BUILD_TYPE=Debug -DNETWORKIT_CXX_STANDARD=$CXX_STANDARD -DNETWORKIT_WARNINGS=ON ..
+cmake -DCMAKE_BUILD_TYPE=Debug -DNETWORKIT_CXX_STANDARD=$CXX_STANDARD -DNETWORKIT_WARNINGS=ON "-DNETWORKIT_SPHINX_OPTIONS=${SPHINX_OPTIONS:-}" ..
 make -j2
 cd ..
 

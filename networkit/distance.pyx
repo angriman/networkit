@@ -185,17 +185,17 @@ cdef class SSSP(Algorithm):
 		getDistances(asarray=None)
 
 		Returns a list of weighted distances from the source node, i.e. the
- 	 	length of the shortest path from the source node to any other node.
+		length of the shortest path from the source node to any other node.
 
 		Parameters
 		----------
 		asarray : optional
 			Return the result as a numpy array. Default: None
 
- 	 	Returns
- 	 	-------
+		Returns
+		-------
 		list or np.ndarray
- 	 		The weighted distances from the source node to any other node in the graph.
+			The weighted distances from the source node to any other node in the graph.
 		"""
 		return maybe_asarray_1d(&(<_SSSP*>(self._this)).getDistances(), asarray)
 
@@ -888,7 +888,7 @@ cdef class JaccardDistance:
 
 cdef class JaccardSimilarityAttributizer:
 	"""
-	JaccardSimilarityAtrributizer(G, triangles)
+	JaccardSimilarityAttributizer(G, triangles)
 
 	The Jaccard similarity measure assigns to each edge (1 - the jaccard coefficient
 	of the neighborhoods of the two adjacent nodes).
@@ -1266,12 +1266,6 @@ cdef class SPSP(Algorithm):
 		list(list(float)) or np.ndarray
 			The shortest-path distances from each source node to the target nodes (if target nodes
 			have been specified), or any other node in the graph.
-
-		Returns
-		-------
-		list(list(float)) or np.ndarray
-			The shortest-path distances from each source node to any other node
-			in the graph.
 		"""
 		return maybe_asarray_2d(&(<_SPSP*>self._this).getDistances(), asarray)
 

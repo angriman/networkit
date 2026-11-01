@@ -3,6 +3,7 @@ Python Documentation
 ====================
 
 .. automodule:: networkit
+   :no-index:
 
 Modules
 ------------------
@@ -20,9 +21,7 @@ Modules
    community
    components
    correlation
-   csbridge
    distance
-   dynamic
    dynamics
    dynbase
    embedding
@@ -30,31 +29,25 @@ Modules
    flow
    generators
    gephi
-   GEXFIO
    globals
    graph
    graphio
    graphtools
-   GraphMLIO
    helpers
    independentset
    linkprediction
    matching
    nxadapter
-   partitioning
-   plot   
+   planarity
+   plot
    profiling
    randomization
    reachability
-   sampling
    scd
    simulation
    sparsification
    stats
-   stopwatch
    structures
    traversal
    viz
    vizbridges
-   viztasks
-   workflows

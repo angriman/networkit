@@ -3008,10 +3008,10 @@ cdef class ComplexPaths(Algorithm):
 	The ComplexPathAlgorithm analysis the spread of complex contagions in a given graph. 
 	Returns the complex contagion paths of a given phenomenon (determined by the threshold) 
 	for single nodes or the entire graph, according to:
-	[ Guilbeault, D., Centola, D. Topological measures for 
-	  identifying and predicting the spread of complex contagions. 
-	  Nat Commun 12, 4430 (2021). 
-	  https://doi.org/10.1038/s41467-021-24704-6 ]
+	[ Guilbeault, D., Centola, D. Topological measures for
+	identifying and predicting the spread of complex contagions.
+	Nat Commun 12, 4430 (2021).
+	https://doi.org/10.1038/s41467-021-24704-6 ]
  
 	Parameters
 	----------
@@ -3021,15 +3021,13 @@ cdef class ComplexPaths(Algorithm):
 	threshold : int
 		The complex path width: minimal number of neighbors.
 
-	Parameter :code:`mode` can be one of the following:
+	mode : ComplexPathMode or str, optional
+		One of the following. Default: ComplexPathMode.ALL_NODES
 
-	- ComplexPathMode.allNodes: Calculate complex path lengths
-					  from every start node(default).
-	- ComplexPathMode.singleNode: Calculate complex path graph
-					  from node start.
-	
-	start : node
-		Start node for ComplexPathMode.singleNode.
+		- ComplexPathMode.ALL_NODES or "allNodes": Calculate complex path lengths from every start node.
+		- ComplexPathMode.SINGLE_NODE or "singleNode": Calculate complex path graph from node start.
+	start : node, optional
+		Start node for ComplexPathMode.SINGLE_NODE.
 	"""
 
 	cdef Graph _G
@@ -3066,7 +3064,7 @@ cdef class ComplexPaths(Algorithm):
 
 		Returns
 		-------
-		Graph	
+		networkit.Graph
 		"""
 		return Graph().setThis((<_ComplexPaths*>(self._this)).getComplexGraph())
 

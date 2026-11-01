@@ -1638,7 +1638,7 @@ def detectCommunities(G, algo=None, inspect=True):
 	
 	Parameters
 	----------
-	G : Graph
+	G : networkit.Graph
 		The graph on which the evaluation is performed.
 	algo : networkit.community.CommunityDetector
 		Community detection algorithm instance. Default: None

@@ -147,8 +147,8 @@ public:
         return values[i];
     }
 
-    friend Attribute<NodeOrEdge, GraphType, T, true>;
-    friend Attribute<NodeOrEdge, GraphType, T, false>;
+    friend class Attribute<NodeOrEdge, GraphType, T, true>;
+    friend class Attribute<NodeOrEdge, GraphType, T, false>;
 
 private:
     std::vector<T> values; // the real attribute storage

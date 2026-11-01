@@ -307,6 +307,7 @@ while performance tests are called with
 Further options are:
 
 ::
+
    -r, --run         Run unit tests which don't use assertions
    -d, --debug       Run tests to debug some algorithms
        --threads     set the maximum number of threads; 0 (=default) uses OMP 
@@ -508,7 +509,7 @@ compiler - coming from C++, its error messages are in general pleasantly
 human-readable.
 
 Adding new C++ Modules to Python
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After having added a new C++ module to NetwoKit, you need to do the same
 in Cython before the new code is available in Python.
@@ -574,10 +575,13 @@ The documentation can be automatically generated with sphinx. You will need the 
 -  `Pandoc <http://pandoc.org>`__
 -  `Doxygen <http://www.stack.nl/~dimitri/doxygen/>`__
 
-After you installed the above mentioned software, you can build the
-class documentation by calling ``./make_doc.sh`` in the folder
-``Doc/doc``. This will generate the class documentation for C++ and
-Python in ``Doc/Documentation``.
+After you installed the above mentioned software and the NetworKit Python
+module, you can build the class documentation by calling ``make docs`` in
+your CMake build directory. This will generate the class documentation for
+C++ and Python in ``htmldocs``.
+
+CI treats Sphinx warnings as errors. To do the same locally, configure with
+``-DNETWORKIT_SPHINX_OPTIONS="-W;--keep-going"``.
 
 Further Reading
 ---------------

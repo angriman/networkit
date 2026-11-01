@@ -98,8 +98,8 @@ cdef class BarabasiAlbertGenerator(StaticGraphGenerator):
 		(https://www.sciencedirect.com/science/article/pii/S0020019016300102)
 
 	The generator will emit a simple graph, where all
-    new nodes are initially connected to k random neighbors.
-    	
+	new nodes are initially connected to k random neighbors.
+
 	Parameters
 	----------
 	k : int
@@ -393,7 +393,7 @@ cdef extern from "<networkit/generators/ClusteredRandomGraphGenerator.hpp>":
 
 cdef class ClusteredRandomGraphGenerator(StaticGraphGenerator):
 	""" 
-	ClusteredRandomGraphGenerator(count, count, pin, pout)
+	ClusteredRandomGraphGenerator(n, k, pin, pout)
 	
 	The ClusteredRandomGraphGenerator class is used to create a clustered random graph.
 

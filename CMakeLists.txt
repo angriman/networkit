@@ -708,6 +708,7 @@ if (NOT SPHINX_EXECUTABLE)
 
 else()
 	message(STATUS "Found sphinx-build: ${SPHINX_EXECUTABLE}")
+	set(NETWORKIT_SPHINX_OPTIONS "" CACHE STRING "Semicolon-separated list of additional sphinx-build options")
 
 	add_custom_target(prepare_docs
 			COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/docs/input
@@ -717,7 +718,7 @@ else()
 
 	add_custom_target(general_docs
 			COMMAND rm -rf htmldocs
-			COMMAND ${SPHINX_EXECUTABLE} ${CMAKE_SOURCE_DIR}/docs htmldocs
+			COMMAND ${SPHINX_EXECUTABLE} ${NETWORKIT_SPHINX_OPTIONS} ${CMAKE_SOURCE_DIR}/docs htmldocs
 			DEPENDS prepare_docs)
 
 	add_custom_target(docs DEPENDS general_docs)

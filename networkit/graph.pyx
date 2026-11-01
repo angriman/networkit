@@ -1283,7 +1283,7 @@ def GraphFromCsr(csr, directed=True, weighted=False):
 
 def GraphFromCoo(inputData, n=0, bool_t weighted=False, bool_t directed=False, bool_t edgesIndexed=False):
 	"""
-	graphFromInputData(inputData, n=0, bool_t weighted=False, bool_t directed=False, bool_t edgesIndexed=False):
+	GraphFromCoo(inputData, n=0, weighted=False, directed=False, edgesIndexed=False)
 
 	Creates a graph based on :code:`inputData` (edge data). Input data is given in triplet format (also known
 	as ijk or coo format). See here for more details: https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_array.html
@@ -1301,7 +1301,7 @@ def GraphFromCoo(inputData, n=0, bool_t weighted=False, bool_t directed=False, b
 	----
 	- If only pairs of row and column indices (i,j) are given, each edge is given weight 1.0 (even in case of a weighted graph).
 	- There is no check if :code:`n` is the correct size. If the parameter is used, make sure that it is at least the
-	maximum index from the coordinate data.
+	  maximum index from the coordinate data.
 
 	Parameters
 	----------

@@ -648,7 +648,7 @@ cdef class GraphTools:
 					Optional continuous node id mapping.
 		checkMapping : bool, optional
 					   Flag to determine if the node id mapping should be checked that it 
-					   is continuous. This check takes O(|V|) time and space.
+					   is continuous. This check takes O(n) time and space.
 		"""
 		cdef unordered_map[node,node] cNodeIdMap
 		if nodeIdMap is not None:

@@ -156,7 +156,7 @@ def strongScaling(algorithmClass, threadSequence, inargs, inputTitle=None, repet
 		Algorithm, which should be tested.
 	threadSequence : list(int)
 		A list of thread numbers to run the :code:`algorithmClass` with.
-	inargs : **kwargs
+	inargs : dict
 		Input arguments for algorithm. 
 	inputTitle : str, optional
 		Set a title for the output. Default: None
@@ -205,7 +205,7 @@ def weakScaling(algorithmClass, inargs, threadSequence, inputSequence, inputTitl
 	----------
 	algorithmClass :
 		Algorithm, which should be tested.
-	inargs : **kwargs
+	inargs : dict
 		Input arguments for algorithm.
 	threadSequence : list(int)
 		A list of thread numbers to run the :code:`algorithmClass` with.

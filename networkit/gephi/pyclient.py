@@ -100,7 +100,7 @@ class JSONClient(object):
 			Node id.
 		flush : bool, optional
 			Parameter not used.
-		attributes : **kwargs
+		**attributes : dict
 			Attributes, which should be associated with the node.
 		"""
 		self.data += json.dumps(self.peh({"an":{id:attributes}})) + '\r\n'

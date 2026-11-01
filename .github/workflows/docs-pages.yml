@@ -68,6 +68,7 @@ jobs:
         with:
           ref: ${{ steps.target.outputs.build_ref }}
           submodules: true
+          fetch-depth: 0
 
       - name: Install prerequisites
         if: steps.target.outputs.skip != 'true'
