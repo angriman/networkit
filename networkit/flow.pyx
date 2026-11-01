@@ -108,6 +108,63 @@ cdef class EdmondsKarp(Algorithm):
 
 # === Dinic binding ===========================================================
 
+cdef extern from "<networkit/flow/StoerWagner.hpp>":
+
+	cdef cppclass _StoerWagner "NetworKit::StoerWagner"(_Algorithm):
+		_StoerWagner(const _Graph &graph) except +
+		edgeweight getCutValue() except +
+		const vector[node] &getCutSide() except +
+
+cdef class StoerWagner(Algorithm):
+	"""
+	StoerWagner(graph)
+
+	Computes a global minimum cut of an undirected graph, i.e., a partition of its nodes into two
+	non-empty sets such that the total weight of the edges between them is minimal, with the
+	algorithm from "A simple min-cut algorithm" by M. Stoer and F. Wagner (1997). Unlike a maximum
+	flow, this requires neither a source nor a target.
+
+	Unweighted graphs are treated as having unit weights. Self-loops are ignored and the weights of
+	parallel edges are summed up.
+
+	Parameters
+	----------
+	graph : networkit.Graph
+		An undirected graph with at least two nodes and non-negative edge weights.
+	"""
+	cdef Graph _graph
+
+	def __cinit__(self, Graph graph not None):
+		self._graph = graph # store reference of graph for memory management, so the graph is not deallocated before this object
+		self._this = new _StoerWagner(graph._this)
+
+	def getCutValue(self):
+		"""
+		getCutValue()
+
+		Returns the total weight of the edges of the minimum cut.
+
+		Returns
+		-------
+		float
+			The weight of the minimum cut.
+		"""
+		return (<_StoerWagner*>(self._this)).getCutValue()
+
+	def getCutSide(self):
+		"""
+		getCutSide()
+
+		Returns the nodes on one side of the minimum cut, in ascending order. The other side
+		consists of all the remaining nodes of the graph.
+
+		Returns
+		-------
+		list(int)
+			The nodes on one side of the minimum cut.
+		"""
+		return (<_StoerWagner*>(self._this)).getCutSide()
+
 cdef extern from "<networkit/flow/Dinic.hpp>":
 
 	cdef cppclass _Dinic "NetworKit::Dinic"(_Algorithm):

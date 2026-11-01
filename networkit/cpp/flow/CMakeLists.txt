@@ -1,6 +1,7 @@
 networkit_add_module(flow
     EdmondsKarp.cpp
     Dinic.cpp
+    StoerWagner.cpp
     SuccessiveShortestPath.cpp
 )
 

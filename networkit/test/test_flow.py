@@ -8,6 +8,16 @@ class TestFlow(unittest.TestCase):
 	def setUp(self):
 		self.L = nk.readGraph("input/looptest1.gml", nk.Format.GML) #without self-loops
 
+	def testStoerWagner(self):
+		G = nk.Graph(4, weighted=True)
+		G.addEdge(0, 1, 3)
+		G.addEdge(1, 2, 1)
+		G.addEdge(2, 3, 3)
+		algo = nk.flow.StoerWagner(G)
+		algo.run()
+		self.assertEqual(algo.getCutValue(), 1)
+		self.assertIn(algo.getCutSide(), ([0, 1], [2, 3]))
+
 	def testEdmondsKarp(self):
 		G = nk.Graph(5)
 		G.addEdge(0,1)
