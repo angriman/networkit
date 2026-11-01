@@ -50,10 +50,11 @@ public:
 class SpSampler {
 private:
     const Graph &G;
-    const ConnectedComponents &cc;
+    // Only set for undirected graphs.
+    const ConnectedComponents *cc;
 
 public:
-    SpSampler(const Graph &G, const ConnectedComponents &cc);
+    SpSampler(const Graph &G, const ConnectedComponents *cc);
     void randomPath(StateFrame *curFrame);
     StateFrame *frame;
     std::mt19937_64 rng;

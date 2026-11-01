@@ -2043,9 +2043,8 @@ TEST_F(CentralityGTest, testKadabraMatchesExactBetweenness) {
         // Kadabra samples among all pairs of nodes, also those with an endpoint in the given node.
         const double n = static_cast<double>(G.numberOfNodes());
         const auto scores = kadabra.scores();
-        G.forNodes([&](node u) -> void {
-            EXPECT_NEAR(scores[u], (n - 2.) / n * exact.score(u), err);
-        });
+        G.forNodes(
+            [&](node u) -> void { EXPECT_NEAR(scores[u], (n - 2.) / n * exact.score(u), err); });
     };
 
     // Nodes have predecessors with very different numbers of shortest paths.
@@ -2062,6 +2061,16 @@ TEST_F(CentralityGTest, testKadabraMatchesExactBetweenness) {
         }
     }
     expectWithinError(grid, 0.01);
+
+    // In directed graphs, paths have to be followed in the direction of the edges.
+    Graph directedGrid(side * side, false, true);
+    grid.forEdges(
+        [&](node u, node v) -> void { directedGrid.addEdge(std::min(u, v), std::max(u, v)); });
+    expectWithinError(directedGrid, 0.01);
+
+    // Many pairs of nodes are not connected here.
+    Aux::Random::setSeed(42, false);
+    expectWithinError(ErdosRenyiGenerator(100, 0.03, true).generate(), 0.01);
 
     // With a single shortest path per pair, only a bias of the estimator itself can cause errors.
     Graph path(9);

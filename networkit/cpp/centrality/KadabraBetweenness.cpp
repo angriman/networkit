@@ -254,7 +254,7 @@ void KadabraBetweenness::init() {
     epochFinished = std::vector<std::atomic<StateFrame *>>(omp_max_threads);
     samplerVec.reserve(omp_max_threads);
     for (count i = 0; i < omp_max_threads; ++i) {
-        samplerVec.emplace_back(G, *cc);
+        samplerVec.emplace_back(G, cc.get());
         epochFinished[i].store(nullptr, std::memory_order_relaxed);
     }
 
@@ -484,7 +484,7 @@ void KadabraBetweenness::checkConvergence(Status &status) {
     }
 }
 
-SpSampler::SpSampler(const Graph &G, const ConnectedComponents &cc) : G(G), cc(cc), rng(0) {
+SpSampler::SpSampler(const Graph &G, const ConnectedComponents *cc) : G(G), cc(cc), rng(0) {
     const auto n = G.upperNodeIdBound();
     distr = std::uniform_int_distribution<node>(0, n - 1);
     q.resize(n);
@@ -500,7 +500,7 @@ void SpSampler::randomPath(StateFrame *curFrame) {
     while (u == v)
         v = distr(rng);
 
-    if (!G.isDirected() && cc.componentOfNode(u) != cc.componentOfNode(v))
+    if (cc != nullptr && cc->componentOfNode(u) != cc->componentOfNode(v))
         return;
 
     count endQ = 2;
@@ -621,9 +621,7 @@ void SpSampler::backtrackPath(const node source, const node target, const node s
 
     node curPred = 0, w = 0;
     bool stop = false;
-    // TODO: update this in the case of directed graphs (use inNeighbors if
-    // ballind is 0x80)
-    G.forNeighborsOf(start, [&](const node t) {
+    const auto visit = [&](const node t) -> void {
         if (!stop) {
             if (dist[t] == dist[start] - 1
                 && ((timestamp[start] & ballMask) == (timestamp[t] & ballMask))) {
@@ -634,7 +632,14 @@ void SpSampler::backtrackPath(const node source, const node target, const node s
                 }
             }
         }
-    });
+    };
+
+    // The ball of the source was explored along the edges, the ball of the target against them.
+    if ((timestamp[start] & ballMask) == 0) {
+        G.forInNeighborsOf(start, visit);
+    } else {
+        G.forNeighborsOf(start, visit);
+    }
 
     if (w != source && w != target)
         backtrackPath(source, target, w);
