@@ -376,8 +376,19 @@ public:
         double coshMaxR = std::cosh(maxRHyper);
         double sinhMinR = std::sinh(minRHyper);
         double sinhMaxR = std::sinh(maxRHyper);
-        double cosDiffLeft = std::cos(phi - leftAngle);
-        double cosDiffRight = std::cos(phi - rightAngle);
+        double sinHalfDiffLeft = std::sin((phi - leftAngle) / 2);
+        double sinHalfDiffRight = std::sin((phi - rightAngle) / 2);
+
+        // As in HyperbolicSpace::nativeDistance, these avoid subtracting huge numbers: the bounds
+        // would otherwise be meaningless for nearby points far from the origin.
+        auto coshDistanceAt = [r_h, sinhr](double radius, double sinHalfDiff) -> double {
+            return std::cosh(radius - r_h)
+                   + 2 * std::sinh(radius) * sinhr * sinHalfDiff * sinHalfDiff;
+        };
+        auto radiusOfExtremum = [r_h, coshr, sinhr](double sinHalfDiff) -> double {
+            double angularTerm = 2 * sinhr * sinHalfDiff * sinHalfDiff;
+            return std::log((coshr + sinhr - angularTerm) / (std::exp(-r_h) + angularTerm)) / 2;
+        };
 
         /**
          * If the query point is not within the quadnode, the distance minimum is on the border.
@@ -387,20 +398,17 @@ public:
         double coshMinDistance, coshMaxDistance;
 
         // Left border
-        double lowerLeftDistance = coshMinR * coshr - sinhMinR * sinhr * cosDiffLeft;
-        double upperLeftDistance = coshMaxR * coshr - sinhMaxR * sinhr * cosDiffLeft;
+        double lowerLeftDistance = coshDistanceAt(minRHyper, sinHalfDiffLeft);
+        double upperLeftDistance = coshDistanceAt(maxRHyper, sinHalfDiffLeft);
         if (responsible(phi, r))
             coshMinDistance = 1; // strictly speaking, this is wrong
         else
             coshMinDistance = std::min(lowerLeftDistance, upperLeftDistance);
 
         coshMaxDistance = std::max(lowerLeftDistance, upperLeftDistance);
-        // double a = std::cosh(r_h);
-        double b = sinhr * cosDiffLeft;
-        double extremum = std::log((coshr + b) / (coshr - b)) / 2;
+        double extremum = radiusOfExtremum(sinHalfDiffLeft);
         if (extremum < maxRHyper && extremum >= minRHyper) {
-            double extremeDistance =
-                std::cosh(extremum) * coshr - std::sinh(extremum) * sinhr * cosDiffLeft;
+            double extremeDistance = coshDistanceAt(extremum, sinHalfDiffLeft);
             coshMinDistance = std::min(coshMinDistance, extremeDistance);
             coshMaxDistance = std::max(coshMaxDistance, extremeDistance);
         }
@@ -412,18 +420,16 @@ public:
         assert(coshMinDistance >= 1);
 
         // Right border
-        double lowerRightDistance = coshMinR * coshr - sinhMinR * sinhr * cosDiffRight;
-        double upperRightDistance = coshMaxR * coshr - sinhMaxR * sinhr * cosDiffRight;
+        double lowerRightDistance = coshDistanceAt(minRHyper, sinHalfDiffRight);
+        double upperRightDistance = coshDistanceAt(maxRHyper, sinHalfDiffRight);
         coshMinDistance = std::min(coshMinDistance, lowerRightDistance);
         coshMinDistance = std::min(coshMinDistance, upperRightDistance);
         coshMaxDistance = std::max(coshMaxDistance, lowerRightDistance);
         coshMaxDistance = std::max(coshMaxDistance, upperRightDistance);
 
-        b = sinhr * cosDiffRight;
-        extremum = std::log((coshr + b) / (coshr - b)) / 2;
+        extremum = radiusOfExtremum(sinHalfDiffRight);
         if (extremum < maxRHyper && extremum >= minRHyper) {
-            double extremeDistance =
-                std::cosh(extremum) * coshr - std::sinh(extremum) * sinhr * cosDiffRight;
+            double extremeDistance = coshDistanceAt(extremum, sinHalfDiffRight);
             coshMinDistance = std::min(coshMinDistance, extremeDistance);
             coshMaxDistance = std::max(coshMaxDistance, extremeDistance);
         }

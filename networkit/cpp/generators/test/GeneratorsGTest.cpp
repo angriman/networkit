@@ -1223,6 +1223,17 @@ TEST_F(GeneratorsGTest, testHyperbolicGeneratorConsistency) {
     ASSERT_TRUE(G.checkConsistency());
 }
 
+TEST_F(GeneratorsGTest, testHyperbolicGeneratorHighTemperatureDegree) {
+    Aux::Random::setSeed(0, false);
+    const count n = 5000;
+    const double k = 10;
+    const count m = n * k / 2;
+    for (const double T : {1.5, 1.7, 3.5}) {
+        const Graph G = HyperbolicGenerator(n, k, 3, T).generate();
+        EXPECT_NEAR(G.numberOfEdges(), m, m / 5) << "T = " << T;
+    }
+}
+
 TEST_F(GeneratorsGTest, testHyperbolicGeneratorMechanicGraphs) {
     Aux::Random::setSeed(0, false);
     count n = 2000;

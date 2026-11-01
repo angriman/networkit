@@ -43,13 +43,15 @@ HyperbolicGenerator::HyperbolicGenerator(count n, double avgDegree, double plexp
         throw std::runtime_error("Temperature must be non-negative and not 1.");
     if (avgDegree >= n)
         throw std::runtime_error("Average Degree must be at most n-1");
+    const double unscaledAlpha = 0.5 * (plexp - 1);
     if (T < 1) {
-        alpha = 0.5 * (plexp - 1);
+        alpha = unscaledAlpha;
     } else {
-        alpha = 0.5 * (plexp - 1) / T;
+        alpha = unscaledAlpha / T;
     }
 
-    R = HyperbolicSpace::getTargetRadius(n, n * avgDegree / 2, alpha, T);
+    // Only the radial dispersion depends on T: getTargetRadius derives the exponent from its alpha.
+    R = HyperbolicSpace::getTargetRadius(n, n * avgDegree / 2, unscaledAlpha, T);
     temperature = T;
     initialize();
 }

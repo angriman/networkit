@@ -28,13 +28,13 @@ double HyperbolicSpace::nativeDistance(double firstangle, double firstR, double 
     if (firstangle == secondangle) {
         result = std::abs(firstR - secondR);
     } else {
-        double deltaPhi = PI - std::abs(PI - std::abs(firstangle - secondangle));
-        double coshDist = std::cosh(firstR) * std::cosh(secondR)
-                          - std::sinh(firstR) * std::sinh(secondR) * std::cos(deltaPhi);
-        if (coshDist >= 1)
-            result = std::acosh(coshDist);
-        else
-            result = 0;
+        // The usual law of cosines subtracts two huge numbers for points far from the origin, which
+        // rounds the distance of nearby points to zero.
+        double sinHalfDelta = std::sin((firstangle - secondangle) / 2);
+        double coshDist =
+            std::cosh(firstR - secondR)
+            + 2 * std::sinh(firstR) * std::sinh(secondR) * sinHalfDelta * sinHalfDelta;
+        result = std::acosh(coshDist);
     }
     assert(result >= 0);
     return result;

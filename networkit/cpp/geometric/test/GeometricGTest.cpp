@@ -99,4 +99,10 @@ TEST_F(GeometricGTest, testHyperbolicTargetRadius) {
     EXPECT_NEAR(R, 167.08503, 1e-4);
 }
 
+TEST_F(GeometricGTest, testNativeDistanceOfNearbyPointsFarFromOrigin) {
+    // Reference values were computed with 120 significant digits.
+    EXPECT_NEAR(HyperbolicSpace::nativeDistance(0, 30, 1e-12, 29.5), 2.971469618934, 1e-9);
+    EXPECT_NEAR(HyperbolicSpace::nativeDistance(1e-12, 28, 0, 28), 0.708233522592, 1e-9);
+}
+
 } /* namespace NetworKit */

@@ -937,4 +937,16 @@ TEST_F(QuadTreeGTest, testQuadNodeCartesianDistances) {
     EXPECT_LE(distanceQueryToCell, minDistance);
 }
 
+TEST_F(QuadTreeGTest, testHyperbolicDistanceBoundsFarFromOrigin) {
+    const QuadNode<index, false> node(1, 29, 1.1, 31);
+    const double queryAngle = 1 - 1e-13;
+    const double queryRadius = 30;
+    ASSERT_FALSE(node.responsible(queryAngle, queryRadius));
+
+    const auto [lower, upper] = node.hyperbolicDistances(queryAngle, queryRadius);
+    const double distanceToCell = HyperbolicSpace::nativeDistance(queryAngle, queryRadius, 1, 30);
+    EXPECT_LE(lower, distanceToCell);
+    EXPECT_GE(upper, distanceToCell);
+}
+
 } /* namespace NetworKit */
