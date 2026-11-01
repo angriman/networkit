@@ -354,5 +354,17 @@ class TestCommunity(unittest.TestCase):
 		Cov = nk.community.Coverage()
 		self.assertAlmostEqual(Cov.getQuality(PLMLLP, self.LL), 0.929, 3)
 
+	def testStochasticBlockmodelInference(self):
+		G = nk.Graph(6)
+		for u, v in [(0, 1), (1, 2), (0, 2), (3, 4), (4, 5), (3, 5), (2, 3)]:
+			G.addEdge(u, v)
+		sbm = nk.community.StochasticBlockmodelInference(G, 2)
+		sbm.run()
+		partition = sbm.getPartition()
+		self.assertEqual(partition[0], partition[2])
+		self.assertEqual(partition[3], partition[5])
+		self.assertNotEqual(partition[0], partition[3])
+		self.assertLess(sbm.getLogLikelihood(), 0)
+
 if __name__ == "__main__":
 	unittest.main()

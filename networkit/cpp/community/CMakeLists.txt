@@ -35,6 +35,7 @@ networkit_add_module(community
     SampledGraphStructuralRandMeasure.cpp
     SampledNodeStructuralRandMeasure.cpp
     StablePartitionNodes.cpp
+    StochasticBlockmodelInference.cpp
     LouvainMapEquation.cpp
     ParallelLeiden.cpp
     )

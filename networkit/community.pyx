@@ -753,6 +753,61 @@ cdef class LouvainMapEquation(CommunityDetector):
 		self._G = G
 		self._this = new _LouvainMapEquation(G._this, hierarchical, maxIterations, stdstring(parallelizationStrategy))
 
+cdef extern from "<networkit/community/StochasticBlockmodelInference.hpp>":
+
+	cdef cppclass _StochasticBlockmodelInference "NetworKit::StochasticBlockmodelInference"(_CommunityDetectionAlgorithm):
+		_StochasticBlockmodelInference(_Graph G, count k, bool_t degreeCorrected, count restarts, count maxSweeps) except +
+		double getLogLikelihood() except +
+
+cdef class StochasticBlockmodelInference(CommunityDetector):
+	"""
+	StochasticBlockmodelInference(G, k, degreeCorrected=True, restarts=30, maxSweeps=100)
+
+	Partitions the nodes of an undirected graph into k blocks by fitting a stochastic blockmodel,
+	using the profile likelihood of Karrer and Newman, "Stochastic blockmodels and community
+	structure in networks", Physical Review E 83, 016107 (2011).
+
+	Unlike modularity-based methods, the model does not assume assortative communities: blocks can
+	also be, for example, the two sides of a bipartite graph. The degree-corrected variant keeps
+	nodes of very different degrees in the same block, which the plain variant tends to separate.
+
+	Edge weights are read as the means of Poisson-distributed edge multiplicities, so they must not
+	be negative. The search maximizes the likelihood with local moves from random starting points,
+	so the result is a local optimum. Restarts run in parallel, and the result is deterministic for
+	a fixed seed only when running on a single thread.
+
+	Parameters
+	----------
+	G : networkit.Graph
+		The undirected input graph, with non-negative edge weights.
+	k : int
+		Number of blocks, between 1 and the number of nodes. Blocks may end up empty.
+	degreeCorrected : bool, optional
+		Whether to use the degree-corrected variant of the model. Default: True
+	restarts : int, optional
+		Number of random starting points, at least 1. Default: 30
+	maxSweeps : int, optional
+		Maximum number of passes over the nodes per starting point, at least 1. Default: 100
+	"""
+
+	def __cinit__(self, Graph G not None, k, degreeCorrected=True, restarts=30, maxSweeps=100):
+		self._G = G
+		self._this = new _StochasticBlockmodelInference(G._this, k, degreeCorrected, restarts, maxSweeps)
+
+	def getLogLikelihood(self):
+		"""
+		getLogLikelihood()
+
+		Returns the profile log-likelihood of the partition, up to a constant that does not depend
+		on the partition.
+
+		Returns
+		-------
+		float
+			The log-likelihood.
+		"""
+		return (<_StochasticBlockmodelInference*>(self._this)).getLogLikelihood()
+
 cdef extern from "<networkit/community/PLP.hpp>":
 
 	cdef cppclass _PLP "NetworKit::PLP"(_CommunityDetectionAlgorithm):

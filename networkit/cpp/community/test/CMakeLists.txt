@@ -7,5 +7,8 @@ networkit_add_benchmark(community CommunityDetectionBenchmark
 networkit_add_test(community LouvainMapEquationGTest
 		auxiliary generators io)
 
+networkit_add_test(community StochasticBlockmodelInferenceGTest
+		auxiliary generators io)
+
 networkit_add_benchmark(community LouvainMapEquationBenchmark
 		auxiliary generators io)
