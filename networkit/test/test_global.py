@@ -42,5 +42,21 @@ class TestGlobal(unittest.TestCase):
 		arr = np.array([0, 0, 0, 4], dtype=np.float64)
 		self.assertAlmostEqual(nk.stats.gini(arr), 0.75, places=12)
 
+	def testTriadCensus(self):
+		G = nk.Graph(4, directed=True)
+		G.addEdge(0, 1)
+		G.addEdge(1, 2)
+		G.addEdge(0, 2)
+
+		census = nk.globals.TriadCensus(G)
+		census.run()
+		counts = census.getCounts()
+
+		self.assertEqual(len(counts), 16)
+		self.assertEqual(counts["030T"], 1)
+		self.assertEqual(counts["012"], 3)
+		self.assertEqual(counts["030C"], 0)
+
+
 if __name__ == "__main__":
 	unittest.main()
