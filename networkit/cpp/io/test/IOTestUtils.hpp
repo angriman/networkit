@@ -4,6 +4,7 @@
 #include <atomic>
 #include <filesystem>
 #include <fstream>
+#include <ostream>
 #include <random>
 #include <stdexcept>
 #include <string>
@@ -15,6 +16,21 @@
 #else
 #include <unistd.h>
 #endif // _WIN32
+
+#include <networkit/graph/AdjListGraph.hpp>
+
+namespace NetworKit {
+
+// Prints a summary in failure messages instead of the raw bytes of the graph. gtest finds it by
+// argument-dependent lookup, so it has to be in the namespace of the graph.
+template <class NodeT, class EdgeWeightT>
+inline void PrintTo(const AdjListGraph<NodeT, EdgeWeightT> &G, std::ostream *os) {
+    *os << (G.isDirected() ? "directed" : "undirected") << ' '
+        << (G.isWeighted() ? "weighted" : "unweighted") << " graph with " << G.numberOfNodes()
+        << " nodes and " << G.numberOfEdges() << " edges";
+}
+
+} // namespace NetworKit
 
 namespace NetworKit::TestUtils {
 
@@ -59,10 +75,11 @@ public:
     // Returns the path of the file with the given name in this directory.
     std::string path(std::string_view fileName) const { return (directory / fileName).string(); }
 
-    // Creates the file with the given name and contents in this directory and returns its path.
+    // Creates the file with the given name and contents in this directory and returns its path. The
+    // file is written in binary mode, so that the line endings are not translated on Windows.
     std::string writeFile(std::string_view fileName, std::string_view contents) const {
         std::string filePath = path(fileName);
-        std::ofstream file(filePath);
+        std::ofstream file(filePath, std::ios::binary);
         file << contents;
         if (!file) {
             throw std::runtime_error("Could not write " + filePath);
