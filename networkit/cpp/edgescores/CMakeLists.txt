@@ -2,7 +2,6 @@ networkit_add_module(edgescores
     ChibaNishizekiQuadrangleEdgeScore.cpp
     ChibaNishizekiTriangleEdgeScore.cpp
     EdgeScore.cpp
-    EdgeScoreAsWeight.cpp
     EdgeScoreBlender.cpp
     EdgeScoreLinearizer.cpp
     EdgeScoreNormalizer.cpp

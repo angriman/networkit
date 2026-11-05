@@ -295,57 +295,6 @@ cdef class GeometricMeanScore(EdgeScore):
 	cdef bool_t isDoubleValue(self):
 		return True
 
-cdef extern from "<networkit/edgescores/EdgeScoreAsWeight.hpp>":
-
-	cdef cppclass _EdgeScoreAsWeight "NetworKit::EdgeScoreAsWeight":
-		_EdgeScoreAsWeight(const _Graph& G, const vector[double]& score, bool_t squared, edgeweight offset, edgeweight factor) except +
-		_Graph calculate() except +
-
-cdef class EdgeScoreAsWeight:
-	"""
-	EdgeScoreAsWeight(G, score, square, offset, factor)
-
-	Assigns an edge score as edge weight of a graph.
-
-	Parameters
-	----------
-	G : networkit.Graph
-		The graph to assign edge weights to.
-	score : list(float)
-		The input edge score.
-	squared : bool
-		Edge weights will be squared if set to True.
-	offset : float
-		This offset will be added to each edge weight.
-	factor : float
-		Each edge weight will be multiplied by this factor.
-	"""
-
-	cdef _EdgeScoreAsWeight* _this
-	cdef Graph _G
-	cdef vector[double] _score
-
-	def __cinit__(self, Graph G, vector[double] score, bool_t squared, edgeweight offset, edgeweight factor):
-		self._G = G
-		self._score = score
-		self._this = new _EdgeScoreAsWeight(G._this, self._score, squared, offset, factor)
-
-	def __dealloc__(self):
-		if self._this is not NULL:
-			del self._this
-			self._this = NULL
-
-	def getWeightedGraph(self):
-		"""
-		getWeightedGraph()
-
-		Returns
-		-------
-		networkit.Graph
-			The weighted result graph.
-		"""
-		return Graph(0).setThis(self._this.calculate())
-
 cdef extern from "<networkit/sparsification/SimmelianOverlapScore.hpp>":
 
 	cdef cppclass _SimmelianOverlapScore "NetworKit::SimmelianOverlapScore"(_EdgeScore[double]):
