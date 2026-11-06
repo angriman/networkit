@@ -42,12 +42,18 @@ namespace NetworKit {
  * The problem line is followed by a listing on exactly m edges. The format
  * is <u v w> for a weighted graph, and <u v> for an unweighted graph.
  */
-class SNAPGraphWriter final : public GraphWriter {
+template <class GraphT>
+class GenericSNAPGraphWriter final : public GraphWriterBase<GraphT> {
 public:
-    SNAPGraphWriter() = default;
+    GenericSNAPGraphWriter() = default;
 
-    void write(const Graph &G, std::string_view path) override;
+    void write(const GraphT &G, std::string_view path) override;
 };
 
+using SNAPGraphWriter = GenericSNAPGraphWriter<Graph>;
+
 } /* namespace NetworKit */
+
+#include <networkit/io/SNAPGraphWriterImpl.hpp>
+
 #endif // NETWORKIT_IO_SNAP_GRAPH_WRITER_HPP_
