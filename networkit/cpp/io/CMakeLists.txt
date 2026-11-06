@@ -9,7 +9,6 @@ networkit_add_module(io
     DotPartitionWriter.cpp
     EdgeListCoverReader.cpp
     EdgeListPartitionReader.cpp
-    GraphIO.cpp
     MemoryMappedFile.cpp
     METISParser.cpp
     MTXParser.cpp

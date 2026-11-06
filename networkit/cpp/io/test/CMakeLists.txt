@@ -9,6 +9,8 @@ networkit_add_test(io EdgeListIOGTest)
 
 networkit_add_test(io GMLGraphIOGTest)
 
+networkit_add_test(io GraphIOGTest)
+
 networkit_add_test(io GraphToolBinaryIOGTest)
 
 networkit_add_test(io IOTestUtilsGTest)
