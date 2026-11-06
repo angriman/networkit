@@ -1,9 +1,21 @@
 /*
- * GraphToolBinaryReader.cpp
+ * GraphToolBinaryReaderImpl.hpp
  *
  *  Created on: 02.12.14
  *      Author: Maximilian Vogel
  */
+
+#ifndef NETWORKIT_IO_GRAPH_TOOL_BINARY_READER_IMPL_HPP_
+#define NETWORKIT_IO_GRAPH_TOOL_BINARY_READER_IMPL_HPP_
+
+#include <algorithm>
+#include <cstdint>
+#include <fstream>
+#include <iterator>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include <networkit/auxiliary/Enforce.hpp>
 #include <networkit/auxiliary/Log.hpp>
@@ -11,7 +23,10 @@
 
 namespace NetworKit {
 
-Graph GraphToolBinaryReader::read(std::string_view path) {
+template <class GraphT>
+GraphT GenericGraphToolBinaryReader<GraphT>::read(std::string_view path) {
+    using NodeT = typename GraphT::NodeT;
+
     std::ifstream file(path.data(), std::ios::binary | std::ios::in);
     Aux::enforceOpened(file);
     // if the header is ok, continue reading the file
@@ -20,7 +35,17 @@ Graph GraphToolBinaryReader::read(std::string_view path) {
         readComment(file);
         bool directed = getDirected(file);
         count n = getNumNodes(file);
-        Graph G(n, false, directed);
+        // NullNodeId<NodeT> is the largest NodeT and marks "no node", so that at most max() nodes
+        // fit.
+        static_assert(NullNodeId<NodeT> == std::numeric_limits<NodeT>::max());
+        constexpr auto maxNumberOfNodes = static_cast<count>(std::numeric_limits<NodeT>::max());
+        if (n > maxNumberOfNodes) {
+            throw std::runtime_error("graph-tool file " + std::string(path) + " has "
+                                     + std::to_string(n)
+                                     + " nodes, but the node type of the graph can hold at most "
+                                     + std::to_string(maxNumberOfNodes) + " nodes");
+        }
+        GraphT G(n, false, directed);
         addOutNeighbours(file, n, G);
         file.close();
         G.shrinkToFit();
@@ -30,7 +55,8 @@ Graph GraphToolBinaryReader::read(std::string_view path) {
     }
 }
 
-bool GraphToolBinaryReader::checkHeader(std::ifstream &file) {
+template <class GraphT>
+bool GenericGraphToolBinaryReader<GraphT>::checkHeader(std::ifstream &file) {
     uint8_t header[8];
     uint8_t reference[6] = {0xe2, 0x9b, 0xbe, 0x20, 0x67, 0x74};
     file.read((char *)header, 8);
@@ -56,7 +82,8 @@ bool GraphToolBinaryReader::checkHeader(std::ifstream &file) {
     return true;
 }
 
-std::string GraphToolBinaryReader::readComment(std::ifstream &file) {
+template <class GraphT>
+std::string GenericGraphToolBinaryReader<GraphT>::readComment(std::ifstream &file) {
     // get length of comment
     auto length = readType<uint64_t>(file, 8);
     char *comment = new char[length];
@@ -67,7 +94,8 @@ std::string GraphToolBinaryReader::readComment(std::ifstream &file) {
     return s;
 }
 
-bool GraphToolBinaryReader::getDirected(std::ifstream &file) {
+template <class GraphT>
+bool GenericGraphToolBinaryReader<GraphT>::getDirected(std::ifstream &file) {
     char c;
     bool directed = false;
     file.read(&c, sizeof(char));
@@ -79,11 +107,13 @@ bool GraphToolBinaryReader::getDirected(std::ifstream &file) {
     return directed;
 }
 
-uint64_t GraphToolBinaryReader::getNumNodes(std::ifstream &file) {
+template <class GraphT>
+uint64_t GenericGraphToolBinaryReader<GraphT>::getNumNodes(std::ifstream &file) {
     return readType<uint64_t>(file, 8);
 }
 
-uint8_t GraphToolBinaryReader::getAdjacencyWidth(uint64_t n) {
+template <class GraphT>
+uint8_t GenericGraphToolBinaryReader<GraphT>::getAdjacencyWidth(uint64_t n) {
     if (n < (uint64_t)1 << 8) {
         return 1;
     } else if (n < (uint64_t)1 << 16) {
@@ -95,8 +125,9 @@ uint8_t GraphToolBinaryReader::getAdjacencyWidth(uint64_t n) {
     } // error handling?
 }
 
-std::vector<std::vector<uint64_t>> GraphToolBinaryReader::getOutNeighbours(std::ifstream &file,
-                                                                           uint64_t numNodes) {
+template <class GraphT>
+std::vector<std::vector<uint64_t>>
+GenericGraphToolBinaryReader<GraphT>::getOutNeighbours(std::ifstream &file, uint64_t numNodes) {
     std::vector<std::vector<uint64_t>> adjacencies(numNodes);
     // value of numNodes determines the size of the unsigned integer type storing the node ids
     int width = (int)getAdjacencyWidth(numNodes);
@@ -114,7 +145,12 @@ std::vector<std::vector<uint64_t>> GraphToolBinaryReader::getOutNeighbours(std::
     return adjacencies;
 }
 
-void GraphToolBinaryReader::addOutNeighbours(std::ifstream &file, uint64_t numNodes, Graph &G) {
+template <class GraphT>
+void GenericGraphToolBinaryReader<GraphT>::addOutNeighbours(std::ifstream &file, uint64_t numNodes,
+                                                            GraphT &G) {
+    using NodeT = typename GraphT::NodeT;
+    using EdgeWeightT = typename GraphT::EdgeWeightT;
+
     // value of numNodes determines the size of the unsigned integer type storing the node ids
     int width = (int)getAdjacencyWidth(numNodes);
     // iterate over each node
@@ -124,10 +160,18 @@ void GraphToolBinaryReader::addOutNeighbours(std::ifstream &file, uint64_t numNo
         for (uint64_t v = 0; v < numOutNeighbours; ++v) {
             // read current adjacency and add edge
             uint64_t node = readType<uint64_t>(file, width);
-            if (!G.addEdge(u, node, defaultEdgeWeight, true))
+            if (node >= numNodes) {
+                throw std::runtime_error("graph-tool file has node id " + std::to_string(node)
+                                         + ", but the valid ids are 0 to "
+                                         + std::to_string(numNodes - 1));
+            }
+            // u and node are smaller than numNodes, which fits into NodeT (checked in read).
+            if (!G.addEdge(static_cast<NodeT>(u), static_cast<NodeT>(node), EdgeWeightT{1}, true))
                 WARN("Not adding edge ", u, "-", node, " since it is already present.");
         }
     }
 }
 
 } /* namespace NetworKit */
+
+#endif // NETWORKIT_IO_GRAPH_TOOL_BINARY_READER_IMPL_HPP_
