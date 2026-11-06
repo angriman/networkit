@@ -29,7 +29,6 @@ networkit_add_module(io
     RBMatrixReader.cpp
     RBGraphReader.cpp
     SNAPEdgeListPartitionReader.cpp
-    SNAPGraphReader.cpp
     ThrillGraphBinaryReader.cpp
     ThrillGraphBinaryWriter.cpp
 )

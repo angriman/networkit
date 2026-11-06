@@ -17,9 +17,15 @@ namespace NetworKit {
 
 /**
  * @ingroup io
+ *
+ * Reading fails if the number of nodes or, without remapping, a node id does not fit into
+ * GraphT::NodeT.
  */
-class SNAPGraphReader final : public GraphReader {
-    std::unordered_map<node, node> nodeIdMap;
+template <class GraphT>
+class GenericSNAPGraphReader final : public GraphReaderBase<GraphT> {
+    using NodeT = typename GraphT::NodeT;
+
+    std::unordered_map<count, NodeT> nodeIdMap;
     bool directed;
     count nodeCount;
     bool remapNodes;
@@ -37,17 +43,21 @@ public:
      * to create consecutive node ids
      * @param[in]  nodeCount  nodeCount is used to preallocated memory for the number of nodes
      */
-    SNAPGraphReader(bool directed = false, const bool &remapNodes = true,
-                    const count &nodeCount = 0);
+    GenericSNAPGraphReader(bool directed = false, const bool &remapNodes = true,
+                           const count &nodeCount = 0);
 
     /**
      * Given the path of an input file, read the graph contained.
      *
      * @param[in]  path  input file path
      */
-    Graph read(std::string_view path) override;
+    GraphT read(std::string_view path) override;
 };
 
+using SNAPGraphReader = GenericSNAPGraphReader<Graph>;
+
 } /* namespace NetworKit */
+
+#include <networkit/io/SNAPGraphReaderImpl.hpp>
 
 #endif // NETWORKIT_IO_SNAP_GRAPH_READER_HPP_
