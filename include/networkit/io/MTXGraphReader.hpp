@@ -13,10 +13,14 @@ namespace NetworKit {
  *
  * Does not allow complex fields.
  *
+ * The file does not store the node and edge weight types: they are given by @a GraphT.
+ * Reading fails if the number of nodes does not fit into GraphT::NodeT, or if GraphT::EdgeWeightT
+ * is integral and an edge weight in the file is not an integer representable by it.
  */
-class MTXGraphReader final : public GraphReader {
+template <class GraphT>
+class GenericMTXGraphReader final : public GraphReaderBase<GraphT> {
 public:
-    MTXGraphReader() = default;
+    GenericMTXGraphReader() = default;
 
     /**
      * Takes a file path as parameter and returns a graph.
@@ -24,8 +28,13 @@ public:
      * @param path
      * @return Graph
      */
-    Graph read(std::string_view path) override;
+    GraphT read(std::string_view path) override;
 };
 
+using MTXGraphReader = GenericMTXGraphReader<Graph>;
+
 } /* namespace NetworKit */
+
+#include <networkit/io/MTXGraphReaderImpl.hpp>
+
 #endif // NETWORKIT_IO_MTX_GRAPH_READER_HPP_
