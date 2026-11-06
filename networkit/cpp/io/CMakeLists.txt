@@ -7,7 +7,6 @@ networkit_add_module(io
     CoverWriter.cpp
     DGSReader.cpp
     DibapGraphReader.cpp
-    DotGraphWriter.cpp
     DotPartitionWriter.cpp
     EdgeListCoverReader.cpp
     EdgeListPartitionReader.cpp
