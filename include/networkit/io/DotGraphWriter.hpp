@@ -24,7 +24,8 @@ namespace NetworKit {
  *
  * [1] https://graphviz.gitlab.io/_pages/pdf/dotguide.pdf
  */
-class DotGraphWriter final : public GraphWriter {
+template <class GraphT>
+class GenericDotGraphWriter final : public GraphWriterBase<GraphT> {
 public:
     /**
      * Write a graph as a GraphViz/file.
@@ -32,8 +33,13 @@ public:
      * @param[in]	graph	The graph object
      * @param[in]	path	The file path to be written to
      */
-    void write(const Graph &G, std::string_view path) override;
+    void write(const GraphT &G, std::string_view path) override;
 };
 
+using DotGraphWriter = GenericDotGraphWriter<Graph>;
+
 } /* namespace NetworKit */
+
+#include <networkit/io/DotGraphWriterImpl.hpp>
+
 #endif // NETWORKIT_IO_DOT_GRAPH_WRITER_HPP_
