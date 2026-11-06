@@ -14,8 +14,15 @@
 #include <networkit/io/GraphReader.hpp>
 
 namespace NetworKit {
-class KONECTGraphReader final : public GraphReader {
-
+/**
+ * @ingroup io
+ *
+ * Reading fails if the number of nodes or, without remapping, a node id does not fit into
+ * GraphT::NodeT, or if GraphT::EdgeWeightT is integral and an edge weight in the file is not an
+ * integer representable by it.
+ */
+template <class GraphT>
+class GenericKONECTGraphReader final : public GraphReaderBase<GraphT> {
 public:
     /*
      * If the input graph has multiple edges, you can specify on how these edges are handled.
@@ -26,19 +33,26 @@ public:
      * @param[in]  handlingmethod  specifies how multiple edges should be handled (only relevant if
      * graph with multiple edges is given)
      */
-    KONECTGraphReader(bool remapNodes = false,
-                      MultipleEdgesHandling handlingmethod = DISCARD_EDGES);
+    GenericKONECTGraphReader(bool remapNodes = false,
+                             GraphReaderOptions::MultipleEdgesHandling handlingmethod =
+                                 GraphReaderOptions::DISCARD_EDGES);
 
     /**
      * Given the path of an input file, read the graph contained.
      *
      * @param[in]  path  input file path
      */
-    Graph read(std::string_view path) override;
+    GraphT read(std::string_view path) override;
 
 private:
     bool remapNodes;
-    MultipleEdgesHandling multipleEdgesHandlingMethod;
+    GraphReaderOptions::MultipleEdgesHandling multipleEdgesHandlingMethod;
 };
+
+using KONECTGraphReader = GenericKONECTGraphReader<Graph>;
+
 } /* namespace NetworKit */
+
+#include <networkit/io/KONECTGraphReaderImpl.hpp>
+
 #endif // NETWORKIT_IO_KONECT_GRAPH_READER_HPP_

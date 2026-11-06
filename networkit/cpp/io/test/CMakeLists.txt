@@ -11,6 +11,8 @@ networkit_add_test(io GraphToolBinaryIOGTest)
 
 networkit_add_test(io IOTestUtilsGTest)
 
+networkit_add_test(io KONECTGraphIOGTest)
+
 networkit_add_test(io METISGraphIOGTest
         generators)
 
