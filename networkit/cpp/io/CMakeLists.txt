@@ -21,7 +21,6 @@ networkit_add_module(io
     PartitionReader.cpp
     RasterReader.cpp
     RBMatrixReader.cpp
-    RBGraphReader.cpp
     SNAPEdgeListPartitionReader.cpp
 )
 
