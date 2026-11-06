@@ -12,7 +12,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <functional>
+#include <concepts>
 #include <vector>
 
 #include <networkit/auxiliary/Log.hpp>
@@ -360,7 +360,8 @@ public:
         }
     }
 
-    count getElementsProbabilistically(Point<double> euQuery, std::function<double(double)> prob,
+    template <std::regular_invocable<double> F>
+    count getElementsProbabilistically(Point<double> euQuery, const F &prob,
                                        vector<T> &result) const {
         TRACE("Getting Euclidean distances");
         auto distancePair = EuclideanDistances(euQuery);
@@ -453,8 +454,8 @@ public:
         return candidatesTested;
     }
 
-    void maybeGetKthElement(double upperBound, Point<double> euQuery,
-                            std::function<double(double)> prob, index k,
+    template <std::regular_invocable<double> F>
+    void maybeGetKthElement(double upperBound, Point<double> euQuery, const F &prob, index k,
                             vector<T> &circleDenizens) const {
         TRACE("Maybe get element ", k, " with upper Bound ", upperBound);
         assert(k < size());

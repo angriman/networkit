@@ -10,7 +10,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <functional>
+#include <concepts>
 #include <vector>
 
 #include <networkit/auxiliary/Log.hpp>
@@ -596,9 +596,9 @@ public:
         }
     }
 
-    count getElementsProbabilistically(Point2DWithIndex<double> euQuery,
-                                       std::function<double(double)> prob, bool suppressLeft,
-                                       vector<T> &result) const {
+    template <std::regular_invocable<double> F>
+    count getElementsProbabilistically(Point2DWithIndex<double> euQuery, const F &prob,
+                                       bool suppressLeft, vector<T> &result) const {
         double phi_q, r_q;
         HyperbolicSpace::cartesianToPolar(euQuery, phi_q, r_q);
         if (suppressLeft && phi_q > rightAngle)
@@ -702,9 +702,9 @@ public:
         return candidatesTested;
     }
 
-    void maybeGetKthElement(double upperBound, Point2DWithIndex<double> euQuery,
-                            std::function<double(double)> prob, index k,
-                            vector<T> &circleDenizens) const {
+    template <std::regular_invocable<double> F>
+    void maybeGetKthElement(double upperBound, Point2DWithIndex<double> euQuery, const F &prob,
+                            index k, vector<T> &circleDenizens) const {
         TRACE("Maybe get element ", k, " with upper Bound ", upperBound);
         assert(k < size());
         if (isLeaf) {

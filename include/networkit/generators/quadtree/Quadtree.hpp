@@ -9,6 +9,7 @@
 #define NETWORKIT_GENERATORS_QUADTREE_QUADTREE_HPP_
 
 #include <cmath>
+#include <concepts>
 #include <memory>
 #include <omp.h>
 #include <vector>
@@ -183,15 +184,15 @@ public:
         getElementsInHyperbolicCircle(circleCenter, hyperbolicRadius, false, circleDenizens);
     }
 
-    count getElementsProbabilistically(Point2DWithIndex<double> euQuery,
-                                       std::function<double(double)> prob,
+    template <std::regular_invocable<double> F>
+    count getElementsProbabilistically(Point2DWithIndex<double> euQuery, const F &prob,
                                        vector<T> &circleDenizens) {
         return root.getElementsProbabilistically(euQuery, prob, false, circleDenizens);
     }
 
-    count getElementsProbabilistically(Point2DWithIndex<double> euQuery,
-                                       std::function<double(double)> prob, bool suppressLeft,
-                                       vector<T> &circleDenizens) {
+    template <std::regular_invocable<double> F>
+    count getElementsProbabilistically(Point2DWithIndex<double> euQuery, const F &prob,
+                                       bool suppressLeft, vector<T> &circleDenizens) {
         return root.getElementsProbabilistically(euQuery, prob, suppressLeft, circleDenizens);
     }
 

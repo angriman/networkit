@@ -9,6 +9,7 @@
 #define NETWORKIT_GENERATORS_QUADTREE_QUADTREE_POLAR_EUCLID_HPP_
 
 #include <cmath>
+#include <concepts>
 #include <omp.h>
 #include <vector>
 
@@ -93,15 +94,15 @@ public:
         root.getElementsInEuclideanCircle(circleCenter, radius, false, circleDenizens);
     }
 
-    count getElementsProbabilistically(Point2DWithIndex<double> euQuery,
-                                       std::function<double(double)> prob,
+    template <std::regular_invocable<double> F>
+    count getElementsProbabilistically(Point2DWithIndex<double> euQuery, const F &prob,
                                        vector<T> &circleDenizens) {
         return root.getElementsProbabilistically(euQuery, prob, false, circleDenizens);
     }
 
-    count getElementsProbabilistically(Point2DWithIndex<double> euQuery,
-                                       std::function<double(double)> prob, bool suppressLeft,
-                                       vector<T> &circleDenizens) {
+    template <std::regular_invocable<double> F>
+    count getElementsProbabilistically(Point2DWithIndex<double> euQuery, const F &prob,
+                                       bool suppressLeft, vector<T> &circleDenizens) {
         return root.getElementsProbabilistically(euQuery, prob, suppressLeft, circleDenizens);
     }
 
