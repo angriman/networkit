@@ -54,15 +54,17 @@ enum class NetworkitBinaryEdgeIDs : int {
  * use v4 right away, you can use nightly builds (see Readme on github).
  *
  */
-class NetworkitBinaryWriter final : public GraphWriter {
+template <class GraphT>
+class GenericNetworkitBinaryWriter final : public GraphWriterBase<GraphT> {
 
 public:
-    NetworkitBinaryWriter(uint64_t chunks = 32,
-                          NetworkitBinaryWeights weightsType = NetworkitBinaryWeights::AUTO_DETECT,
-                          NetworkitBinaryEdgeIDs edgeIndex = NetworkitBinaryEdgeIDs::AUTO_DETECT);
+    GenericNetworkitBinaryWriter(
+        uint64_t chunks = 32,
+        NetworkitBinaryWeights weightsType = NetworkitBinaryWeights::AUTO_DETECT,
+        NetworkitBinaryEdgeIDs edgeIndex = NetworkitBinaryEdgeIDs::AUTO_DETECT);
 
-    void write(const Graph &G, std::string_view path) override;
-    std::vector<uint8_t> writeToBuffer(const Graph &G);
+    void write(const GraphT &G, std::string_view path) override;
+    std::vector<uint8_t> writeToBuffer(const GraphT &G);
 
 private:
     static constexpr const char *FILE_FORMAT = "nkbg004";
@@ -71,9 +73,13 @@ private:
     NetworkitBinaryEdgeIDs edgeIndex;
     bool preserveEdgeIndex;
     template <class T>
-    void writeData(T &outStream, const Graph &G);
+    void writeData(T &outStream, const GraphT &G);
 };
 
+using NetworkitBinaryWriter = GenericNetworkitBinaryWriter<Graph>;
+
 } // namespace NetworKit
+
+#include <networkit/io/NetworkitBinaryWriterImpl.hpp>
 
 #endif // NETWORKIT_IO_NETWORKIT_BINARY_WRITER_HPP_

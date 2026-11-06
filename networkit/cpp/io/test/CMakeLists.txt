@@ -22,6 +22,8 @@ networkit_add_test(io MemoryMappedFileGTest)
 
 networkit_add_test(io MTXGraphIOGTest)
 
+networkit_add_test(io NetworkitBinaryIOGTest)
+
 networkit_add_test(io RBGraphIOGTest)
 
 networkit_add_test(io SNAPGraphIOGTest)

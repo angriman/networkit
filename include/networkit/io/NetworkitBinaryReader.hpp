@@ -32,15 +32,18 @@ namespace NetworKit {
  * written with the new code are automatically upgraded to the newest version 4. If you want to
  * use v4 right away, you can use nightly builds (see Readme on github).
  *
+ * The file does not store the node and edge weight types: they are given by @a GraphT.
+ * Reading fails if the number of nodes does not fit into GraphT::NodeT, or if GraphT::EdgeWeightT
+ * is integral and an edge weight in the file is not an integer representable by it.
  */
-
-class NetworkitBinaryReader final : public GraphReader {
+template <class GraphT>
+class GenericNetworkitBinaryReader final : public GraphReaderBase<GraphT> {
 
 public:
-    NetworkitBinaryReader() {};
+    GenericNetworkitBinaryReader() {};
 
-    Graph read(std::string_view path) override;
-    Graph readFromBuffer(const std::vector<uint8_t> &data);
+    GraphT read(std::string_view path) override;
+    GraphT readFromBuffer(const std::vector<uint8_t> &data);
 
 private:
     count nodes;
@@ -51,8 +54,13 @@ private:
     count version;
 
     template <class T>
-    Graph readData(const T &source);
+    GraphT readData(const T &source);
 };
+
+using NetworkitBinaryReader = GenericNetworkitBinaryReader<Graph>;
+
 } // namespace NetworKit
+
+#include <networkit/io/NetworkitBinaryReaderImpl.hpp>
 
 #endif // NETWORKIT_IO_NETWORKIT_BINARY_READER_HPP_

@@ -14,8 +14,6 @@ networkit_add_module(io
     MemoryMappedFile.cpp
     METISParser.cpp
     MTXParser.cpp
-    NetworkitBinaryReader.cpp
-    NetworkitBinaryWriter.cpp
     MatrixMarketReader.cpp
     PartitionReader.cpp
     RasterReader.cpp
