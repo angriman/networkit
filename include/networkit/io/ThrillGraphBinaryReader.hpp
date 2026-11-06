@@ -16,8 +16,11 @@ namespace NetworKit {
 
 /**
  * Reads a graph format consisting of a serialized DIA of vector<uint32_t> from thrill.
+ *
+ * Reading fails if the number of nodes does not fit into GraphT::NodeT.
  */
-class ThrillGraphBinaryReader final : public GraphReader {
+template <class GraphT>
+class GenericThrillGraphBinaryReader final : public GraphReaderBase<GraphT> {
 
 public:
     /**
@@ -25,20 +28,25 @@ public:
      *
      * @param[in]  n  The number of nodes
      */
-    ThrillGraphBinaryReader(count n = 0);
+    GenericThrillGraphBinaryReader(count n = 0);
 
     /**
      * Given the path of an input file, read the graph contained.
      *
      * @param[in]  path  input file path
      */
-    Graph read(std::string_view path) override;
+    GraphT read(std::string_view path) override;
 
-    Graph read(const std::vector<std::string> &path);
+    GraphT read(const std::vector<std::string> &paths);
 
 private:
     const count n;
 };
 
+using ThrillGraphBinaryReader = GenericThrillGraphBinaryReader<Graph>;
+
 } /* namespace NetworKit */
+
+#include <networkit/io/ThrillGraphBinaryReaderImpl.hpp>
+
 #endif // NETWORKIT_IO_THRILL_GRAPH_BINARY_READER_HPP_
