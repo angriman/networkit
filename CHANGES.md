@@ -3,6 +3,18 @@
 
 API-breaking changes are extracted and filtered by using [ABI-compliance checker](https://lvc.github.io/abi-compliance-checker/) together with [ABI-dumper](https://github.com/lvc/abi-dumper) for C++ core-library and the Cython-interface. Native Python-code functions are covered by diffs.
 
+## Changes in NetworKit 12.0
+
+### Function/Class removed
+
+- Edge scores
+  - `ChibaNishizekiTriangleEdgeScore`, deprecated since NetworKit 4.2. Use `TriangleEdgeScore` instead:
+    it computes the same per-edge triangle counts, takes the same arguments, and runs in parallel.
+
+### Changes in Python interface
+
+- Removed functions and classes from C++ are also removed in the Python interface
+
 ## Changes in NetworKit 11.0
 
 ### Function/Class removed

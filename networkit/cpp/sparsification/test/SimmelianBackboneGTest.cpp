@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-#include <networkit/edgescores/ChibaNishizekiTriangleEdgeScore.hpp>
+#include <networkit/edgescores/TriangleEdgeScore.hpp>
 #include <networkit/sparsification/SimmelianOverlapScore.hpp>
 #include <networkit/sparsification/Sparsifiers.hpp>
 
@@ -73,7 +73,7 @@ TEST_F(SimmelianBackboneGTest, testRankedNeighborhood) {
     g.indexEdges();
 
     // Apply triangle counting algorithm
-    ChibaNishizekiTriangleEdgeScore counter(g);
+    TriangleEdgeScore counter(g);
     counter.run();
     std::vector<count> triangles = counter.scores();
 
@@ -115,7 +115,7 @@ TEST_F(SimmelianBackboneGTest, testRankedNeighborhoodSkippedRanks) {
     g.indexEdges();
 
     // Apply triangle counting algorithm
-    ChibaNishizekiTriangleEdgeScore counter(g);
+    TriangleEdgeScore counter(g);
     counter.run();
     std::vector<count> triangles = counter.scores();
 

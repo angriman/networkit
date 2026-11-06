@@ -9,7 +9,6 @@
 
 #include <networkit/auxiliary/Log.hpp>
 #include <networkit/auxiliary/Timer.hpp>
-#include <networkit/edgescores/ChibaNishizekiTriangleEdgeScore.hpp>
 #include <networkit/edgescores/PrefixJaccardScore.hpp>
 #include <networkit/edgescores/TriangleEdgeScore.hpp>
 #include <networkit/graph/Graph.hpp>
@@ -44,7 +43,7 @@ TEST_F(SparsificationBenchmark, completeGraphSimmelianSparsificationParametric) 
 
     runtime.start();
 
-    ChibaNishizekiTriangleEdgeScore counter(G);
+    TriangleEdgeScore counter(G);
     counter.run();
     std::vector<count> counts = counter.scores();
 
@@ -66,7 +65,7 @@ TEST_F(SparsificationBenchmark, completeGraphSimmelianSparsificationNonParametri
 
     runtime.start();
 
-    ChibaNishizekiTriangleEdgeScore counter(G);
+    TriangleEdgeScore counter(G);
     counter.run();
     std::vector<count> counts = counter.scores();
 
@@ -107,7 +106,7 @@ TEST_F(SparsificationBenchmark, completeGraphLocalSimilaritySparsification) {
 
     runtime.start();
 
-    ChibaNishizekiTriangleEdgeScore counter(G);
+    TriangleEdgeScore counter(G);
     counter.run();
     std::vector<count> triangles = counter.scores();
 
@@ -140,15 +139,6 @@ TEST_F(SparsificationBenchmark, SparsificationBenchmarkGraphFile) {
     g.indexEdges();
     runtime.stop();
     std::cout << "[DONE] edge indexing " << runtime.elapsedTag() << std::endl;
-
-    // --------- Triangle counting
-    std::cout << "[BEGIN] triangle counting: " << std::endl;
-    runtime.start();
-    ChibaNishizekiTriangleEdgeScore oldTriangleAttributizer(g);
-    oldTriangleAttributizer.run();
-    std::vector<count> oldTriangles = oldTriangleAttributizer.scores();
-    runtime.stop();
-    std::cout << "[DONE] Chiba Nishizeki triangle counting " << runtime.elapsedTag() << std::endl;
 
     // --------- Triangle counting
     std::cout << "[BEGIN] triangle counting: " << std::endl;

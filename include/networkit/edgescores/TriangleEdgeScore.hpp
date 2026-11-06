@@ -18,8 +18,7 @@ namespace NetworKit {
  * This implementation avoids less work but needs therefore also less checks and
  * is (apart from a fast initialization) parallel without any locks. In experiments
  * this implementation seems to be fast both in non-parallel as well as in parallel
- * settings. With only one thread its performance is similar to the sequential
- * ChibaNishizekiTriangleEdgeScore in NetworKit.
+ * settings.
  *
  * [0] Triangle Listing Algorithms: Back from the Diversion
  * Mark Ortmann and Ulrik Brandes * 2014 Proceedings of the Sixteenth Workshop on Algorithm

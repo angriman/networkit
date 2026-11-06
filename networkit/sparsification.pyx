@@ -85,30 +85,6 @@ cdef class EdgeScore(Algorithm):
 			return (<_EdgeScore[count]*>(self._this)).scores()
 
 
-cdef extern from "<networkit/edgescores/ChibaNishizekiTriangleEdgeScore.hpp>":
-
-	cdef cppclass _ChibaNishizekiTriangleEdgeScore "NetworKit::ChibaNishizekiTriangleEdgeScore"(_EdgeScore[count]):
-		_ChibaNishizekiTriangleEdgeScore(const _Graph& G) except +
-
-cdef class ChibaNishizekiTriangleEdgeScore(EdgeScore):
-	"""
-	ChibaNishizekiTriangleEdgeScore(G)
-
-	Calculates for each edge the number of triangles it is embedded in.
-
-	Parameters
-	----------
-	G : networkit.Graph
-		The graph to count triangles on.
-	"""
-
-	def __cinit__(self, Graph G):
-		self._G = G
-		self._this = new _ChibaNishizekiTriangleEdgeScore(G._this)
-
-	cdef bool_t isDoubleValue(self):
-		return False
-
 cdef extern from "<networkit/edgescores/ChibaNishizekiQuadrangleEdgeScore.hpp>":
 
 	cdef cppclass _ChibaNishizekiQuadrangleEdgeScore "NetworKit::ChibaNishizekiQuadrangleEdgeScore"(_EdgeScore[count]):

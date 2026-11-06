@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-#include <networkit/edgescores/ChibaNishizekiTriangleEdgeScore.hpp>
+#include <networkit/edgescores/TriangleEdgeScore.hpp>
 #include <networkit/sparsification/LocalSimilarityScore.hpp>
 
 namespace NetworKit {
@@ -23,7 +23,7 @@ TEST_F(LocalSimilarityGTest, testAttributeSimple) {
     g.addEdge(1, 2);
     g.indexEdges();
 
-    ChibaNishizekiTriangleEdgeScore triangleEdgeScore(g);
+    TriangleEdgeScore triangleEdgeScore(g);
     triangleEdgeScore.run();
     std::vector<count> triangles = triangleEdgeScore.scores();
 
