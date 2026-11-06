@@ -14,7 +14,7 @@
 
 namespace NetworKit {
 
-template <typename GraphT>
+template <GraphLike GraphT>
 GenericLeftRightPlanarityCheck<GraphT>::GenericLeftRightPlanarityCheck(const GraphT &G)
     : graph(&G) {
     if (G.isDirected()) {
@@ -37,7 +37,7 @@ GenericLeftRightPlanarityCheck<GraphT>::GenericLeftRightPlanarityCheck(const Gra
     dfsGraph = GraphT(graph->numberOfNodes(), false, true, false);
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 void GenericLeftRightPlanarityCheck<GraphT>::run() {
     // Euler-criterion: non-planar if m > 3n - 6 for n > 2
     if (graph->numberOfNodes() > 2 && graph->numberOfEdges() > 3 * graph->numberOfNodes() - 6) {
@@ -70,7 +70,7 @@ void GenericLeftRightPlanarityCheck<GraphT>::run() {
     hasRun = true;
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 void GenericLeftRightPlanarityCheck<GraphT>::sortAdjacencyListByNestingDepth() {
     dfsGraph.forNodes([&](NodeT currentNode) {
         dfsGraph.sortNeighbors(currentNode, [&](NodeT neighbor1, NodeT neighbor2) {
@@ -81,7 +81,7 @@ void GenericLeftRightPlanarityCheck<GraphT>::sortAdjacencyListByNestingDepth() {
     });
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 bool GenericLeftRightPlanarityCheck<GraphT>::conflicting(const Interval &interval, edgeid edgeId) {
     if (interval.isEmpty()) {
         return false;
@@ -93,7 +93,7 @@ bool GenericLeftRightPlanarityCheck<GraphT>::conflicting(const Interval &interva
            && iteratorHigh > iteratorEdge;
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 bool GenericLeftRightPlanarityCheck<GraphT>::applyConstraints(const edgeid edgeId,
                                                               const edgeid parentEdgeId) {
     ConflictPair tmpConflictPair{};
@@ -164,7 +164,7 @@ bool GenericLeftRightPlanarityCheck<GraphT>::applyConstraints(const edgeid edgeI
     return true;
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 count GenericLeftRightPlanarityCheck<GraphT>::getLowestLowPoint(const ConflictPair &conflictPair) {
     if (conflictPair.left.isEmpty()) {
         return lowestPoint[conflictPair.right.low];
@@ -175,7 +175,7 @@ count GenericLeftRightPlanarityCheck<GraphT>::getLowestLowPoint(const ConflictPa
     return std::min(lowestPoint[conflictPair.right.low], lowestPoint[conflictPair.left.low]);
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 void GenericLeftRightPlanarityCheck<GraphT>::removeBackEdges(const edgeid edgeId,
                                                              const NodeT parentNode) {
     while (!stack.empty() && getLowestLowPoint(stack.top()) == heights[parentNode]) {
@@ -225,7 +225,7 @@ void GenericLeftRightPlanarityCheck<GraphT>::removeBackEdges(const edgeid edgeId
     }
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 bool GenericLeftRightPlanarityCheck<GraphT>::dfsTesting(NodeT startNode) {
     std::stack<NodeT> dfsStack;
     dfsStack.push(startNode);
@@ -303,7 +303,7 @@ bool GenericLeftRightPlanarityCheck<GraphT>::dfsTesting(NodeT startNode) {
     return true;
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 void GenericLeftRightPlanarityCheck<GraphT>::dfsOrientation(NodeT startNode) {
     std::stack<NodeT> dfsStack;
     dfsStack.push(startNode);

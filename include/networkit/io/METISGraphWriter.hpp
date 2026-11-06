@@ -8,6 +8,7 @@
 #ifndef NETWORKIT_IO_METIS_GRAPH_WRITER_HPP_
 #define NETWORKIT_IO_METIS_GRAPH_WRITER_HPP_
 
+#include <networkit/graph/GraphConcepts.hpp>
 #include <networkit/io/GraphWriter.hpp>
 
 namespace NetworKit {
@@ -15,7 +16,7 @@ namespace NetworKit {
 /**
  * @ingroup io
  */
-template <class GraphT>
+template <GraphLike GraphT>
 class GenericMETISGraphWriter final : public GraphWriterBase<GraphT> {
 
 public:

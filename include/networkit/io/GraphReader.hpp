@@ -10,6 +10,7 @@
 
 #include <networkit/auxiliary/StringTools.hpp>
 #include <networkit/graph/Graph.hpp>
+#include <networkit/graph/GraphConcepts.hpp>
 
 namespace NetworKit {
 
@@ -32,7 +33,7 @@ public:
  * @ingroup io
  * Abstract base class for graph readers.
  */
-template <class GraphT>
+template <GraphLike GraphT>
 class GraphReaderBase : public GraphReaderOptions {
 public:
     virtual ~GraphReaderBase() = default;

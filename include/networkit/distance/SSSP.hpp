@@ -21,7 +21,7 @@ namespace NetworKit {
  * @ingroup distance
  * Abstract base class for single-source shortest path algorithms.
  */
-template <class GraphT>
+template <GraphLike GraphT>
 class SingleSourceShortestPaths : public Algorithm {
     using NodeT = typename GraphT::NodeT;
     using EdgeWeightT = typename GraphT::EdgeWeightT;
@@ -191,7 +191,7 @@ protected:
                                      //!< the source
 };
 
-template <class GraphT>
+template <GraphLike GraphT>
 inline double SingleSourceShortestPaths<GraphT>::_numberOfPaths(NodeT t) const {
     if (!storePaths) {
         throw std::runtime_error("number of paths have not been stored");
@@ -210,5 +210,6 @@ using SSSP = SingleSourceShortestPaths<AdjListGraph<node, edgeweight>>;
 } /* namespace NetworKit */
 
 #include <networkit/distance/SSSPImpl.hpp>
+#include <networkit/graph/GraphConcepts.hpp>
 
 #endif // NETWORKIT_DISTANCE_SSSP_HPP_

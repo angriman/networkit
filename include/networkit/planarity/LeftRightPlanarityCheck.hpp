@@ -17,7 +17,7 @@
 
 namespace NetworKit {
 
-template <typename GraphT>
+template <GraphLike GraphT>
 class GenericLeftRightPlanarityCheck final : public Algorithm {
 
 public:
@@ -120,6 +120,7 @@ using LeftRightPlanarityCheck = GenericLeftRightPlanarityCheck<Graph>;
 
 } // namespace NetworKit
 
+#include <networkit/graph/GraphConcepts.hpp>
 #include <networkit/planarity/LeftRightPlanarityCheckImpl.hpp>
 
 #endif // NETWORKIT_PLANARITY_LEFT_RIGHT_PLANARITY_CHECK_HPP_

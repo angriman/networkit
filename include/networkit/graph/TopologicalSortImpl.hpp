@@ -14,13 +14,13 @@
 
 namespace NetworKit {
 
-template <typename GraphT>
+template <GraphLike GraphT>
 GenericTopologicalSort<GraphT>::GenericTopologicalSort(const GraphT &G)
     : G(G), computedNodeIdMap(computeContinuousNodeIds(G)) {
     checkDirected();
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 GenericTopologicalSort<GraphT>::GenericTopologicalSort(const GraphT &G,
                                                        const NodeIdMapping &nodeIdMap,
                                                        bool checkMapping)
@@ -33,7 +33,7 @@ GenericTopologicalSort<GraphT>::GenericTopologicalSort(const GraphT &G,
         checkNodeIdMap();
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 typename GenericTopologicalSort<GraphT>::NodeIdMapping
 GenericTopologicalSort<GraphT>::computeContinuousNodeIds(const GraphT &G) {
     NodeIdMapping nodeIdMap;
@@ -45,13 +45,13 @@ GenericTopologicalSort<GraphT>::computeContinuousNodeIds(const GraphT &G) {
     return nodeIdMap;
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 void GenericTopologicalSort<GraphT>::checkDirected() {
     if (!G.isDirected())
         throw std::runtime_error("Topological sort is defined for directed graphs only.");
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 void GenericTopologicalSort<GraphT>::checkNodeIdMap() {
     if (!nodeIdMap)
         return;
@@ -67,7 +67,7 @@ void GenericTopologicalSort<GraphT>::checkNodeIdMap() {
     }
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 void GenericTopologicalSort<GraphT>::run() {
     reset();
 
@@ -107,7 +107,7 @@ void GenericTopologicalSort<GraphT>::run() {
     hasRun = true;
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 index GenericTopologicalSort<GraphT>::mapNode(NodeT u) const {
     if (nodeIdMap) {
         const auto it = nodeIdMap->find(u);
@@ -124,7 +124,7 @@ index GenericTopologicalSort<GraphT>::mapNode(NodeT u) const {
     }
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 void GenericTopologicalSort<GraphT>::reset() {
     const count n = G.numberOfNodes();
     if (n == 0)

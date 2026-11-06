@@ -8,6 +8,7 @@
 #ifndef NETWORKIT_IO_METIS_GRAPH_READER_HPP_
 #define NETWORKIT_IO_METIS_GRAPH_READER_HPP_
 
+#include <networkit/graph/GraphConcepts.hpp>
 #include <networkit/io/GraphReader.hpp>
 
 namespace NetworKit {
@@ -22,7 +23,7 @@ namespace NetworKit {
  *
  * [1] http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/manual.pdf
  */
-template <class GraphT>
+template <GraphLike GraphT>
 class GenericMETISGraphReader final : public GraphReaderBase<GraphT> {
 public:
     GenericMETISGraphReader() = default;

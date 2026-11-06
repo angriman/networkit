@@ -12,6 +12,7 @@
 #include <queue>
 
 #include <networkit/distance/SSSP.hpp>
+#include <networkit/graph/GraphConcepts.hpp>
 
 namespace NetworKit {
 
@@ -20,7 +21,7 @@ namespace NetworKit {
  * The BFS class is used to do a breadth-first search on a Graph from a given
  * source node.
  */
-template <class GraphT>
+template <GraphLike GraphT>
 class BreadthFirstSearch final : public SingleSourceShortestPaths<GraphT> {
     using NodeT = typename GraphT::NodeT;
     using EdgeWeightT = typename GraphT::EdgeWeightT;
@@ -49,7 +50,7 @@ public:
     void run() override;
 };
 
-template <class GraphT>
+template <GraphLike GraphT>
 void BreadthFirstSearch<GraphT>::run() {
     constexpr EdgeWeightT weightOne{1};
     const count z = this->G->upperNodeIdBound();

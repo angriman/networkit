@@ -28,7 +28,7 @@ namespace NetworKit {
  * The algorithm has a time complexity of O(n³), making it suitable for small to
  * medium-sized graphs.
  */
-template <typename GraphT>
+template <GraphLike GraphT>
 class GenericFloydWarshall : public Algorithm {
 public:
     using NodeT = typename GraphT::NodeT;
@@ -112,5 +112,6 @@ using FloydWarshall = GenericFloydWarshall<Graph>;
 } // namespace NetworKit
 
 #include <networkit/distance/FloydWarshallImpl.hpp>
+#include <networkit/graph/GraphConcepts.hpp>
 
 #endif // NETWORKIT_DISTANCE_FLOYD_WARSHALL_HPP_

@@ -21,12 +21,12 @@
 
 namespace NetworKit {
 
-template <class GraphT>
+template <GraphLike GraphT>
 void GenericMETISGraphWriter<GraphT>::write(const GraphT &G, std::string_view path) {
     this->write(G, G.isWeighted(), path);
 }
 
-template <class GraphT>
+template <GraphLike GraphT>
 void GenericMETISGraphWriter<GraphT>::write(const GraphT &G, bool weighted, std::string_view path) {
     using NodeT = typename GraphT::NodeT;
     using EdgeWeightT = typename GraphT::EdgeWeightT;

@@ -23,7 +23,7 @@
 
 namespace NetworKit {
 
-template <class GraphT>
+template <GraphLike GraphT>
 GraphT GenericMETISGraphReader<GraphT>::read(std::string_view path) {
     using NodeT = typename GraphT::NodeT;
     using EdgeWeightT = typename GraphT::EdgeWeightT;

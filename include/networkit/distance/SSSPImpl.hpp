@@ -16,7 +16,7 @@
 
 namespace NetworKit {
 
-template <class GraphT>
+template <GraphLike GraphT>
 SingleSourceShortestPaths<GraphT>::SingleSourceShortestPaths(const GraphT &G, NodeT source,
                                                              bool storePaths,
                                                              bool storeNodesSortedByDistance,
@@ -29,7 +29,7 @@ SingleSourceShortestPaths<GraphT>::SingleSourceShortestPaths(const GraphT &G, No
         throw std::runtime_error("Error: node not in the graph.");
 }
 
-template <class GraphT>
+template <GraphLike GraphT>
 auto SingleSourceShortestPaths<GraphT>::getPath(NodeT t, bool forward) const -> std::vector<NodeT> {
     if (!storePaths) {
         throw std::runtime_error("paths have not been stored");
@@ -52,7 +52,7 @@ auto SingleSourceShortestPaths<GraphT>::getPath(NodeT t, bool forward) const -> 
     return path;
 }
 
-template <class GraphT>
+template <GraphLike GraphT>
 auto SingleSourceShortestPaths<GraphT>::getPaths(NodeT t, bool forward) const
     -> std::set<std::vector<NodeT>> {
 
@@ -115,7 +115,7 @@ auto SingleSourceShortestPaths<GraphT>::getPaths(NodeT t, bool forward) const
     return paths;
 }
 
-template <class GraphT>
+template <GraphLike GraphT>
 auto SingleSourceShortestPaths<GraphT>::getNodesSortedByDistance() const
     -> const std::vector<NodeT> & {
     if (!storeNodesSortedByDistance) {

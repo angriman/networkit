@@ -9,6 +9,7 @@
 #define NETWORKIT_IO_GRAPH_WRITER_HPP_
 
 #include <networkit/graph/Graph.hpp>
+#include <networkit/graph/GraphConcepts.hpp>
 
 namespace NetworKit {
 
@@ -16,7 +17,7 @@ namespace NetworKit {
  * @ingroup io
  * Abstract base class for graph writers.
  */
-template <class GraphT>
+template <GraphLike GraphT>
 class GraphWriterBase {
 public:
     virtual ~GraphWriterBase() = default;

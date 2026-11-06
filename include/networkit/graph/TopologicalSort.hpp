@@ -21,7 +21,7 @@ namespace NetworKit {
  * Undirected graphs are not accepted as input, since a topology sort is a linear ordering of
  * vertices such that for every edge u -> v, node u comes before v in the ordering.
  */
-template <typename GraphT>
+template <GraphLike GraphT>
 class GenericTopologicalSort final : public Algorithm {
 public:
     using NodeT = typename GraphT::NodeT;
@@ -95,6 +95,7 @@ using TopologicalSort = GenericTopologicalSort<Graph>;
 
 } // namespace NetworKit
 
+#include <networkit/graph/GraphConcepts.hpp>
 #include <networkit/graph/TopologicalSortImpl.hpp>
 
 #endif // NETWORKIT_GRAPH_TOPOLOGICAL_SORT_HPP_

@@ -16,14 +16,14 @@
 
 namespace NetworKit {
 
-template <typename GraphT>
+template <GraphLike GraphT>
 GenericFloydWarshall<GraphT>::GenericFloydWarshall(const GraphT &G) : graph(&G) {
     if (!G.isWeighted()) {
         throw std::runtime_error("The input graph is unweighted!");
     }
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 void GenericFloydWarshall<GraphT>::tagNegativeCycles() {
     graph->forNodes([&](NodeT w) {
         if (distances[w][w] >= 0.0)
@@ -44,7 +44,7 @@ void GenericFloydWarshall<GraphT>::tagNegativeCycles() {
     });
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 void GenericFloydWarshall<GraphT>::run() {
     const index numberOfNodes = graph->numberOfNodes();
     distances.resize(numberOfNodes, std::vector<DistanceT>(numberOfNodes, infiniteDistance));
@@ -95,20 +95,20 @@ void GenericFloydWarshall<GraphT>::run() {
     hasRun = true;
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 typename GenericFloydWarshall<GraphT>::DistanceT
 GenericFloydWarshall<GraphT>::getDistance(NodeT source, NodeT target) const {
     assureFinished();
     return distances[source][target];
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 bool GenericFloydWarshall<GraphT>::isNodeInNegativeCycle(NodeT u) const {
     assureFinished();
     return nodesInNegativeCycle[u] == 1;
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 std::vector<typename GenericFloydWarshall<GraphT>::NodeT>
 GenericFloydWarshall<GraphT>::getNodesOnShortestPath(NodeT source, NodeT target) const {
     assureFinished();
@@ -128,7 +128,7 @@ GenericFloydWarshall<GraphT>::getNodesOnShortestPath(NodeT source, NodeT target)
     return path;
 }
 
-template <typename GraphT>
+template <GraphLike GraphT>
 const std::vector<std::vector<typename GenericFloydWarshall<GraphT>::DistanceT>> &
 GenericFloydWarshall<GraphT>::getDistances() const {
     assureFinished();
