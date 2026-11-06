@@ -21,12 +21,15 @@ namespace NetworKit {
 /**
  * @ingroup io
  * TODO: class documentation
+ *
+ * Reading fails if the number of nodes does not fit into GraphT::NodeT.
  */
-class DibapGraphReader final : public GraphReader {
+template <class GraphT>
+class GenericDibapGraphReader final : public GraphReaderBase<GraphT> {
 public:
-    DibapGraphReader() = default;
+    GenericDibapGraphReader() = default;
 
-    Graph read(std::string_view path) override;
+    GraphT read(std::string_view path) override;
 
     const std::vector<Point<coordinate>> &getCoordinates() const noexcept { return coordinates; }
 
@@ -36,7 +39,11 @@ private:
     std::vector<Point<coordinate>> coordinates;
 };
 
+using DibapGraphReader = GenericDibapGraphReader<Graph>;
+
 } /* namespace NetworKit */
+
+#include <networkit/io/DibapGraphReaderImpl.hpp>
 
 #endif // NETWORKIT_WINDOWS
 
