@@ -14,7 +14,6 @@ networkit_add_module(io
     KONECTGraphReader.cpp
     MemoryMappedFile.cpp
     METISParser.cpp
-    MTXGraphReader.cpp
     MTXParser.cpp
     NetworkitBinaryReader.cpp
     NetworkitBinaryWriter.cpp

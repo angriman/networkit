@@ -7,25 +7,6 @@
 
 namespace NetworKit {
 
-/**
- * Extract a (weighted) edge from a line in the file.
- */
-MTXParser::Edge parseLine(const std::string &line, const bool weighted) {
-    node i, j;
-    std::optional<double> value;
-    std::istringstream istring(line);
-    istring >> i >> j;
-    i--;
-    j--;
-
-    if (weighted) {
-        double tmp;
-        if (istring >> tmp)
-            value = tmp;
-    }
-    return MTXParser::Edge(i, j, value);
-}
-
 MTXParser::MTXParser(const std::string &path) : graphFile(path) {
     if (!(graphFile)) {
         ERROR("invalid graph file: ", path);
@@ -86,28 +67,6 @@ MTXParser::MatrixSize MTXParser::getMatrixSize() {
     } else {
         throw std::runtime_error("Getting MTX matrix size line failed.");
     }
-}
-
-std::optional<WeightedEdge> MTXParser::getNext(bool weighted) {
-    std::string line;
-
-    do {
-        auto hasLine = static_cast<bool>(std::getline(graphFile, line));
-        if (!hasLine)
-            return std::nullopt;
-        // check for comment line starting with '%'
-        if (line[0] == '%') {
-            throw std::runtime_error(
-                "Invalid MTX file structure. No comments allowed after size line.");
-        } else {
-            auto e = parseLine(line, weighted);
-            edgeweight w = 1.0;
-            if (weighted) {
-                w = e.weight.value();
-            }
-            return std::optional<WeightedEdge>({e.from, e.to, w});
-        }
-    } while (true);
 }
 
 } /* namespace NetworKit */

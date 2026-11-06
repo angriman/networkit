@@ -18,6 +18,8 @@ networkit_add_test(io METISParserGTest)
 
 networkit_add_test(io MemoryMappedFileGTest)
 
+networkit_add_test(io MTXGraphIOGTest)
+
 networkit_add_test(io SNAPGraphIOGTest)
 
 networkit_add_test(io ThrillGraphBinaryIOGTest)
