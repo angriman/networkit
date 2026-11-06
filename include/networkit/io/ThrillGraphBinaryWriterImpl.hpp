@@ -1,17 +1,28 @@
 /*
- * ThrillGraphBinaryWriter.cpp
+ * ThrillGraphBinaryWriterImpl.hpp
  *
  * @author Michael Hamann
  */
 
+#ifndef NETWORKIT_IO_THRILL_GRAPH_BINARY_WRITER_IMPL_HPP_
+#define NETWORKIT_IO_THRILL_GRAPH_BINARY_WRITER_IMPL_HPP_
+
+#include <cstdint>
 #include <fstream>
+#include <limits>
+#include <stdexcept>
+#include <vector>
 
 #include <networkit/io/ThrillGraphBinaryWriter.hpp>
 
 namespace NetworKit {
 
-void ThrillGraphBinaryWriter::write(const Graph &G, std::string_view path) {
-    if (G.upperNodeIdBound() > std::numeric_limits<uint32_t>::max()) {
+template <class GraphT>
+void GenericThrillGraphBinaryWriter<GraphT>::write(const GraphT &G, std::string_view path) {
+    using NodeT = typename GraphT::NodeT;
+
+    const auto upperNodeIdBound = static_cast<count>(G.upperNodeIdBound());
+    if (upperNodeIdBound > std::numeric_limits<uint32_t>::max()) {
         throw std::runtime_error(
             "Thrill binary graphs only support graphs with up to 2^32-1 nodes.");
     }
@@ -20,13 +31,15 @@ void ThrillGraphBinaryWriter::write(const Graph &G, std::string_view path) {
 
     std::vector<uint32_t> neighbors;
 
-    for (node u = 0; u < G.upperNodeIdBound(); ++u) {
+    for (count u = 0; u < upperNodeIdBound; ++u) {
         neighbors.clear();
 
-        if (G.hasNode(u)) {
-            G.forEdgesOf(u, [&](node v) {
-                if (u <= v) {
-                    neighbors.push_back(v);
+        // u < upperNodeIdBound, so that it fits into NodeT.
+        const auto uNode = static_cast<NodeT>(u);
+        if (G.hasNode(uNode)) {
+            G.forEdgesOf(uNode, [&](NodeT v) -> void {
+                if (uNode <= v) {
+                    neighbors.push_back(static_cast<uint32_t>(v));
                 }
             });
         }
@@ -55,4 +68,7 @@ void ThrillGraphBinaryWriter::write(const Graph &G, std::string_view path) {
 
     out_stream.close();
 }
+
 } // namespace NetworKit
+
+#endif // NETWORKIT_IO_THRILL_GRAPH_BINARY_WRITER_IMPL_HPP_
