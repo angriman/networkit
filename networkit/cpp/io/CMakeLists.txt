@@ -30,7 +30,6 @@ networkit_add_module(io
     RBGraphReader.cpp
     SNAPEdgeListPartitionReader.cpp
     SNAPGraphReader.cpp
-    SNAPGraphWriter.cpp
     ThrillGraphBinaryReader.cpp
     ThrillGraphBinaryWriter.cpp
 )
