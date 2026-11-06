@@ -8,6 +8,7 @@
 #include <string>
 #include <gtest/gtest.h>
 #include <networkit/Globals.hpp>
+#include <networkit/graph/AdjListGraph.hpp>
 #include <networkit/graph/GraphConcepts.hpp>
 
 namespace NetworKit {
@@ -28,6 +29,15 @@ TEST(GraphConceptsGTest, testGraphEdgeWeightConstraints) {
     static_assert(GraphEdgeWeight<double>);
     static_assert(GraphEdgeWeight<bool>);
     static_assert(!GraphEdgeWeight<std::string>);
+
+    SUCCEED();
+}
+
+TEST(GraphConceptsGTest, testGraphLikeConstraints) {
+    static_assert(GraphLike<Graph>);
+    static_assert(GraphLike<AdjListGraph<uint32_t, float>>);
+    static_assert(!GraphLike<int>);
+    static_assert(!GraphLike<std::string>);
 
     SUCCEED();
 }
