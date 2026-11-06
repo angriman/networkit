@@ -13,6 +13,8 @@
 #include <atomic>
 #include <cassert>
 #include <cmath>
+#include <concepts>
+#include <limits>
 #include <random>
 
 #include <networkit/Globals.hpp>
@@ -283,31 +285,26 @@ private:
         return 1 + static_cast<count>(std::floor((std::log2(random_prob)) * inv_log2_cp));
     }
 
-    // SFINAE to determine and construct the right uniform distribution
+    // Determine and construct the right uniform distribution
     template <bool FixedPoint>
-    auto get_distribution() const ->
-        typename std::enable_if<FixedPoint, std::uniform_int_distribution<integral_t>>::type {
-        return std::uniform_int_distribution<integral_t>{1, std::numeric_limits<integral_t>::max()};
+    auto get_distribution() const {
+        if constexpr (FixedPoint) {
+            return std::uniform_int_distribution<integral_t>{
+                1, std::numeric_limits<integral_t>::max()};
+        } else {
+            return std::uniform_real_distribution<double>{std::nextafter(0.0, 1.0),
+                                                          std::nextafter(1.0, 0.0)};
+        }
     }
 
-    template <bool FixedPoint>
-    auto get_distribution() const ->
-        typename std::enable_if<!FixedPoint, std::uniform_real_distribution<double>>::type {
-        return std::uniform_real_distribution<double>{std::nextafter(0.0, 1.0),
-                                                      std::nextafter(1.0, 0.0)};
-    }
-
-    // SFINAE to allow using functors with and without thread id as parameter
-    template <typename Handle>
-    auto callHandle(Handle h, unsigned tid, node u, node v) const
-        -> decltype(h(0u, node{0}, node{0})) {
-        return h(tid, u, v);
-    }
-
-    template <typename Handle>
-    auto callHandle(Handle h, unsigned /*tid*/, node u, node v) const
-        -> decltype(h(node{0}, node{0})) {
-        return h(u, v);
+    // Allow using functors with and without thread id as parameter
+    template <class Handle>
+    decltype(auto) callHandle(Handle h, unsigned tid, node u, node v) const {
+        if constexpr (std::invocable<Handle &, unsigned, node, node>) {
+            return h(tid, u, v);
+        } else {
+            return h(u, v);
+        }
     }
 };
 
