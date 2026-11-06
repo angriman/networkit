@@ -31,7 +31,8 @@ public:
      *     for each edge {u, v}:
      *       write line "u v"
      */
-    void writeEdgeList(const Graph &G, std::string_view path);
+    template <class GraphT>
+    void writeEdgeList(const GraphT &G, std::string_view path);
 
     /**
      * Writes graph to text file in adjacency list format.
@@ -45,8 +46,12 @@ public:
      *       write "x" for each edge {v, x}
      *       end line
      */
-    void writeAdjacencyList(const Graph &G, std::string_view path);
+    template <class GraphT>
+    void writeAdjacencyList(const GraphT &G, std::string_view path);
 };
 
 } /* namespace NetworKit */
+
+#include <networkit/io/GraphIOImpl.hpp>
+
 #endif // NETWORKIT_IO_GRAPH_IO_HPP_
