@@ -9,9 +9,11 @@
 #define NETWORKIT_IO_RB_MATRIX_READER_HPP_
 
 #include <networkit/io/MatrixReader.hpp>
-#include <networkit/io/RBGraphReader.hpp>
 
 namespace NetworKit {
+
+template <class GraphT>
+class GenericRBGraphReader;
 
 /**
  * @ingroup io
@@ -31,7 +33,8 @@ public:
     CSRMatrix read(std::istream &in);
 
 private:
-    friend RBGraphReader;
+    template <class GraphT>
+    friend class GenericRBGraphReader;
     // data format is CSC
     std::vector<index> pointers;
     std::vector<index> rowindex;
@@ -46,4 +49,9 @@ private:
 };
 
 } // namespace NetworKit
+
+// Included after RBMatrixReader is complete, since the graph reader uses it. Also keeps
+// RBGraphReader available to code that only includes this header.
+#include <networkit/io/RBGraphReader.hpp>
+
 #endif // NETWORKIT_IO_RB_MATRIX_READER_HPP_
