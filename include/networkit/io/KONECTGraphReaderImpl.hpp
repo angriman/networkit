@@ -1,5 +1,5 @@
 /*
- * KONECTGraphReader.cpp
+ * KONECTGraphReaderImpl.hpp
  *
  *  Created on: 11.05.2018
  *      Author: Roman Bange
@@ -9,6 +9,17 @@
  *
  */
 
+#ifndef NETWORKIT_IO_KONECT_GRAPH_READER_IMPL_HPP_
+#define NETWORKIT_IO_KONECT_GRAPH_READER_IMPL_HPP_
+
+#include <charconv>
+#include <cstdlib>
+#include <functional>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <system_error>
+#include <type_traits>
 #include <unordered_map>
 #include <tlx/unused.hpp>
 
@@ -17,10 +28,18 @@
 #include <networkit/io/MemoryMappedFile.hpp>
 
 namespace NetworKit {
-KONECTGraphReader::KONECTGraphReader(bool remapNodes, MultipleEdgesHandling handlingmethod)
+
+template <class GraphT>
+GenericKONECTGraphReader<GraphT>::GenericKONECTGraphReader(
+    bool remapNodes, GraphReaderOptions::MultipleEdgesHandling handlingmethod)
     : remapNodes(remapNodes), multipleEdgesHandlingMethod(handlingmethod) {}
 
-Graph KONECTGraphReader::read(std::string_view path) {
+template <class GraphT>
+GraphT GenericKONECTGraphReader<GraphT>::read(std::string_view path) {
+    using NodeT = typename GraphT::NodeT;
+    using EdgeWeightT = typename GraphT::EdgeWeightT;
+    using Options = GraphReaderOptions;
+
     std::string graphFormat = "";
     std::string graphType = "";
     count numberOfNodes = -1;
@@ -31,7 +50,7 @@ Graph KONECTGraphReader::read(std::string_view path) {
     bool multiple = false;
     int valuesPerLine = 2;
     bool secondPropertyLine = false;
-    std::unordered_map<node, node> nodeIdMap;
+    std::unordered_map<count, NodeT> nodeIdMap;
 
     MemoryMappedFile mmfile(path);
     auto it = mmfile.cbegin();
@@ -68,7 +87,7 @@ Graph KONECTGraphReader::read(std::string_view path) {
     };
 
     // The following functions are helpers for parsing.
-    auto skipWhitespace = [&] {
+    auto skipWhitespace = [&]() -> void {
         while (it != end && (*it == ' ' || *it == '\t'))
             ++it;
         if (it == end) { // proper error message if file ends unexpected
@@ -77,7 +96,7 @@ Graph KONECTGraphReader::read(std::string_view path) {
     };
 
     // This function parses in whole words
-    auto scanWord = [&]() {
+    auto scanWord = [&]() -> std::string {
         std::string word = "";
         while (it != end && *it != ' ' && *it != '\t' && *it != '\n' && *it != '\r') {
             word += *it;
@@ -86,21 +105,39 @@ Graph KONECTGraphReader::read(std::string_view path) {
         return word;
     };
 
-    auto scanId = [&]() -> node {
-        char *past;
-        auto value = strtol(it, &past, 10);
-        if (past <= it) {
+    auto scanId = [&]() -> count {
+        count value{};
+        const auto [past, ec] = std::from_chars(it, end, value);
+        if (ec != std::errc{}) {
             throw std::runtime_error("Scanning node failed. The file may be corrupt.");
         }
         it = past;
         return value;
     };
 
-    auto scanWeight = [&]() -> edgeweight {
-        char *past;
-        auto value = strtod(it, &past);
-        if (past <= it) {
-            throw std::runtime_error("Scanning node failed. The file may be corrupt.");
+    // Parses the weight at it directly into EdgeWeightT, so that integral weights must be integers
+    // representable by EdgeWeightT.
+    auto scanWeight = [&]() -> EdgeWeightT {
+        const char *tokenEnd = it;
+        while (tokenEnd != end && *tokenEnd != ' ' && *tokenEnd != '\t' && *tokenEnd != '\n'
+               && *tokenEnd != '\r') {
+            ++tokenEnd;
+        }
+        EdgeWeightT value{};
+        const char *past = it;
+        if constexpr (std::is_integral_v<EdgeWeightT>) {
+            const auto [ptr, ec] = std::from_chars(it, tokenEnd, value);
+            if (ec == std::errc{}) {
+                past = ptr;
+            }
+        } else {
+            char *strtodPast;
+            value = static_cast<EdgeWeightT>(std::strtod(it, &strtodPast));
+            past = strtodPast;
+        }
+        if (past == it || past != tokenEnd) {
+            throw std::runtime_error("Scanning weight " + std::string(it, tokenEnd)
+                                     + " failed. It may not fit into the edge weight type.");
         }
         it = past;
         return value;
@@ -128,7 +165,7 @@ Graph KONECTGraphReader::read(std::string_view path) {
             weighted = true;
             valuesPerLine = 3;
         } else if (graphType == "positive") { // multiple edges
-            if (multipleEdgesHandlingMethod == SUM_WEIGHTS_UP) {
+            if (multipleEdgesHandlingMethod == Options::SUM_WEIGHTS_UP) {
                 weighted = true;
             }
             multiple = true; // weights will be added
@@ -177,12 +214,35 @@ Graph KONECTGraphReader::read(std::string_view path) {
         DEBUG("Second property line read in. Edges: " + std::to_string(numberOfEdges)
               + " / Nodes: " + std::to_string(numberOfNodes));
         tlx::unused(numberOfEdges);
+
+        // NullNodeId<NodeT> is the largest NodeT and marks "no node", so that at most max() nodes
+        // fit.
+        static_assert(NullNodeId<NodeT> == std::numeric_limits<NodeT>::max());
+        constexpr auto maxNumberOfNodes = static_cast<count>(std::numeric_limits<NodeT>::max());
+        if (numberOfNodes > maxNumberOfNodes) {
+            throw std::runtime_error("KONECT file " + std::string(path) + " has "
+                                     + std::to_string(numberOfNodes)
+                                     + " nodes, but the node type of the graph can hold at most "
+                                     + std::to_string(maxNumberOfNodes) + " nodes");
+        }
     }
 
-    Graph graph((secondPropertyLine ? numberOfNodes : 0), weighted, directed);
+    GraphT graph((secondPropertyLine ? numberOfNodes : 0), weighted, directed);
+
+    // Without remapping, the 1-based node id in becomes in - 1.
+    const auto checkNodeId = [](count in) -> void {
+        if (in == 0) {
+            throw std::runtime_error("KONECT node ids start at 1, but the file has node id 0");
+        }
+        // NullNodeId<NodeT> is the largest NodeT, so that the largest valid node id is smaller.
+        if (in - 1 >= static_cast<count>(NullNodeId<NodeT>)) {
+            throw std::runtime_error("Node id " + std::to_string(in)
+                                     + " does not fit into the node type of the graph");
+        }
+    };
 
     // Map nodes and increase graph size if no second property is defined
-    std::function<node(node)> mapNode = [&](node in) -> node {
+    std::function<NodeT(count)> mapNode = [&](count in) -> NodeT {
         if (secondPropertyLine) {
             if (in > numberOfNodes) { // if file is corrupted
                 // secondPropertyLine is made useless
@@ -191,41 +251,49 @@ Graph KONECTGraphReader::read(std::string_view path) {
                 if (remapNodes) { // if remapNodes is selected true, the map has to be initalized
                                   // with the existing nodes
                     nodeIdMap.reserve(numberOfNodes);
-                    graph.forNodes([&](node u) { nodeIdMap.insert({u, u}); });
+                    graph.forNodes(
+                        [&](NodeT u) -> void { nodeIdMap.insert({static_cast<count>(u) + 1, u}); });
                 }
                 return mapNode(in);
             } else {
-                return in - 1; // minus firstNode
+                checkNodeId(in);
+                return static_cast<NodeT>(in - 1); // minus firstNode
             }
         } else {
             if (remapNodes) {
                 auto it = nodeIdMap.find(in);
                 if (it != nodeIdMap.end())
                     return it->second;
+                if (graph.upperNodeIdBound() == NullNodeId<NodeT>) {
+                    throw std::runtime_error("The file has more nodes than the node type of the "
+                                             "graph can hold");
+                }
                 auto result = nodeIdMap.insert({in, graph.addNode()});
                 assert(result.second);
                 return result.first->second;
             } else {
-                for (count i = graph.upperNodeIdBound(); i < in; i++)
-                    graph.addNode();
-                return in - 1;
+                checkNodeId(in);
+                const auto upperNodeIdBound = static_cast<count>(graph.upperNodeIdBound());
+                if (upperNodeIdBound < in)
+                    graph.addNodes(in - upperNodeIdBound);
+                return static_cast<NodeT>(in - 1);
             }
         }
     };
 
     // Helper function for handling edges
-    auto handleEdge = [&](node source, node target, edgeweight weight) {
+    auto handleEdge = [&](NodeT source, NodeT target, EdgeWeightT weight) -> void {
         if (!graph.hasEdge(source, target)) {
             if (!graph.addEdge(source, target, weight, true))
                 WARN("Not adding edge ", source, "-", target, " since it is already present.");
         } else if (multiple) {
             switch (multipleEdgesHandlingMethod) {
-            case DISCARD_EDGES:
+            case Options::DISCARD_EDGES:
                 break; // Do nothing
-            case SUM_WEIGHTS_UP:
+            case Options::SUM_WEIGHTS_UP:
                 graph.increaseWeight(source, target, weight);
                 break;
-            case KEEP_MINIMUM_WEIGHT:
+            case Options::KEEP_MINIMUM_WEIGHT:
                 if (graph.weight(source, target) > weight) {
                     graph.setWeight(source, target, weight);
                 }
@@ -266,11 +334,15 @@ Graph KONECTGraphReader::read(std::string_view path) {
                 throw std::runtime_error("Unexpected end of file");
             }
             skipWhitespace();
+            // Map the source first, so that remapped ids do not depend on the evaluation order of
+            // function arguments.
+            const NodeT source = mapNode(sourceId);
+            const NodeT target = mapNode(targetId);
             if (valuesPerLine > 2) {
                 auto edgeWeight = scanWeight();
-                handleEdge(mapNode(sourceId), mapNode(targetId), edgeWeight);
+                handleEdge(source, target, edgeWeight);
             } else {
-                handleEdge(mapNode(sourceId), mapNode(targetId), defaultEdgeWeight);
+                handleEdge(source, target, EdgeWeightT{1});
             }
         }
         // break lines
@@ -282,3 +354,5 @@ Graph KONECTGraphReader::read(std::string_view path) {
     return graph;
 }
 } // namespace NetworKit
+
+#endif // NETWORKIT_IO_KONECT_GRAPH_READER_IMPL_HPP_
