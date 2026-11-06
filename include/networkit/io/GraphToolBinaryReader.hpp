@@ -18,23 +18,26 @@ namespace NetworKit {
 /**
  * Reads graphs from files in the binary format defined by graph-tool[1].
  * [1]: http://graph-tool.skewed.de/static/doc/gt_format.html
+ *
+ * Reading fails if the number of nodes does not fit into GraphT::NodeT.
  */
-class GraphToolBinaryReader final : public GraphReader {
+template <class GraphT>
+class GenericGraphToolBinaryReader final : public GraphReaderBase<GraphT> {
 
 public:
-    GraphToolBinaryReader() = default; // nullary constructor for Python shell
+    GenericGraphToolBinaryReader() = default; // nullary constructor for Python shell
 
     /**
      * Given the path of an input file, read the graph contained.
      *
      * @param[in]  path  input file path
      */
-    Graph read(std::string_view path) override;
+    GraphT read(std::string_view path) override;
 
 private:
     bool littleEndianness;
 
-    void addOutNeighbours(std::ifstream &file, uint64_t numNodes, Graph &G);
+    void addOutNeighbours(std::ifstream &file, uint64_t numNodes, GraphT &G);
 
     std::vector<std::vector<uint64_t>> getOutNeighbours(std::ifstream &file, uint64_t numNodes);
 
@@ -67,5 +70,10 @@ private:
     }
 };
 
+using GraphToolBinaryReader = GenericGraphToolBinaryReader<Graph>;
+
 } /* namespace NetworKit */
+
+#include <networkit/io/GraphToolBinaryReaderImpl.hpp>
+
 #endif // NETWORKIT_IO_GRAPH_TOOL_BINARY_READER_HPP_

@@ -11,8 +11,6 @@ networkit_add_module(io
     EdgeListCoverReader.cpp
     EdgeListPartitionReader.cpp
     GraphIO.cpp
-    GraphToolBinaryReader.cpp
-    GraphToolBinaryWriter.cpp
     KONECTGraphReader.cpp
     MemoryMappedFile.cpp
     METISParser.cpp

@@ -16,22 +16,23 @@ namespace NetworKit {
  * Writes graphs to files in the binary format defined by graph-tool[1].
  * [1]: http://graph-tool.skewed.de/static/doc/gt_format.html
  */
-class GraphToolBinaryWriter final : public GraphWriter {
+template <class GraphT>
+class GenericGraphToolBinaryWriter final : public GraphWriterBase<GraphT> {
 
 public:
-    GraphToolBinaryWriter(bool littleEndianness = true);
+    GenericGraphToolBinaryWriter(bool littleEndianness = true);
 
     /**
      * Given the path of an input file, read the graph contained.
      *
      * @param[in]  path  input file path
      */
-    void write(const Graph &G, std::string_view path) override;
+    void write(const GraphT &G, std::string_view path) override;
 
 private:
     bool littleEndianness;
 
-    void writeAdjacencies(std::ofstream &file, const Graph &G);
+    void writeAdjacencies(std::ofstream &file, const GraphT &G);
 
     uint8_t getAdjacencyWidth(uint64_t n);
 
@@ -57,5 +58,10 @@ private:
     }
 };
 
+using GraphToolBinaryWriter = GenericGraphToolBinaryWriter<Graph>;
+
 } /* namespace NetworKit */
+
+#include <networkit/io/GraphToolBinaryWriterImpl.hpp>
+
 #endif // NETWORKIT_IO_GRAPH_TOOL_BINARY_WRITER_HPP_
