@@ -1,31 +1,40 @@
 /*
- * GMLGraphReader.cpp
+ * GMLGraphReaderImpl.hpp
  *
  *  Created on: 18.09.2014
  *      Author: Maximilian Vogel (maximilian.vogel@student.kit.edu)
  */
 
+#ifndef NETWORKIT_IO_GML_GRAPH_READER_IMPL_HPP_
+#define NETWORKIT_IO_GML_GRAPH_READER_IMPL_HPP_
+
 #include <exception>
 #include <fstream>
+#include <stdexcept>
+#include <string>
 #include <unordered_map>
+#include <utility>
 
 #include <tlx/define/attribute_fallthrough.hpp>
 
 #include <networkit/auxiliary/Enforce.hpp>
 #include <networkit/auxiliary/Log.hpp>
-#include <networkit/auxiliary/StringTools.hpp>
 #include <networkit/io/GMLGraphReader.hpp>
 
 namespace NetworKit {
 
-Graph GMLGraphReader::read(std::string_view path) {
+template <class GraphT>
+GraphT GenericGMLGraphReader<GraphT>::read(std::string_view path) {
+    using NodeT = typename GraphT::NodeT;
+    using EdgeWeightT = typename GraphT::EdgeWeightT;
+
     std::ifstream graphFile(path.data());
     Aux::enforceOpened(graphFile);
     std::string line;
 
-    std::unordered_map<std::string, node> nodeMap;
+    std::unordered_map<std::string, NodeT> nodeMap;
 
-    auto ignoreWhitespaces = [](std::string &s, index i) {
+    auto ignoreWhitespaces = [](std::string &s, index i) -> index {
         index newIdx = i;
         index end = s.size();
         while (s[newIdx] == ' ' && newIdx < end)
@@ -33,7 +42,7 @@ Graph GMLGraphReader::read(std::string_view path) {
         return newIdx;
     };
 
-    auto getPair = [&ignoreWhitespaces](std::string &s) {
+    auto getPair = [&ignoreWhitespaces](std::string &s) -> std::pair<std::string, std::string> {
         if (s.find("[") < s.size()) {
             throw std::runtime_error("found opening bracket");
         } else if (s.find("]") < s.size()) {
@@ -55,23 +64,28 @@ Graph GMLGraphReader::read(std::string_view path) {
         return std::make_pair(key, value);
     };
 
-    auto parseNode = [&](Graph &G) {
+    auto parseNode = [&](GraphT &G) -> bool {
         bool closed = false;
         if (line.find("node") < line.size() && line.find("[") < line.size()) {
             std::getline(graphFile, line);
             closed = line.find("]") < line.size();
             while (!closed) {
+                std::pair<std::string, std::string> pair;
                 try {
-                    auto pair = getPair(line);
-                    if (pair.first == "id") {
-                        // currently, node attributes are ignored and only the id is relevant for
-                        // edges later on
-                        node u = G.addNode();
-                        nodeMap.insert(std::make_pair(pair.second, u));
-                        DEBUG("added node: ", u, ", ", pair.second);
-                    }
+                    pair = getPair(line);
                 } catch (const std::exception &e) {
                     return false;
+                }
+                if (pair.first == "id") {
+                    if (G.upperNodeIdBound() == NullNodeId<NodeT>) {
+                        throw std::runtime_error("The file has more nodes than the node type of "
+                                                 "the graph can hold");
+                    }
+                    // currently, node attributes are ignored and only the id is relevant for
+                    // edges later on
+                    NodeT u = G.addNode();
+                    nodeMap.insert(std::make_pair(pair.second, u));
+                    DEBUG("added node: ", u, ", ", pair.second);
                 }
                 std::getline(graphFile, line);
                 closed = line.find("]") < line.size();
@@ -86,11 +100,11 @@ Graph GMLGraphReader::read(std::string_view path) {
         }
     };
 
-    auto parseEdge = [&](Graph &G) {
+    auto parseEdge = [&](GraphT &G) -> bool {
         if (line.find("edge") < line.size() && line.find("[") < line.size()) {
             std::getline(graphFile, line);
-            node u = 0;
-            node v = 0;
+            NodeT u = 0;
+            NodeT v = 0;
             while (!(line.find("]") < line.size())) {
                 try {
                     auto pair = getPair(line);
@@ -106,7 +120,7 @@ Graph GMLGraphReader::read(std::string_view path) {
                 }
                 std::getline(graphFile, line);
             }
-            if (!G.addEdge(u, v, defaultEdgeWeight, true))
+            if (!G.addEdge(u, v, EdgeWeightT{1}, true))
                 WARN("Not adding edge ", u, "-", v, " since it is already present.");
             else
                 DEBUG("added edge ", u, ", ", v);
@@ -120,8 +134,8 @@ Graph GMLGraphReader::read(std::string_view path) {
         }
     };
 
-    auto parseGraph = [&]() {
-        Graph G;
+    auto parseGraph = [&]() -> GraphT {
+        GraphT G;
         int key_type = 0; // 0 for graph keys, 1 for node, 2 for edges
         bool directed = false;
         std::getline(graphFile, line);
@@ -143,9 +157,9 @@ Graph GMLGraphReader::read(std::string_view path) {
                             break;
                         } catch (const std::exception &e) {
                             if (directed) {
-                                G = Graph(0, false, true);
+                                G = GraphT(0, false, true);
                             } else {
-                                G = Graph(0, false, false);
+                                G = GraphT(0, false, false);
                             }
                             ++key_type;
                         }
@@ -180,9 +194,11 @@ Graph GMLGraphReader::read(std::string_view path) {
         return G;
     };
 
-    Graph G = parseGraph();
+    GraphT G = parseGraph();
     G.shrinkToFit();
     return G;
 }
 
 } /* namespace NetworKit */
+
+#endif // NETWORKIT_IO_GML_GRAPH_READER_IMPL_HPP_

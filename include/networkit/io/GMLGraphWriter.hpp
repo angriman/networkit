@@ -15,10 +15,11 @@ namespace NetworKit {
 /**
  * @ingroup io
  */
-class GMLGraphWriter final : public GraphWriter {
+template <class GraphT>
+class GenericGMLGraphWriter final : public GraphWriterBase<GraphT> {
 public:
     /** Default constructor */
-    GMLGraphWriter() = default;
+    GenericGMLGraphWriter() = default;
 
     /**
      * Write a graph @a G and its coordinates to a GML file.
@@ -26,8 +27,13 @@ public:
      * @param[in]  G     Graph of type NetworKit with 2D coordinates.
      * @param[in]  path  Path to file.
      */
-    void write(const Graph &G, std::string_view path) override;
+    void write(const GraphT &G, std::string_view path) override;
 };
 
+using GMLGraphWriter = GenericGMLGraphWriter<Graph>;
+
 } /* namespace NetworKit */
+
+#include <networkit/io/GMLGraphWriterImpl.hpp>
+
 #endif // NETWORKIT_IO_GML_GRAPH_WRITER_HPP_

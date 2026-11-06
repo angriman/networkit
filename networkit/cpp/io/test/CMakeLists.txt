@@ -5,6 +5,8 @@ networkit_add_test(io DotGraphIOGTest)
 
 networkit_add_test(io EdgeListIOGTest)
 
+networkit_add_test(io GMLGraphIOGTest)
+
 networkit_add_test(io IOTestUtilsGTest)
 
 networkit_add_test(io METISGraphIOGTest

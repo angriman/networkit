@@ -14,10 +14,13 @@ namespace NetworKit {
 
 /**
  * @ingroup io
+ *
+ * Reading fails if the number of nodes does not fit into GraphT::NodeT.
  */
-class GMLGraphReader final : public GraphReader {
+template <class GraphT>
+class GenericGMLGraphReader final : public GraphReaderBase<GraphT> {
 public:
-    GMLGraphReader() = default;
+    GenericGMLGraphReader() = default;
 
     /**
      * Takes a file path as parameter and returns a graph file.
@@ -26,8 +29,13 @@ public:
      *
      * @param[out]  the graph read from file
      */
-    Graph read(std::string_view path) override;
+    GraphT read(std::string_view path) override;
 };
 
+using GMLGraphReader = GenericGMLGraphReader<Graph>;
+
 } /* namespace NetworKit */
+
+#include <networkit/io/GMLGraphReaderImpl.hpp>
+
 #endif // NETWORKIT_IO_GML_GRAPH_READER_HPP_
