@@ -46,6 +46,7 @@ void DynKatzCentrality::run() {
 
     isActive.clear();
     isActive.resize(G.upperNodeIdBound(), true);
+    activeRanking.clear();
     for (count u = 0; u < G.upperNodeIdBound(); u++)
         activeRanking.push_back(u);
 
@@ -66,6 +67,24 @@ void DynKatzCentrality::run() {
 }
 
 void DynKatzCentrality::updateBatch(std::span<const GraphEvent> events) {
+    for (GraphEvent e : events) {
+        if (e.type != GraphEvent::EDGE_ADDITION && e.type != GraphEvent::EDGE_REMOVAL) {
+            throw std::runtime_error("Event type not allowed. Edge insertions or deletions only.");
+        }
+    }
+
+    // The bounds are only valid as long as alpha < 1 / maxdeg. If an addition raises the max.
+    // degree, we choose alpha as the constructor would for the updated graph and start over.
+    for (GraphEvent e : events) {
+        if (e.type == GraphEvent::EDGE_ADDITION
+            && (G.degree(e.u) > maxdeg || (!G.isDirected() && G.degree(e.v) > maxdeg))) {
+            maxdeg = static_cast<count>(GraphTools::maxDegree(G));
+            alpha = 1.0 / (maxdeg + 1.0);
+            run();
+            return;
+        }
+    }
+
     std::vector<count> preUpdatePaths(G.upperNodeIdBound(), 0);
     std::vector<count> preUpdateContrib(G.upperNodeIdBound(), 0);
 
@@ -77,10 +96,6 @@ void DynKatzCentrality::updateBatch(std::span<const GraphEvent> events) {
 
     // First, we manually handle level 1. At level 1 only the two endpoints change.
     for (GraphEvent e : events) {
-        if (e.type != GraphEvent::EDGE_ADDITION && e.type != GraphEvent::EDGE_REMOVAL) {
-            throw std::runtime_error("Event type not allowed. Edge insertions or deletions only.");
-        }
-
         if (!wasSeen[e.v]) {
             wasSeen[e.v] = true;
             seenNodes.push_back(e.v);
@@ -107,10 +122,10 @@ void DynKatzCentrality::updateBatch(std::span<const GraphEvent> events) {
         }
 
         if (seenNodes.size() < G.numberOfNodes()) {
-            // Caveat: We need preUpdateContrib[e.u] for deletions.
+            // Caveat: We need preUpdateContrib[e.u] for the added and deleted edges.
             // If e.u was not seen yet, we initialize that value here.
             for (GraphEvent e : events)
-                if (e.type == GraphEvent::EDGE_REMOVAL && !wasSeen[e.u])
+                if (!wasSeen[e.u])
                     preUpdateContrib[e.u] = nPaths[i - 1][e.u];
 
             // Subtract the old contribution and add the new one.
@@ -141,12 +156,13 @@ void DynKatzCentrality::updateBatch(std::span<const GraphEvent> events) {
                     }
                 });
 
-            // Handle the added/deleted edges.
+            // Handle the added/deleted edges. G already contains the added edges, so the loop
+            // above has subtracted a contribution that they never made before the update.
             for (GraphEvent e : events) {
                 if (e.type == GraphEvent::EDGE_ADDITION) {
-                    nPaths[i][e.v] += nPaths[i - 1][e.u];
+                    nPaths[i][e.v] += preUpdateContrib[e.u];
                     if (!G.isDirected())
-                        nPaths[i][e.u] += nPaths[i - 1][e.v];
+                        nPaths[i][e.u] += preUpdateContrib[e.v];
                 } else {
                     assert(e.type == GraphEvent::EDGE_REMOVAL);
                     nPaths[i][e.v] -= preUpdateContrib[e.u];
@@ -171,7 +187,7 @@ void DynKatzCentrality::updateBatch(std::span<const GraphEvent> events) {
             auto alpha_pow = std::pow(alpha, i);
             G.balancedParallelForNodes([&](node u) {
                 nPaths[i][u] = 0;
-                G.forInEdgesOf(u, [&](node v, edgeweight) { nPaths[i][u] += preUpdateContrib[v]; });
+                G.forInEdgesOf(u, [&](node v, edgeweight) { nPaths[i][u] += nPaths[i - 1][v]; });
 
                 baseData[u] -= alpha_pow * preUpdatePaths[u];
                 baseData[u] += alpha_pow * nPaths[i][u];
@@ -215,8 +231,6 @@ void DynKatzCentrality::updateBatch(std::span<const GraphEvent> events) {
         }
     });
     DEBUG("DynKatz: ", activeRanking.size(), " nodes in ranking after reactivation");
-
-    // TODO what if the maxdeg increases???
 
     // Check if we need more iterations.
     if (!checkConvergence()) {

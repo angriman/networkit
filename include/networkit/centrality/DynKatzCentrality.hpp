@@ -53,10 +53,12 @@ public:
     void run() override;
 
     /**
-     * Updates the katz centralities after an edge insertion or deletion on the
-     * graph.
+     * Updates the katz centralities after edge insertions or deletions on the
+     * graph. The graph must already reflect the events. If an insertion
+     * increases the maximum degree, the damping factor is chosen anew and the
+     * centralities are recomputed from scratch.
      *
-     * @param event The edge insertions or deletion.
+     * @param events The edge insertions or deletions.
      */
     void updateBatch(std::span<const GraphEvent> events) override;
 

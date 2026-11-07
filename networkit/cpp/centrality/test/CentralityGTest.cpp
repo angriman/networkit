@@ -9,6 +9,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <omp.h>
 #include <random>
 #include <stdexcept>
 #include <unordered_set>
@@ -355,8 +356,8 @@ TEST_F(CentralityGTest, testKatzDynamicAddition) {
         v = GraphTools::randomNode(G);
     } while (G.hasEdge(u, v));
     GraphEvent e(GraphEvent::EDGE_ADDITION, u, v, 1.0);
-    kc.update(e);
     G.addEdge(u, v);
+    kc.update(e);
     DynKatzCentrality kc2(G, 100);
     kc2.run();
     const edgeweight tol = 1e-9;
@@ -406,6 +407,112 @@ TEST_F(CentralityGTest, testKatzDynamicDeletion) {
     INFO("Level reached: ", kc.levelReached, ", ", kc2.levelReached);
 }
 
+// A triangle with a tail of 5 nodes (0-1-2 triangle, path 2-3-4-5-6-7). Toggling the edge (0, 3)
+// keeps the max. degree (and hence alpha) unchanged and makes the set of affected nodes cover more
+// than half of the graph after a few levels, so that updateBatch() recomputes all remaining levels
+// statically.
+TEST_F(CentralityGTest, testKatzDynamicUpdateRecomputesAllNodes) {
+    const int numThreads = omp_get_max_threads();
+    omp_set_num_threads(2);
+
+    for (const bool addition : {true, false}) {
+        SCOPED_TRACE(addition ? "addition" : "removal");
+        Graph G(8);
+        for (const auto &[u, v] : std::vector<std::pair<node, node>>{
+                 {0, 1}, {0, 2}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}}) {
+            G.addEdge(u, v);
+        }
+        if (!addition) {
+            G.addEdge(0, 3);
+        }
+
+        DynKatzCentrality kc(G, 3, false, 0.1);
+        kc.run();
+
+        if (addition) {
+            G.addEdge(0, 3);
+            kc.update(GraphEvent(GraphEvent::EDGE_ADDITION, 0, 3, 1.0));
+        } else {
+            G.removeEdge(0, 3);
+            kc.update(GraphEvent(GraphEvent::EDGE_REMOVAL, 0, 3, 1.0));
+        }
+
+        DynKatzCentrality kc2(G, 3, false, 0.1);
+        kc2.run();
+
+        // An updated instance never drops levels, so it may have more than a fresh one.
+        const count levels = std::min(kc.levelReached, kc2.levelReached);
+        ASSERT_GE(levels, 3u);
+        for (count i = 0; i <= levels; ++i) {
+            G.forNodes([&](node u) { EXPECT_EQ(kc.nPaths[i][u], kc2.nPaths[i][u]); });
+        }
+    }
+
+    omp_set_num_threads(numThreads);
+}
+
+// Directed variant: e.u is not affected by the update before the edge is added, and the added
+// edge raises the in-degree of e.v only.
+TEST_F(CentralityGTest, testKatzDynamicUpdateDirected) {
+    const int numThreads = omp_get_max_threads();
+    omp_set_num_threads(2);
+
+    Graph G(8, false, true);
+    for (const auto &[u, v] : std::vector<std::pair<node, node>>{
+             {0, 1}, {1, 2}, {2, 0}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 5}}) {
+        G.addEdge(u, v);
+    }
+
+    DynKatzCentrality kc(G, 3, false, 0.1);
+    kc.run();
+
+    G.addEdge(6, 3);
+    kc.update(GraphEvent(GraphEvent::EDGE_ADDITION, 6, 3, 1.0));
+
+    DynKatzCentrality kc2(G, 3, false, 0.1);
+    kc2.run();
+
+    ASSERT_EQ(kc.levelReached, kc2.levelReached);
+    for (count i = 0; i <= kc.levelReached; ++i) {
+        G.forNodes([&](node u) { EXPECT_EQ(kc.nPaths[i][u], kc2.nPaths[i][u]); });
+    }
+    G.forNodes([&](node u) {
+        EXPECT_NEAR(kc.score(u), kc2.score(u), 1e-9);
+        EXPECT_NEAR(kc.bound(u), kc2.bound(u), 1e-9);
+    });
+
+    omp_set_num_threads(numThreads);
+}
+
+// Adding an edge to a node of max. degree increases the max. degree, which invalidates alpha.
+TEST_F(CentralityGTest, testKatzDynamicMaxDegreeIncrease) {
+    Graph G(6);
+    for (node u = 0; u + 1 < G.numberOfNodes(); ++u) {
+        G.addEdge(u, u + 1);
+    }
+
+    DynKatzCentrality kc(G, 3, false, 0.1);
+    kc.run();
+
+    G.addEdge(1, 3);
+    G.addEdge(1, 4);
+    const std::vector<GraphEvent> events{GraphEvent(GraphEvent::EDGE_ADDITION, 1, 3, 1.0),
+                                         GraphEvent(GraphEvent::EDGE_ADDITION, 1, 4, 1.0)};
+    kc.updateBatch(events);
+
+    DynKatzCentrality kc2(G, 3, false, 0.1);
+    kc2.run();
+
+    ASSERT_EQ(kc.levelReached, kc2.levelReached);
+    for (count i = 0; i <= kc.levelReached; ++i) {
+        G.forNodes([&](node u) { EXPECT_EQ(kc.nPaths[i][u], kc2.nPaths[i][u]); });
+    }
+    G.forNodes([&](node u) {
+        EXPECT_NEAR(kc.score(u), kc2.score(u), 1e-9);
+        EXPECT_NEAR(kc.bound(u), kc2.bound(u), 1e-9);
+    });
+}
+
 TEST_F(CentralityGTest, testKatzDynamicBuilding) {
     Graph GIn = METISGraphReader{}.read("input/hep-th.graph");
 
@@ -433,8 +540,8 @@ TEST_F(CentralityGTest, testKatzDynamicBuilding) {
         if (edgesProcessed > 1000)
             return;
         GraphEvent e(GraphEvent::EDGE_ADDITION, u, v, 1.0);
-        dynAlgo.update(e);
         G.addEdge(u, v);
+        dynAlgo.update(e);
         edgesProcessed++;
     });
 
@@ -493,8 +600,8 @@ TEST_F(CentralityGTest, testKatzDirectedAddition) {
         v = GraphTools::randomNode(G);
     } while (G.hasEdge(u, v));
     GraphEvent e(GraphEvent::EDGE_ADDITION, u, v, 1.0);
-    kc.update(e);
     G.addEdge(u, v);
+    kc.update(e);
 
     DynKatzCentrality kc2(G, 5);
     kc2.run();
