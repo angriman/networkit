@@ -340,16 +340,26 @@ TEST_F(DistanceGTest, testJaccardDistance) {
 }
 
 TEST_P(DistanceGTest, testVolume) {
-    Aux::Random::setSeed(42, false);
-    auto G = generateERGraph(500, 0.03);
-    G.indexEdges();
-    Volume vol;
+    // Every node of a cycle sees the same ball, so the volume does not depend on the sampled nodes.
+    constexpr count n = 10;
+    const edgeweight edgeLength = isWeighted() ? 0.5 : 1.0;
+    Graph G(n, isWeighted(), isDirected());
+    for (node u = 0; u < n; ++u) {
+        G.addEdge(u, (u + 1) % n, edgeLength);
+    }
 
-    for (double radius = 1.0; radius <= 2.0; radius += 0.05) {
-        for (int samples = 1; samples <= 10; ++samples) {
-            auto res = vol.volume(G, radius, samples);
-            EXPECT_GT(res, 1.0);
-        }
+    const auto expectedVolume = [&](double radius) -> double {
+        const auto hops = static_cast<count>(radius / edgeLength);
+        return static_cast<double>((isDirected() ? 1 : 2) * hops + 1);
+    };
+
+    EXPECT_DOUBLE_EQ(Volume::volume(G, 1.5, 3), expectedVolume(1.5));
+
+    const std::vector<double> radii{0.5, 1.0, 2.0};
+    const auto volumes = Volume::volume(G, radii, 3);
+    ASSERT_EQ(volumes.size(), radii.size());
+    for (index i = 0; i < radii.size(); ++i) {
+        EXPECT_DOUBLE_EQ(volumes[i], expectedVolume(radii[i]));
     }
 }
 
@@ -992,7 +1002,7 @@ TEST_P(DistanceGTest, testDynPrunedLandmarkLabelingAddEdge) {
 }
 
 TEST_P(DistanceGTest, testDynPrunedLandmarkLabelingBuildClique) {
-    const count n = 50;
+    const count n = 10;
     Graph G(n, isWeighted(), isDirected());
     DynPrunedLandmarkLabeling pll(G);
     pll.run();

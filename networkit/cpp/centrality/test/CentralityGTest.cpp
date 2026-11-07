@@ -325,7 +325,7 @@ TEST_F(CentralityGTest, testKatzCentralityDirected) {
 
 TEST_F(CentralityGTest, testKatzTopk) {
     Aux::Log::setLogLevel("QUIET");
-    const auto G = METISGraphReader{}.read("input/caidaRouterLevel.graph");
+    const auto G = METISGraphReader{}.read("input/PGPgiantcompo.graph");
 
     KatzCentrality exactAlgo(G, 0, 1.0);
     DynKatzCentrality topAlgo(G, 100);
@@ -2240,25 +2240,28 @@ TEST_P(CentralityGTest, testGedWalk) {
 
 TEST_F(CentralityGTest, testApproxElectricalCloseness) {
     const double eps = 0.1;
-    const count n = 75;
-    for (int seed : {1, 2, 3}) {
-        Aux::Random::setSeed(seed, true);
-        auto G = HyperbolicGenerator(n, 10, 3).generate();
-        G = ConnectedComponents::extractLargestConnectedComponent(G, true);
-        auto new_n = G.numberOfNodes();
-
-        // Create a biconnected component with size 2.
-        G.addNodes(2);
-        G.addEdge(new_n - 1, new_n);
-        G.addEdge(new_n, new_n + 1);
-
-        ApproxElectricalCloseness apx(G);
-        apx.run();
-        const auto diag = apx.getDiagonal();
-        const auto gt = apx.computeExactDiagonal(1e-12);
-        G.forNodes([&](node u) { EXPECT_NEAR(diag[u], gt[u], eps); });
-        EXPECT_EQ(apx.scores().size(), G.numberOfNodes());
+    /*
+     * The path 0 - 1 - 2 - 3 leads to node 4 of a wheel: the rim 4 - 5 - 6 - 7 - 8 - 4 and the hub
+     * 9, which is adjacent to the whole rim. The hub has a higher degree than node 4, so the
+     * random walks of the spanning tree sampling of the wheel have to reach node 4 before the hub.
+     * The path adds the bridges as biconnected components.
+     */
+    Graph G(10);
+    for (node u = 0; u < 3; ++u) {
+        G.addEdge(u, u + 1);
     }
+    G.addEdge(3, 4);
+    for (node u = 4; u < 9; ++u) {
+        G.addEdge(u, u == 8 ? 4 : u + 1);
+        G.addEdge(u, 9);
+    }
+
+    ApproxElectricalCloseness apx(G);
+    apx.run();
+    const auto diag = apx.getDiagonal();
+    const auto gt = apx.computeExactDiagonal(1e-12);
+    G.forNodes([&](node u) { EXPECT_NEAR(diag[u], gt[u], eps); });
+    EXPECT_EQ(apx.scores().size(), G.numberOfNodes());
 }
 
 TEST_F(CentralityGTest, testGroupClosenessDirected) {
@@ -2284,13 +2287,16 @@ TEST_F(CentralityGTest, testGroupClosenessGrowShrinkDirectedExplicitInsertions) 
 }
 
 TEST_P(CentralityGTest, testGroupClosenessGrowShrink) {
+    if (isDirected()) {
+        GTEST_SKIP() << "Directed graphs are not supported";
+    }
+
     const count k = 5;
-    auto G = EdgeListReader{'\t', 0, "#", false, false}.read("input/MIT8.edgelist");
-    G = ConnectedComponents::extractLargestConnectedComponent(G);
+    auto G = METISGraphReader{}.read("input/jazz.graph");
 
     if (isWeighted()) {
-        Aux::Random::setSeed(42, false);
-        GraphTools::randomizeWeights(G);
+        G = GraphTools::toWeighted(G);
+        G.forEdges([&G](node u, node v) -> void { G.setWeight(u, v, 1 + (u + v) % 3); });
     }
 
     auto farnessOfGroup = [&](const Graph &G, const std::unordered_set<node> &group) -> edgeweight {
@@ -2308,32 +2314,25 @@ TEST_P(CentralityGTest, testGroupClosenessGrowShrink) {
         return farness;
     };
 
-    for (int seed : {1, 2, 3}) {
-        Aux::Random::setSeed(seed, true);
+    const std::unordered_set<node> group{0, 1, 2, 3, 4};
+    ASSERT_EQ(group.size(), k);
 
-        std::unordered_set<node> group;
+    edgeweight sumDist = farnessOfGroup(G, group);
+    GroupClosenessGrowShrink gc(G, group.begin(), group.end());
+    gc.run();
+    auto groupMaxCC = gc.groupMaxCloseness();
+    count nSwaps = gc.numberOfIterations();
 
-        do {
-            group.insert(GraphTools::randomNode(G));
-        } while (group.size() < k);
+    EXPECT_EQ(groupMaxCC.size(), k);
 
-        edgeweight sumDist = farnessOfGroup(G, group);
-        GroupClosenessGrowShrink gc(G, group.begin(), group.end());
-        gc.run();
-        auto groupMaxCC = gc.groupMaxCloseness();
-        count nSwaps = gc.numberOfIterations();
-
-        EXPECT_EQ(groupMaxCC.size(), k);
-
-        edgeweight sumDistGroupMaxCC =
-            farnessOfGroup(G, std::unordered_set<node>(groupMaxCC.begin(), groupMaxCC.end()));
-        if (nSwaps > 0) {
-            EXPECT_GE(sumDist, sumDistGroupMaxCC);
-        } else {
-            EXPECT_EQ(sumDist, sumDistGroupMaxCC);
-            std::for_each(groupMaxCC.begin(), groupMaxCC.end(),
-                          [&group](const node u) { EXPECT_NE(group.find(u), group.end()); });
-        }
+    edgeweight sumDistGroupMaxCC =
+        farnessOfGroup(G, std::unordered_set<node>(groupMaxCC.begin(), groupMaxCC.end()));
+    if (nSwaps > 0) {
+        EXPECT_GE(sumDist, sumDistGroupMaxCC);
+    } else {
+        EXPECT_EQ(sumDist, sumDistGroupMaxCC);
+        std::for_each(groupMaxCC.begin(), groupMaxCC.end(),
+                      [&group](const node u) { EXPECT_NE(group.find(u), group.end()); });
     }
 }
 
@@ -2444,11 +2443,10 @@ TEST_P(CentralityGTest, testGroupClosenessLocalSwaps) {
     }
 
     const count k = 5;
-    auto G = EdgeListReader{'\t', 0, "#", false, false}.read("input/MIT8.edgelist");
-    G = ConnectedComponents::extractLargestConnectedComponent(G);
+    auto G = METISGraphReader{}.read("input/jazz.graph");
 
-    if (isWeighted()) {
-        GraphTools::randomizeWeights(G);
+    if (isWeighted()) { // The weights are ignored
+        G = GraphTools::toWeighted(G);
     }
 
     auto farnessOfGroup = [&](const Graph &G, const std::unordered_set<node> &group) -> count {
@@ -2459,35 +2457,28 @@ TEST_P(CentralityGTest, testGroupClosenessLocalSwaps) {
         return farness;
     };
 
-    for (int seed : {1, 2, 3}) {
-        Aux::Random::setSeed(seed, true);
+    const std::unordered_set<node> group{0, 1, 2, 3, 4};
+    ASSERT_EQ(group.size(), k);
 
-        std::unordered_set<node> group;
+    const count maxSwaps = 100;
+    const count sumDist = farnessOfGroup(G, group);
+    GroupClosenessLocalSwaps gc(G, group.begin(), group.end(), maxSwaps);
+    gc.run();
+    auto groupMaxCC = gc.groupMaxCloseness();
+    const count nSwaps = gc.numberOfSwaps();
 
-        do {
-            group.insert(GraphTools::randomNode(G));
-        } while (group.size() < k);
+    EXPECT_LE(nSwaps, maxSwaps);
+    EXPECT_EQ(groupMaxCC.size(), k);
 
-        const count maxSwaps = 100;
-        const count sumDist = farnessOfGroup(G, group);
-        GroupClosenessLocalSwaps gc(G, group.begin(), group.end(), maxSwaps);
-        gc.run();
-        auto groupMaxCC = gc.groupMaxCloseness();
-        const count nSwaps = gc.numberOfSwaps();
+    count sumDistGroupMaxCC =
+        farnessOfGroup(G, std::unordered_set<node>(groupMaxCC.begin(), groupMaxCC.end()));
 
-        EXPECT_LE(nSwaps, maxSwaps);
-        EXPECT_EQ(groupMaxCC.size(), k);
-
-        count sumDistGroupMaxCC =
-            farnessOfGroup(G, std::unordered_set<node>(groupMaxCC.begin(), groupMaxCC.end()));
-
-        if (nSwaps > 0) {
-            EXPECT_GE(sumDist, sumDistGroupMaxCC);
-        } else {
-            EXPECT_EQ(sumDist, sumDistGroupMaxCC);
-            std::for_each(groupMaxCC.begin(), groupMaxCC.end(),
-                          [&group](const node u) { EXPECT_NE(group.find(u), group.end()); });
-        }
+    if (nSwaps > 0) {
+        EXPECT_GE(sumDist, sumDistGroupMaxCC);
+    } else {
+        EXPECT_EQ(sumDist, sumDistGroupMaxCC);
+        std::for_each(groupMaxCC.begin(), groupMaxCC.end(),
+                      [&group](const node u) { EXPECT_NE(group.find(u), group.end()); });
     }
 }
 

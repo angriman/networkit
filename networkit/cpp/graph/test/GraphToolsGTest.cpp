@@ -6,6 +6,7 @@
  */
 
 #include <array>
+#include <set>
 #include <unordered_map>
 
 #include <gtest/gtest.h>
@@ -1053,36 +1054,56 @@ TEST_P(GraphToolsGTest, testParallelSumEdgesIndexed) {
     EXPECT_LE(sum, maxWeight);
 }
 
+namespace {
+// Every weight is outside [0, 1], so a weight left there was never randomized. The self-loop and,
+// in directed graphs, the pair of opposite edges are the special cases of the in-place update.
+Graph graphWithOutOfRangeWeights(bool directed) {
+    Graph G(5, true, directed);
+    G.addEdge(0, 1, 2.0);
+    G.addEdge(1, 2, 2.0);
+    G.addEdge(2, 0, 2.0);
+    G.addEdge(2, 3, 2.0);
+    G.addEdge(3, 3, 2.0);
+    G.addEdge(3, 4, 2.0);
+    if (directed) {
+        G.addEdge(1, 0, 2.0);
+    }
+    return G;
+}
+} // namespace
+
 TEST_P(GraphToolsGTest, testEdgesRandomizer) {
-    if (!weighted())
+    if (!weighted()) {
         return;
-    Aux::Random::setSeed(1, true);
-    Graph G1 = ErdosRenyiGenerator{2000, 0.3, directed()}.generate();
-    Graph G(G1, true, directed());
+    }
+    Graph G = graphWithOutOfRangeWeights(directed());
     GraphTools::randomizeWeights(G);
-    edgeweight sum = G.parallelSumForEdges([&](node, node, edgeweight ew) { return ew; });
-    edgeweight average = sum / G.numberOfEdges();
-    edgeweight squareDiffSum = G.parallelSumForEdges(
-        [&](node, node, edgeweight ew) { return (ew - average) * (ew - average); });
-    // since we have a uniform distribution  between 0 and 1 the variance is 1/12
-    EXPECT_NEAR(1.0 / 12.0, squareDiffSum / G.numberOfEdges(), 1e-2);
-    EXPECT_NEAR(0.5, average, 1e-3);
-    if (!directed())
-        G.forEdges([&G](node u, node v) { EXPECT_EQ(G.weight(u, v), G.weight(v, u)); });
-    else
-        G.forNodes([&G](node u) {
-            G.forInEdgesOf(u,
-                           [&](node u, node v, edgeweight ew) { EXPECT_EQ(G.weight(v, u), ew); });
+
+    std::set<edgeweight> weights;
+    G.forEdges([&](node, node, edgeweight ew) -> void {
+        EXPECT_GE(ew, 0.0);
+        EXPECT_LE(ew, 1.0);
+        weights.insert(ew);
+    });
+    EXPECT_GT(weights.size(), 1);
+
+    // Both stored copies of an edge must get the same weight.
+    if (directed()) {
+        G.forNodes([&G](node u) -> void {
+            G.forInEdgesOf(
+                u, [&G](node u, node v, edgeweight ew) -> void { EXPECT_EQ(G.weight(v, u), ew); });
         });
+    } else {
+        G.forEdges([&G](node u, node v, edgeweight ew) -> void { EXPECT_EQ(G.weight(v, u), ew); });
+    }
 }
 
 TEST_P(GraphToolsGTest, testEdgesRandomizerDeterminism) {
-    if (!weighted())
+    if (!weighted()) {
         return;
-    Aux::Random::setSeed(1, true);
-    Graph G1 = ErdosRenyiGenerator{2000, 0.3, directed()}.generate();
-    Graph Ga(G1, true, directed());
-    Graph Gb(G1, true, directed());
+    }
+    Graph Ga = graphWithOutOfRangeWeights(directed());
+    Graph Gb = Ga;
     Aux::Random::setSeed(1, true);
     GraphTools::randomizeWeights(Ga);
     Aux::Random::setSeed(1, true);

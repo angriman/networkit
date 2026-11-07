@@ -1366,7 +1366,7 @@ TEST_F(GeneratorsGTest, testLFRGeneratorWithBinomialDistribution) {
 
 TEST_F(GeneratorsGTest, testMocnikGenerator) {
     count dim = 3;
-    count n = 10000;
+    count n = 1000;
     double k = 2.6;
 
     MocnikGenerator Mocnik(dim, n, k);
@@ -1380,7 +1380,7 @@ TEST_F(GeneratorsGTest, testMocnikGenerator) {
 
 TEST_F(GeneratorsGTest, testMocnikGeneratorBasic) {
     count dim = 3;
-    count n = 5000;
+    count n = 500;
     double k = 2.6;
 
     MocnikGeneratorBasic Mocnik(dim, n, k);

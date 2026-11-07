@@ -100,39 +100,62 @@ TEST_P(TopClosenessGTest, testTopClosenessWithNodeList) {
 }
 
 TEST_P(TopHarmonicClosenessGTest, testTopHarmonicCloseness) {
-    const count size = 400;
     const double tol = 1e-6;
+    constexpr count k = 3;
 
-    for (int seed : {1, 2, 3}) {
-        for (bool isDirected : {false, true}) {
-            for (bool isWeighted : {false, true}) {
-                Aux::Random::setSeed(seed, false);
-                auto G = ErdosRenyiGenerator(size, 0.01, isDirected).generate();
-                if (isWeighted) {
-                    G = GraphTools::toWeighted(G);
-                    G.forEdges(
-                        [&G](node u, node v) { G.setWeight(u, v, Aux::Random::probability()); });
+    /*
+     * A clique of 6 nodes with a path of 6 nodes hanging off node 5: the clique nodes have the
+     * highest closeness, so the search for the top-3 must prune the path. Undirected graphs also
+     * get a separate edge and an isolated node; directed graphs also get the diamond
+     * 12 -> {13, 14} -> 15 -> 16 feeding the cycle 17 -> 18 -> 19 -> 17, where bounds on the number
+     * of reachable nodes are not tight.
+     */
+    for (bool isDirected : {false, true}) {
+        for (bool isWeighted : {false, true}) {
+            if (isWeighted && useNBBound()) {
+                continue;
+            }
+            Graph G(isDirected ? 20 : 14, isWeighted, isDirected);
+            const auto addEdge = [&](node u, node v) -> void {
+                G.addEdge(u, v, 1 + (u + v) % 3);
+                if (isDirected && u < 6 && v < 6) {
+                    G.addEdge(v, u, 1 + (u + v) % 3);
                 }
-                HarmonicCloseness cc(G, false);
-                cc.run();
-                const auto ranking = cc.ranking();
-                for (count k : {5, 10, 20}) {
-                    if (isWeighted && useNBBound())
-                        continue;
-                    TopHarmonicCloseness topcc(G, k, useNBBound());
-                    topcc.run();
-
-                    auto topkScores = topcc.topkScoresList();
-                    EXPECT_EQ(topcc.topkNodesList().size(), k);
-                    EXPECT_EQ(topkScores.size(), k);
-
-                    topkScores = topcc.topkScoresList(true);
-
-                    for (count i = 0; i < topkScores.size(); ++i)
-                        EXPECT_NEAR(ranking[i].second, topkScores[i], tol);
-                    for (count i = k; i < topkScores.size(); ++i)
-                        EXPECT_NEAR(topkScores[i], topkScores[k - 1], tol);
+            };
+            for (node u = 0; u < 6; ++u) {
+                for (node v = u + 1; v < 6; ++v) {
+                    addEdge(u, v);
                 }
+            }
+            for (node u = 5; u < 11; ++u) {
+                addEdge(u, u + 1);
+            }
+            if (isDirected) {
+                for (const auto &[u, v] : std::to_array<std::pair<node, node>>(
+                         {{12, 13}, {12, 14}, {13, 15}, {14, 15}, {15, 16}, {16, 17}, {17, 18},
+                          {18, 19}, {19, 17}})) {
+                    addEdge(u, v);
+                }
+            } else {
+                addEdge(12, 13);
+            }
+            HarmonicCloseness cc(G, false);
+            cc.run();
+            const auto ranking = cc.ranking();
+            TopHarmonicCloseness topcc(G, k, useNBBound());
+            topcc.run();
+
+            auto topkScores = topcc.topkScoresList();
+            EXPECT_EQ(topcc.topkNodesList().size(), k);
+            EXPECT_EQ(topkScores.size(), k);
+
+            topkScores = topcc.topkScoresList(true);
+
+            for (count i = 0; i < topkScores.size(); ++i) {
+                EXPECT_NEAR(ranking[i].second, topkScores[i], tol);
+            }
+            for (count i = k; i < topkScores.size(); ++i) {
+                EXPECT_NEAR(topkScores[i], topkScores[k - 1], tol);
             }
         }
     }

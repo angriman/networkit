@@ -64,7 +64,8 @@ TEST_F(FiniteEmbeddingTest, testFiniteEmbeddingOnSmallGraph) {
 
     Graph graph = METISGraphReader{}.read("input/karate.graph");
 
-    Node2Vec algo(graph, .3, 1.3);
+    // Short walks and few dimensions: the defaults (80, 10, 128) only make the test slower.
+    Node2Vec algo(graph, .3, 1.3, 20, 2, 16);
     algo.run();
     auto features = algo.getFeatures();
 
