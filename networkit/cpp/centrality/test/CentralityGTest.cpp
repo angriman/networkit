@@ -11,6 +11,7 @@
 #include <iostream>
 #include <random>
 #include <stdexcept>
+#include <tuple>
 #include <unordered_set>
 
 #include <gmock/gmock-more-matchers.h>
@@ -2173,27 +2174,33 @@ TEST_P(CentralityGTest, testDynTopHarmonicCloseness) {
 }
 
 TEST_F(CentralityGTest, testApproxSpanningEdge) {
-    Aux::Random::setSeed(42, false);
-
-    // Testing a graph that is too small yields approximation errors; however, if the input
-    // graph has > 100 nodes, running the exact algorithm takes too long.
-    // Therefore, in this test we use the approximation algorithm implemented in
-    // SpanningEdgeCentrality as baseline, and check that the values are within a 2-epsilon
-    // approximation.
-    Graph G = ErdosRenyiGenerator(300, 0.1, false).generate();
+    /*
+     * 0 - 1
+     *  \ /     4 - 5
+     *   2 - 3 -|   |
+     *          +-- 6
+     *
+     * The spanning edge centrality of an edge is the fraction of spanning trees containing it:
+     * 1 for the bridge {2, 3}, 2/3 for the edges of the triangle and 3/4 for the edges of the
+     * 4-cycle. This covers all kinds of biconnected components: bridge, triangle and larger.
+     */
+    const auto edges = std::to_array<std::tuple<node, node, double>>(
+        {{0, 1, 2. / 3}, {1, 2, 2. / 3}, {2, 0, 2. / 3}, {2, 3, 1.}, {3, 4, 3. / 4}, {4, 5, 3. / 4},
+         {5, 6, 3. / 4}, {6, 3, 3. / 4}});
+    Graph G(7);
+    for (const auto &[u, v, score] : edges) {
+        G.addEdge(u, v);
+    }
     G.indexEdges();
-    constexpr double eps = 0.1;
 
+    constexpr double eps = 0.1;
     ApproxSpanningEdge apx(G, eps);
     apx.run();
-    SpanningEdgeCentrality se(G, eps);
-    se.runParallelApproximation();
-    auto apxScores = apx.scores();
-    auto exactScores = se.scores();
+    const auto scores = apx.scores();
 
-    G.forEdges([&](node /*u*/, node /*v*/, edgeweight /*w*/, edgeid eid) {
-        EXPECT_NEAR(apxScores[eid], exactScores[eid], 2 * eps);
-    });
+    for (const auto &[u, v, expected] : edges) {
+        EXPECT_NEAR(scores[G.edgeId(u, v)], expected, eps) << "edge {" << u << ", " << v << "}";
+    }
 }
 
 TEST_P(CentralityGTest, testGedWalk) {

@@ -28,7 +28,7 @@ class MatricesGTest : public testing::Test {
 protected:
     using Matrix = Type;
 
-    void SetUp() { graph = METISGraphReader{}.read("input/PGPgiantcompo.graph"); }
+    void SetUp() { graph = METISGraphReader{}.read("input/jazz.graph"); }
 
     static Matrix get4x4Matrix() {
         std::vector<Triplet> triplets = {{0, 0, 1}, {0, 1, 2},  {0, 2, 3},  {1, 0, 2}, {1, 1, 2},
@@ -1307,7 +1307,7 @@ TYPED_TEST(MatricesGTest, testLaplacianOfGraph) {
 
     EXPECT_TRUE(MatrixTools::isLaplacian(mat));
 
-    mat = Matrix::laplacianMatrix(METISGraphReader{}.read("input/power.graph"));
+    mat = Matrix::laplacianMatrix(METISGraphReader{}.read("input/karate.graph"));
     EXPECT_TRUE(MatrixTools::isLaplacian(mat));
 }
 
@@ -1317,7 +1317,7 @@ TYPED_TEST(MatricesGTest, testNormalizedLaplacianOfGraph) {
         GTEST_SKIP() << "Skipping normalizedLaplacian test for DenseMatrix";
     }
 
-    Graph G = METISGraphReader{}.read("input/power.graph");
+    Graph G = METISGraphReader{}.read("input/karate.graph");
     DynamicMatrix DynMat = DynamicMatrix::normalizedLaplacianMatrix(G);
 
     // check properties of normalizedLaplacian
